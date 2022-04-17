@@ -3,6 +3,8 @@ package ru.hse.sd.rgb.entities
 import ru.hse.sd.rgb.*
 import ru.hse.sd.rgb.entities.common.*
 import ru.hse.sd.rgb.views.*
+import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
+import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
 class Hero : GameEntity() {
 
@@ -11,17 +13,8 @@ class Hero : GameEntity() {
     }
 
     inner class ViewHero : ViewEntity() {
-        override fun convert(units: Set<GameUnit>): GameEntityViewSnapshot {
-            return units.map {
-                object : ViewUnit(it) {
-                    override fun getSwingAppearance() =
-                        SwingEntityAppearance(SwingUnitShape.CIRCLE, it.gameColor.toSwingColor())
-                }
-            }.toSet()
-        }
-
-        override fun applyMessageToAppearance(m: Message) = when (m) {
-            else -> ignore
+        override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SQUARE)
         }
     }
 
@@ -38,7 +31,7 @@ class Hero : GameEntity() {
         when (m) {
             is UserMoved -> {
                 val moved = controller.physics.tryMove(this, m.dir)
-                if (moved) controller.view.receive(EntityMoved(this, viewEntity.convert(units)))
+                if (moved) controller.view.receive(EntityMoved(this, viewEntity.takeViewSnapshot()))
             }
         }
     }

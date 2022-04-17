@@ -1,14 +1,12 @@
 package ru.hse.sd.rgb
 
-class GameColor(r: Int, g: Int, b: Int) {
+import ru.hse.sd.rgb.views.RGB
 
-    var r: Int = r
-        private set
+class GameColor(rgb: RGB) {
 
-    var g: Int = g
-        private set
+    constructor(r: Int, g: Int, b: Int) : this(RGB(r, g, b))
 
-    var b: Int = b
+    var rgb: RGB = rgb
         private set
 
 }

@@ -1,7 +1,8 @@
-package ru.hse.sd.rgb.views
+package ru.hse.sd.rgb.views.swing
 
 import ru.hse.sd.rgb.*
 import ru.hse.sd.rgb.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.views.*
 import java.awt.*
 import java.awt.event.*
 import java.awt.geom.Ellipse2D
@@ -81,8 +82,8 @@ class SwingView(
         private fun drawWorld(g: Graphics2D) {
             for ((_, viewUnits) in drawables) {
                 for (viewUnit in viewUnits) {
-                    val (shape, color) = viewUnit.getSwingAppearance()
-                    g.color = color
+                    val (shape) = viewUnit.swingAppearance
+                    g.color = viewUnit.rgb.toSwingColor()
                     g.fill(convertToSwingShape(shape, viewUnit.cell))
                 }
             }
@@ -99,7 +100,7 @@ class SwingView(
     }
 
     private val gamePanel = GamePanel()
-    private val ticker = Ticker(10) // TODO: magic constant
+    private val ticker: Ticker = Ticker(10) // TODO: magic constant
 
     fun initialize() {
         val window = JFrame("RGB") // TODO: magic constant (config?)
@@ -141,4 +142,4 @@ class SwingView(
 
 }
 
-fun GameColor.toSwingColor() = Color(r, g, b)
+fun RGB.toSwingColor() = Color(r, g, b)

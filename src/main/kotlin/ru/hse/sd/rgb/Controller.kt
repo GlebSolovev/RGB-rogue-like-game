@@ -9,7 +9,7 @@ import ru.hse.sd.rgb.entities.Wall
 import ru.hse.sd.rgb.logic.PhysicsLogic
 import ru.hse.sd.rgb.logic.generateMaze
 import ru.hse.sd.rgb.views.EntityMoved
-import ru.hse.sd.rgb.views.SwingView
+import ru.hse.sd.rgb.views.swing.SwingView
 import ru.hse.sd.rgb.views.View
 import java.util.concurrent.Executors
 
@@ -46,7 +46,8 @@ class ControllerImpl : Controller {
                 if (level[y][x]) {
                     val wall = Wall(x, y) // TODO: consistency with i,j ordering
                     physics.tryPopulate(wall)
-                    view.receive(EntityMoved(wall, wall.viewEntity.convert(wall.units))) // TODO: too decoupled?
+                    view.receive(EntityMoved(wall, wall.viewEntity.takeViewSnapshot())) // TODO: too decoupled?
+                    // TODO: only pass entity to EntityMoved
                 }
             }
         }
