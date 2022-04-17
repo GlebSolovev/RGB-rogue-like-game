@@ -1,17 +1,17 @@
 package ru.hse.sd.rgb
 
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 
 abstract class Message
 
 abstract class Messagable {
 
-    private val msgFlow = MutableSharedFlow<Message>(100) // TODO: magic number
+    private val messageChannel = Channel<Message>(Channel.UNLIMITED) // TODO: magic number
 
-    fun receive(m: Message) = msgFlow.tryEmit(m).takeUnless { false } ?: throw GameError("flow overflow")
+    fun receive(m: Message) = messageChannel.trySend(m).getOrThrow()
 
     suspend fun messagingRoutine() {
-        msgFlow.collect { m -> handleMessage(m) }
+        for (message in messageChannel) handleMessage(message)
     }
 
     abstract suspend fun handleMessage(m: Message)

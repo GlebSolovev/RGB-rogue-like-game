@@ -43,13 +43,16 @@ class PhysicsLogic(val h: Int, val w: Int) {
         }
     }
 
-//    fun tryPopulate(entity: PhysicalEntity): Boolean {
-//        val cells = entity.occupiedCells()
-//        withLockedArea(cells) {
-//            if(!checkAvailability(cells)) return false
-//            for(cell in cells) worldGrid[cell].add(entity)
-//            return true
-//        }
-//    }
+    suspend fun tryPopulate(entity: GameEntity): Boolean {
+        val units = entity.units
+        val cells = units.map { it.cell }.toSet()
+        return withLockedArea(cells) {
+            if(!checkAvailability(cells)) return@withLockedArea false
+            units.forEach {
+                worldGrid[it.cell].add(it)
+            }
+            return@withLockedArea true
+        }
+    }
 
 }
