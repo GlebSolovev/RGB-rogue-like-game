@@ -17,10 +17,10 @@ class SwingView : View() {
 
     private fun handleKeyEvent(e: KeyEvent) {
         val message: Message = when (e.keyCode) {
-            KeyEvent.VK_W -> UserMoved(Direction.UP)
-            KeyEvent.VK_A -> UserMoved(Direction.LEFT)
-            KeyEvent.VK_S -> UserMoved(Direction.DOWN)
-            KeyEvent.VK_D -> UserMoved(Direction.RIGHT)
+            KeyEvent.VK_W, KeyEvent.VK_UP -> UserMoved(Direction.UP)
+            KeyEvent.VK_A, KeyEvent.VK_LEFT -> UserMoved(Direction.LEFT)
+            KeyEvent.VK_S, KeyEvent.VK_DOWN -> UserMoved(Direction.DOWN)
+            KeyEvent.VK_D, KeyEvent.VK_RIGHT -> UserMoved(Direction.RIGHT)
             KeyEvent.VK_I -> UserToggledInventory()
             KeyEvent.VK_ESCAPE -> UserQuit()
             else -> return

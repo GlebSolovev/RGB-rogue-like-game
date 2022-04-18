@@ -1,5 +1,6 @@
 package ru.hse.sd.rgb.logic
 
+import ru.hse.sd.rgb.levelloading.generators.generateMaze
 import kotlin.random.Random
 import kotlin.test.Test
 
