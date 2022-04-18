@@ -1,3 +1,5 @@
 package ru.hse.sd.rgb
 
-class GameError(msg: String, cause: Throwable? = null) : Error(msg, cause)
+open class GameError(msg: String, cause: Throwable? = null) : Error(msg, cause)
+
+class WrongConfigError(msg: String) : GameError(msg)

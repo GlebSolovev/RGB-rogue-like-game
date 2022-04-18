@@ -26,3 +26,11 @@ operator fun <T> List<MutableList<T>>.set(cell: Cell, value: T) {
 val ignore = Unit
 val unreachable: Nothing
     get() = throw RuntimeException("reached unreachable")
+
+infix fun <U, V> Iterable<U>.cross(other: Iterable<V>): Iterable<Pair<U, V>> = sequence {
+    for (t in this@cross) {
+        for (u in other) {
+            yield(Pair(t, u))
+        }
+    }
+}.asIterable()

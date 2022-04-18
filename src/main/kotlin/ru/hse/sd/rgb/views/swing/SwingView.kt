@@ -2,27 +2,95 @@ package ru.hse.sd.rgb.views.swing
 
 import ru.hse.sd.rgb.*
 import ru.hse.sd.rgb.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.entities.common.GameEntity
 import ru.hse.sd.rgb.views.*
 import java.awt.*
 import java.awt.event.*
-import java.awt.geom.Ellipse2D
+import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JFrame
 import javax.swing.JPanel
 
-class SwingView(
-    private val offsetX: Int,
-    private val offsetY: Int,
-    private val frameWidth: Int,
-    private val frameHeight: Int,
-    private val tileSize: Int,
-) : View() {
+class SwingView : View() {
 
-    private inner class SwingPlayingState : PlayingState() {
+    private val window: JFrame = JFrame("RGB")
+    private lateinit var panel: JPanel
+
+    private fun handleKeyEvent(e: KeyEvent) {
+        val message: Message = when (e.keyCode) {
+            KeyEvent.VK_W -> UserMoved(Direction.UP)
+            KeyEvent.VK_A -> UserMoved(Direction.LEFT)
+            KeyEvent.VK_S -> UserMoved(Direction.DOWN)
+            KeyEvent.VK_D -> UserMoved(Direction.RIGHT)
+            KeyEvent.VK_I -> UserToggledInventory()
+            KeyEvent.VK_ESCAPE -> UserQuit()
+            else -> return
+        }
+        this.receive(message)
+    }
+
+    private fun switchPanel(newPanel: JPanel) {
+        if (this::panel.isInitialized) {
+            val tmp = panel
+            panel = newPanel
+            window.add(panel)
+            window.remove(tmp)
+        } else {
+            panel = newPanel
+            window.add(panel)
+        }
+
+        panel.isFocusable = true
+        panel.setBounds(0, 0, window.width, window.height)
+        panel.isVisible = true
+        panel.requestFocusInWindow()
+        panel.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) = handleKeyEvent(e)
+        })
+        window.validate()
+        window.repaint()
+    }
+
+    private inner class SwingPlayingState(
+        drawables: MutableMap<GameEntity, GameEntityViewSnapshot>,
+        wGrid: Int,
+        hGrid: Int,
+        bgColor: RGB,
+    ) : PlayingState(drawables, wGrid, hGrid, bgColor) {
+
+        init {
+            val wPx = panel.width
+            val hPx = panel.height
+            val (tileSize, offsetX, offsetY) = if (wPx / (wGrid + 2) > hPx / (hGrid + 2)) {
+                val tileSize = hPx / (hGrid + 2)
+                val offsetX = (wPx - wGrid * tileSize) / 2
+                Triple(tileSize, offsetX, tileSize)
+            } else {
+                val tileSize = wPx / (wGrid + 2)
+                val offsetY = (hPx - hGrid * tileSize) / 2
+                Triple(tileSize, tileSize, offsetY)
+            }
+            switchPanel(GamePanel(offsetX, offsetY, tileSize, drawables, bgColor.toSwingColor()))
+        }
+
         override fun next(m: Message): ViewState = when (m) {
-            is Ticker.Tick -> this.also { gamePanel.repaint() }
-            is UserToggledInventory -> TODO()
+            is Ticker.Tick -> this.also {
+                panel.repaint()
+            }
+            is UserMoved -> this.also {
+                movementListeners.forEach { it.receive(m) }
+            }
+            is UserToggledInventory -> SwingPlayingInventoryState().also {
+                inventoryListeners.forEach { it.receive(m) }
+            }
+            is UserQuit -> this.also {
+                quitListeners.forEach { it.receive(m) }
+            }
+            is EntityMoved -> this.also {
+                drawables[m.gameEntity] = m.nextSnapshot
+            }
             else -> this
         }
+
     }
 
     private inner class SwingPlayingInventoryState : PlayingInventoryState() {
@@ -32,104 +100,34 @@ class SwingView(
     }
 
     private inner class SwingLoadingState : LoadingState() {
-        override fun next(m: Message): ViewState {
-            TODO("Not yet implemented")
+
+        init {
+            switchPanel(LoadingPanel())
+        }
+
+        override fun next(m: Message): ViewState = when (m) {
+            is Ticker.Tick -> this.also { panel.repaint() }
+            is GameViewStarted -> {
+                val (w, h, _, bgColor) = m.level
+                SwingPlayingState(m.drawables, w, h, bgColor)
+            }
+            is UserQuit -> this.also {
+                quitListeners.forEach { it.receive(m) }
+            }
+            else -> this
         }
     }
 
-    private val playingState = SwingPlayingState()
-    private val playingInventoryState = SwingPlayingInventoryState()
-    private val loadingState = SwingLoadingState()
+    override var state: AtomicReference<ViewState> = AtomicReference(SwingLoadingState())
 
-    override var state: ViewState = playingState
-
-    private inner class GamePanel : JPanel() {
-
-        private fun convertCellToPixels(c: Cell): Pair<Int, Int> {
-            return Pair(offsetX + c.x * tileSize, offsetY + c.y * tileSize)
-        }
-
-        private fun convertToSwingShape(s: SwingUnitShape, at: Cell): Shape {
-            val (pxX, pxY) = convertCellToPixels(at)
-            return when (s) {
-                SwingUnitShape.SQUARE -> Rectangle(pxX, pxY, tileSize, tileSize)
-                SwingUnitShape.CIRCLE -> Ellipse2D.Double(
-                    pxX.toDouble(),
-                    pxY.toDouble(),
-                    tileSize.toDouble(),
-                    tileSize.toDouble(),
-                )
-                SwingUnitShape.TRIANGLE -> Polygon(
-                    intArrayOf(pxX, pxX + tileSize / 2, pxX + tileSize),
-                    intArrayOf(pxY + tileSize, pxY, pxY + tileSize),
-                    3
-                )
-            }
-        }
-
-        override fun paintComponent(graphics: Graphics) {
-            super.paintComponent(graphics)
-            val g = graphics as Graphics2D
-            g.color = Color.BLACK
-            g.fillRect(0, 0, frameWidth, frameHeight)
-            when (state) { // TODO: STATE IS NOT THREAD-SAFE
-                is PlayingState -> drawWorld(g)
-                is PlayingInventoryState -> drawInventory(g)
-                is LoadingState -> drawLoading(g)
-            }
-        }
-
-        private fun drawWorld(g: Graphics2D) {
-            for ((_, viewUnits) in drawables) {
-                for (viewUnit in viewUnits) {
-                    val (shape) = viewUnit.swingAppearance
-                    g.color = viewUnit.rgb.toSwingColor()
-                    g.fill(convertToSwingShape(shape, viewUnit.cell))
-                }
-            }
-        }
-
-        private fun drawInventory(g: Graphics2D) {
-            TODO()
-        }
-
-        private fun drawLoading(g: Graphics2D) {
-            TODO()
-        }
-
-    }
-
-    private val gamePanel = GamePanel()
     private val ticker: Ticker = Ticker(10) // TODO: magic constant
 
     fun initialize() {
-        val window = JFrame("RGB") // TODO: magic constant (config?)
         window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE // TODO: maybe save smth on exit?
-        window.setSize(frameWidth, frameHeight)
-        window.isVisible = true
+        window.extendedState = JFrame.MAXIMIZED_BOTH
+        window.isUndecorated = true
         window.isFocusable = true
-        window.add(gamePanel)
-
-        gamePanel.isFocusable = true
-        gamePanel.requestFocusInWindow()
-
-        gamePanel.addKeyListener(object : KeyAdapter() {
-            override fun keyPressed(e: KeyEvent) {
-                val message: Message = when (e.keyCode) {
-                    KeyEvent.VK_W -> UserMoved(Direction.UP)
-                    KeyEvent.VK_A -> UserMoved(Direction.LEFT)
-                    KeyEvent.VK_S -> UserMoved(Direction.DOWN)
-                    KeyEvent.VK_D -> UserMoved(Direction.RIGHT)
-                    KeyEvent.VK_I -> UserToggledInventory()
-                    else -> return
-                }
-                if (message is UserToggledInventory || state is PlayingInventoryState) {
-                    inventoryListeners
-                } else {
-                    movementListeners
-                }.forEach { it.receive(message) }
-            }
-        })
+        window.isVisible = true
 
         window.addWindowListener(object : WindowAdapter() {
             override fun windowClosing(e: WindowEvent?) {

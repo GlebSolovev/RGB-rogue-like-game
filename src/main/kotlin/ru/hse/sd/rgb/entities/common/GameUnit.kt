@@ -19,3 +19,5 @@ data class GameUnit(
     }
 
 }
+
+data class ColorCell(val cell: Cell, val color: GameColor)

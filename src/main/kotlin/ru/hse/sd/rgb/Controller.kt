@@ -1,66 +1,118 @@
 package ru.hse.sd.rgb
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import ru.hse.sd.rgb.entities.Hero
-import ru.hse.sd.rgb.entities.Wall
+import kotlinx.coroutines.*
+import ru.hse.sd.rgb.entities.common.GameStarted
+import ru.hse.sd.rgb.levelloading.loadLevel
+import ru.hse.sd.rgb.logic.CreationLogic
 import ru.hse.sd.rgb.logic.PhysicsLogic
-import ru.hse.sd.rgb.logic.generateMaze
-import ru.hse.sd.rgb.views.EntityMoved
-import ru.hse.sd.rgb.views.swing.SwingView
+import ru.hse.sd.rgb.views.GameViewStarted
+import ru.hse.sd.rgb.views.UserQuit
 import ru.hse.sd.rgb.views.View
+import ru.hse.sd.rgb.views.swing.SwingView
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.system.exitProcess
 
 val viewCoroutineScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
 val gameCoroutineScope =
     CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher())
 
-interface Controller {
-    val physics: PhysicsLogic
-    val view: View
-//    val hero: Hero
+class Controller : Messagable() {
 
-    suspend fun start()
-}
+    private var stateRef: AtomicReference<ControllerState> = AtomicReference(GameInitState())
 
-class ControllerImpl : Controller {
-    // TODO: config (DI?)
-    val h = 40
-    val w = 80
-    override val physics = PhysicsLogic(h, w)
-    override val view = SwingView(0, 0, 1600, 800, 10)
+    override suspend fun handleMessage(m: Message) {
+        stateRef.get().next(m)
+    }
 
-    private val hero = Hero()
+    private abstract class ControllerState {
+        abstract suspend fun next(m: Message)
+    }
 
-    override suspend fun start() {
+    private inner class GameInitState : ControllerState() {
+        override suspend fun next(m: Message): Unit = when (m) {
+            is StartControllerMessage -> {
+                start()
+            }
+            is UserQuit -> { quit() }
+            else -> unreachable
+        }
+    }
+
+    private inner class GamePlayingState(
+        val creation: CreationLogic,
+        val physics: PhysicsLogic,
+        val view: View,
+    ) : ControllerState() {
+        override suspend fun next(m: Message): Unit = when (m) {
+            is FinishControllerMessage, is UserQuit -> { // TODO: finish screen
+                quit()
+            }
+            else -> unreachable
+        }
+    }
+
+    private suspend fun start() {
+        val view = SwingView()
         viewCoroutineScope.launch {
             view.initialize()
             view.messagingRoutine()
         }
+        view.receive(View.SubscribeToQuit(this@Controller))
 
-        val level = generateMaze(w, h, 3, 3)
-        for(x in 0 until w) {
-            for(y in 0 until h) {
-                if (level[y][x]) {
-                    val wall = Wall(x, y) // TODO: consistency with i,j ordering
-                    physics.tryPopulate(wall)
-                    view.receive(EntityMoved(wall, wall.viewEntity.takeViewSnapshot())) // TODO: too decoupled?
-                    // TODO: only pass entity to EntityMoved
-                }
-            }
+        val level = loadLevel(filename)
+//        delay(1.seconds)
+
+        val physics = PhysicsLogic(level.h, level.w)
+        val creation = CreationLogic(physics)
+        // TODO fightLogic
+
+        for (entity in level.entities) {
+            if (!creation.tryAddToWorld(entity)) throw IllegalStateException("invalid level")
         }
 
-        gameCoroutineScope.launch {
-            view.receive(View.SubscribeToMovement(hero))
-            hero.messagingRoutine()
+        stateRef.set(GamePlayingState(creation, physics, view))
+
+        view.receive(GameViewStarted(level))
+        for (entity in level.entities) {
+            gameCoroutineScope.launch { entity.messagingRoutine() }
+            entity.receive(GameStarted())
         }
     }
+
+    private fun quit(): Nothing {
+        gameCoroutineScope.cancel()
+        Ticker.resetAll()
+        exitProcess(0)
+    }
+
+    val creation: CreationLogic
+        get() {
+            val state = stateRef.get()
+            return if (state is GamePlayingState) state.creation else throw IllegalStateException()
+        }
+
+    val physics: PhysicsLogic
+        get() {
+            val state = stateRef.get()
+            return if (state is GamePlayingState) state.physics else throw IllegalStateException()
+        }
+
+    val view: View // TODO: should be global for Controller
+        get() {
+            val state = stateRef.get()
+            return if (state is GamePlayingState) state.view else throw IllegalStateException()
+        }
+
 }
 
-var controller: Controller = ControllerImpl()
+var controller = Controller()
+val filename: String? = null // "src/test/resources/sampleLevel.description" // TODO: CLI argument
+
+class StartControllerMessage : Message()
+data class FinishControllerMessage(val isWin: Boolean) : Message()
 
 fun main() = runBlocking {
-    controller.start()
+    controller.receive(StartControllerMessage())
+    controller.messagingRoutine()
 }

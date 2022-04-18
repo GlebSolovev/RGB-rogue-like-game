@@ -1,7 +1,22 @@
-package ru.hse.sd.rgb.logic
+package ru.hse.sd.rgb.levelloading.generators
 
 import ru.hse.sd.rgb.Cell
 import kotlin.random.Random
+import kotlin.random.nextInt
+
+fun generateMaze(
+    widthRange: IntRange,
+    heightRange: IntRange,
+    minPathSizeRange: IntRange,
+    passageSizeRange: IntRange,
+    random: Random = Random
+): List<List<Boolean>> {
+    val w = random.nextInt(widthRange)
+    val h = random.nextInt(heightRange)
+    val minPathSize = random.nextInt(minPathSizeRange)
+    val passageSize = random.nextInt(passageSizeRange)
+    return generateMaze(w, h, minPathSize, passageSize, random)
+}
 
 // recursive division method
 // might have inaccessible areas, prob of that ~= 0 when minPathSize >= 3

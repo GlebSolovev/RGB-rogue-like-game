@@ -6,7 +6,7 @@ import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
-class Hero : GameEntity() {
+class Hero(colorCells: Set<ColorCell>) : GameEntity(colorCells) {
 
     inner class PhysicalHero : PhysicalEntity() {
         override val isSolid = true
@@ -18,20 +18,18 @@ class Hero : GameEntity() {
         }
     }
 
-    override val units: Set<GameUnit> = setOf(
-        GameUnit(this, Cell(0, 0), GameColor(255, 0, 0), true),
-        GameUnit(this, Cell(1, 0), GameColor(0, 255, 0), true),
-        GameUnit(this, Cell(0, 1), GameColor(255, 0, 255), true),
-        GameUnit(this, Cell(1, 1), GameColor(255, 255, 255), true)
-    )
     override val physicalEntity = PhysicalHero()
     override val viewEntity = ViewHero()
 
-    override suspend fun handleMessage(m: Message) {
+    override fun onGameStart() {
+        controller.view.receive(View.SubscribeToMovement(this))
+    }
+
+    override suspend fun handleGameMessage(m: Message) {
         when (m) {
             is UserMoved -> {
                 val moved = controller.physics.tryMove(this, m.dir)
-                if (moved) controller.view.receive(EntityMoved(this, viewEntity.takeViewSnapshot()))
+                if (moved) controller.view.receive(EntityMoved(this))
             }
         }
     }

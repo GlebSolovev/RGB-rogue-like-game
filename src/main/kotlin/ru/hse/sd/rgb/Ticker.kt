@@ -36,6 +36,11 @@ class Ticker private constructor(
     companion object {
         fun Messagable.Ticker(periodMillis: Long) = Ticker(periodMillis, this)
 
-        private val tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
+        private var tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
+
+        fun resetAll() {
+            tickerCoroutineScope.cancel()
+            tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
+        }
     }
 }
