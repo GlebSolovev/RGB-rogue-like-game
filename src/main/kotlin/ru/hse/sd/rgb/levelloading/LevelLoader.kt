@@ -15,7 +15,8 @@ import java.util.*
 data class LevelDescription(
     val w: Int,
     val h: Int,
-    val entities: Set<GameEntity>,
+    val allEntities: Set<GameEntity>, // include hero
+    val hero: Hero,
     val bgColor: RGB, // can be ViewBackground
 )
 
@@ -44,7 +45,8 @@ fun loadLevel(filename: String?): LevelDescription {
         if (builder.isMulti) entities.add(builder.creator(builder.colorCells))
     }
     val bgColor = readRGB(scanner)
-    return LevelDescription(w, h, entities, bgColor)
+    val hero = entities.find { it is Hero }!! as Hero
+    return LevelDescription(w, h, entities, hero, bgColor)
 }
 
 // ----------------- private -----------------

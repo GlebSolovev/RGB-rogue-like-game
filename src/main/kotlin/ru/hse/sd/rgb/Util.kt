@@ -1,5 +1,8 @@
 package ru.hse.sd.rgb
 
+import ru.hse.sd.rgb.entities.common.GameEntity
+import kotlin.random.Random
+
 data class Cell(val x: Int, val y: Int)
 data class GridShift(val dx: Int, val dy: Int)
 
@@ -34,3 +37,9 @@ infix fun <U, V> Iterable<U>.cross(other: Iterable<V>): Iterable<Pair<U, V>> = s
         }
     }
 }.asIterable()
+
+operator fun <T, U, V> Map<Pair<T, U>, V>.get(t: T, u: U) = this[t to u]
+
+fun <T> Set<T>.randomElement(random: Random = Random) = this.shuffled(random).firstOrNull()
+
+fun GameEntity.randomCell(random: Random = Random) = this.units.randomElement(random)!!.cell

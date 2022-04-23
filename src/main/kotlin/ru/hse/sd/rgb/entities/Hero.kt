@@ -31,6 +31,15 @@ class Hero(colorCells: Set<ColorCell>) : GameEntity(colorCells) {
                 val moved = controller.physics.tryMove(this, m.dir)
                 if (moved) controller.view.receive(EntityMoved(this))
             }
+            is CollidedWith -> {
+                controller.fighting.attack(m.myUnit, m.otherUnit)
+            }
+            is ColorTick -> {
+                addArgs = Struct{attackTarget: NEAREST, healTarget: LOW_HP}
+                state.get(unit) -> fightEntity.get(unit)
+                controller.fighting.update(m.unit, addArgs)
+            }
+            else -> unreachable
         }
     }
 

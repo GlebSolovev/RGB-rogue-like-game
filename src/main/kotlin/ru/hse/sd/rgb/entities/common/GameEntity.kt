@@ -3,6 +3,9 @@ package ru.hse.sd.rgb.entities.common
 import ru.hse.sd.rgb.*
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
+import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentSkipListSet
 
 abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
@@ -17,18 +20,23 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     }
 
     abstract inner class PhysicalEntity {
-        abstract val isSolid: Boolean // if true, only this entity can occupy its cells TODO: physics
+        abstract val isSolid: Boolean // if true, only this entity can occupy its cells
+
+        abstract fun getUnitDirection(unit: GameUnit, dir: Direction): Direction
     }
 
-    abstract val physicalEntity: PhysicalEntity
-    abstract val viewEntity: ViewEntity
+    abstract inner class FightEntity {
+        abstract fun isUnitActive(unit: GameUnit): Boolean
+    }
 
-    val units: Set<GameUnit>
+    abstract val viewEntity: ViewEntity
+    abstract val physicalEntity: PhysicalEntity
+
+    val units: MutableSet<GameUnit> = Collections.newSetFromMap(ConcurrentHashMap())
 
     init {
         val cells = colorCells.map { it.cell }.toSet()
         val shifts = setOf(GridShift(-1, 0), GridShift(1, 0), GridShift(0, 1), GridShift(0, -1))
-        units = mutableSetOf()
         outer@ for ((cell, color) in colorCells) {
             for (shift in shifts) {
                 if (cell + shift !in cells) {
@@ -58,3 +66,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 }
 
 class GameStarted : Message()
+data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : Message()
+data class ReceivedAttack(val myUnit: GameUnit, val fromUnit: GameUnit, val isFatal: Boolean) : Message()
+
+class MoveTick : Tick()

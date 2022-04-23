@@ -3,9 +3,12 @@ package ru.hse.sd.rgb
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicLong
 
-class Ticker private constructor(
+open class Tick : Message()
+
+class Ticker(
     periodMillis: Long,
     private val target: Messagable,
+    private val tick: Tick,
 ) {
     private val periodHolder = AtomicLong(periodMillis)
     private lateinit var coroutineJob: Job
@@ -27,14 +30,13 @@ class Ticker private constructor(
     suspend fun CoroutineScope.tickingRoutine() {
         while (isActive) {
             delay(periodMillis)
-            target.receive(Tick)
+            target.receive(tick)
         }
     }
 
-    object Tick : Message()
 
     companion object {
-        fun Messagable.Ticker(periodMillis: Long) = Ticker(periodMillis, this)
+        fun Messagable.Ticker(periodMillis: Long, tick: Tick = Tick()) = Ticker(periodMillis, this, tick)
 
         private var tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
 

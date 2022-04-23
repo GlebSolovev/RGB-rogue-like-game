@@ -1,9 +1,11 @@
 package ru.hse.sd.rgb
 
 import kotlinx.coroutines.*
+import ru.hse.sd.rgb.entities.Hero
 import ru.hse.sd.rgb.entities.common.GameStarted
 import ru.hse.sd.rgb.levelloading.loadLevel
 import ru.hse.sd.rgb.logic.CreationLogic
+import ru.hse.sd.rgb.logic.FightLogic
 import ru.hse.sd.rgb.logic.PhysicsLogic
 import ru.hse.sd.rgb.views.GameViewStarted
 import ru.hse.sd.rgb.views.UserQuit
@@ -34,7 +36,9 @@ class Controller : Messagable() {
             is StartControllerMessage -> {
                 start()
             }
-            is UserQuit -> { quit() }
+            is UserQuit -> {
+                quit()
+            }
             else -> unreachable
         }
     }
@@ -42,7 +46,9 @@ class Controller : Messagable() {
     private inner class GamePlayingState(
         val creation: CreationLogic,
         val physics: PhysicsLogic,
+        val fighting: FightLogic,
         val view: View,
+        val hero: Hero,
     ) : ControllerState() {
         override suspend fun next(m: Message): Unit = when (m) {
             is FinishControllerMessage, is UserQuit -> { // TODO: finish screen
@@ -64,17 +70,18 @@ class Controller : Messagable() {
 //        delay(1.seconds)
 
         val physics = PhysicsLogic(level.h, level.w)
+        val fighting = FightLogic()
         val creation = CreationLogic(physics)
-        // TODO fightLogic
+        val hero = level.hero
 
-        for (entity in level.entities) {
+        for (entity in level.allEntities) {
             if (!creation.tryAddToWorld(entity)) throw IllegalStateException("invalid level")
         }
 
-        stateRef.set(GamePlayingState(creation, physics, view))
+        stateRef.set(GamePlayingState(creation, physics, fighting, view, hero))
 
         view.receive(GameViewStarted(level))
-        for (entity in level.entities) {
+        for (entity in level.allEntities) {
             gameCoroutineScope.launch { entity.messagingRoutine() }
             entity.receive(GameStarted())
         }
@@ -98,12 +105,23 @@ class Controller : Messagable() {
             return if (state is GamePlayingState) state.physics else throw IllegalStateException()
         }
 
+    val fighting: FightLogic
+        get() {
+            val state = stateRef.get()
+            return if (state is GamePlayingState) state.fighting else throw IllegalStateException()
+        }
+
     val view: View // TODO: should be global for Controller
         get() {
             val state = stateRef.get()
             return if (state is GamePlayingState) state.view else throw IllegalStateException()
         }
 
+    val hero: Hero
+        get() {
+            val state = stateRef.get()
+            return if (state is GamePlayingState) state.hero else throw IllegalStateException()
+        }
 }
 
 var controller = Controller()
