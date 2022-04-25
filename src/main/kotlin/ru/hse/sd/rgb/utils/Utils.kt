@@ -1,7 +1,9 @@
-package ru.hse.sd.rgb
+package ru.hse.sd.rgb.utils
 
-import ru.hse.sd.rgb.entities.common.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import kotlin.random.Random
+
+data class RGB(val r: Int, val g: Int, val b: Int)
 
 data class Cell(val x: Int, val y: Int)
 data class GridShift(val dx: Int, val dy: Int)
@@ -29,14 +31,6 @@ operator fun <T> List<MutableList<T>>.set(cell: Cell, value: T) {
 val ignore = Unit
 val unreachable: Nothing
     get() = throw RuntimeException("reached unreachable")
-
-infix fun <U, V> Iterable<U>.cross(other: Iterable<V>): Iterable<Pair<U, V>> = sequence {
-    for (t in this@cross) {
-        for (u in other) {
-            yield(Pair(t, u))
-        }
-    }
-}.asIterable()
 
 operator fun <T, U, V> Map<Pair<T, U>, V>.get(t: T, u: U) = this[t to u]
 

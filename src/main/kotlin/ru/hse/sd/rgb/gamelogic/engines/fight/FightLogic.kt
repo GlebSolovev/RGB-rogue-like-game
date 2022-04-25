@@ -1,14 +1,11 @@
-package ru.hse.sd.rgb.logic
+package ru.hse.sd.rgb.gamelogic.engines.fight
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import ru.hse.sd.rgb.GameColor
-import ru.hse.sd.rgb.basecolorupdate.BaseColorUpdateEffect
-import ru.hse.sd.rgb.basecolorupdate.ControlParams
-import ru.hse.sd.rgb.entities.common.GameUnit
-import ru.hse.sd.rgb.entities.common.GameUnitId
-import ru.hse.sd.rgb.entities.common.ReceivedAttack
-import ru.hse.sd.rgb.views.RGB
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
+import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
+import ru.hse.sd.rgb.gamelogic.entities.ReceivedAttack
+import ru.hse.sd.rgb.utils.RGB
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 
@@ -34,6 +31,7 @@ class FightLogic(
         fun unsafeAttack(from: GameUnit, to: GameUnit)
     }
 
+    // TODO: is it a good idea?
     private inner class UnsafeMethodsImpl : UnsafeMethods {
         override fun unsafeChangeRGB(unit: GameUnit, newRgb: RGB) {
             unit.gameColor.rgb = newRgb
@@ -70,8 +68,8 @@ class FightLogic(
     }
 
     private fun computeAttack(from: GameColor, to: GameColor): Int {
-        val similarityCoef = from.rgb similarityTo to.cachedBaseColorId
-        return (attackFromTo[from.cachedBaseColorId to to.cachedBaseColorId]!! * similarityCoef).toInt()
+        val similarityCoefficient = from.rgb similarityTo to.cachedBaseColorId
+        return (attackFromTo[from.cachedBaseColorId to to.cachedBaseColorId]!! * similarityCoefficient).toInt()
     }
 
     suspend fun registerUnit(unit: GameUnit) {
@@ -79,7 +77,7 @@ class FightLogic(
         mutex.withLock { unitMutexes.put(unit.id, mutex)?.let { throw IllegalStateException("double unit register") } }
     }
 
-    suspend fun unregisterUnit(unit: GameUnit) {
+    suspend fun unregisterUnit(unit: GameUnit) { // TODO: use in CreationLogic
         val mutex = unitMutexes[unit.id]!!
         mutex.withLock {
             unitMutexes.remove(unit.id)
@@ -102,12 +100,16 @@ class FightLogic(
     }
 
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
+        // TODO: fight green fireballs and dead locks
         withLockedUnits(setOf(unit)) {
-            for (updateEffect in unit.gameColor.cachedBaseColorId.stats.updateEffects) updateEffect.activate(
-                unit,
-                controlParams,
-                unsafeMethods
-            )
+            // TODO: fix "Suspension functions can be called only within coroutine body"
+            for (updateEffect in unit.gameColor.cachedBaseColorId.stats.updateEffects)
+                TODO()
+//                updateEffect.activate(
+//                    unit,
+//                    controlParams,
+//                    unsafeMethods
+//                )
         }
     }
 

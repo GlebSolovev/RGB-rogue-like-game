@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.views.swing
 
-import ru.hse.sd.rgb.Cell
-import ru.hse.sd.rgb.entities.common.GameEntity
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import java.awt.*
 import java.awt.geom.Ellipse2D

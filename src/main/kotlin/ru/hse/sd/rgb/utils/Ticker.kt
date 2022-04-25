@@ -1,4 +1,4 @@
-package ru.hse.sd.rgb
+package ru.hse.sd.rgb.utils
 
 import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicLong
@@ -13,7 +13,7 @@ class Ticker(
     private val periodHolder = AtomicLong(periodMillis)
     private lateinit var coroutineJob: Job
 
-    var periodMillis: Long
+    private var periodMillis: Long
         get() = periodHolder.get()
         set(value) = periodHolder.set(value)
 
@@ -27,7 +27,7 @@ class Ticker(
         coroutineJob.cancel()
     }
 
-    suspend fun CoroutineScope.tickingRoutine() {
+    private suspend fun CoroutineScope.tickingRoutine() {
         while (isActive) {
             delay(periodMillis)
             target.receive(tick)

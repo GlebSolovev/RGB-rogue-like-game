@@ -1,6 +1,10 @@
-package ru.hse.sd.rgb.entities.common
+package ru.hse.sd.rgb.gamelogic.entities
 
-import ru.hse.sd.rgb.*
+import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.Tick
+import ru.hse.sd.rgb.utils.Ticker
 import java.util.concurrent.atomic.AtomicLong
 
 typealias GameUnitId = Long
@@ -16,7 +20,7 @@ data class GameUnit(
         controller.fighting.getBaseColorStats(gameColor.cachedBaseColorId).updatePeriodMillis,
         parent,
         ColorTick(this)
-    ).also { it.start() }
+    ).also { it.start() } // TODO: update when base color changes
 
     companion object {
         private val globalId = AtomicLong(0)
@@ -30,6 +34,6 @@ data class GameUnit(
 
 }
 
-data class ColorCell(val color: GameColor, val cell: Cell)
+data class ColorHpCell(val color: GameColor, val hp: Int, val cell: Cell)
 
 data class ColorTick(val unit: GameUnit) : Tick()

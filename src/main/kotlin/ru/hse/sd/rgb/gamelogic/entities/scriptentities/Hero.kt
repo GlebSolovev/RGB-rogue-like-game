@@ -1,15 +1,19 @@
-package ru.hse.sd.rgb.entities
+package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.*
-import ru.hse.sd.rgb.entities.common.*
+import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.entities.*
+import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.Message
+import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
-class Hero(colorCells: Set<ColorCell>) : GameEntity(colorCells) {
+class Hero(colorHpCells: Set<ColorHpCell>) : GameEntity(colorHpCells) {
 
     inner class PhysicalHero : PhysicalEntity() {
         override val isSolid = true
+        override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = dir
     }
 
     inner class ViewHero : ViewEntity() {
@@ -35,9 +39,10 @@ class Hero(colorCells: Set<ColorCell>) : GameEntity(colorCells) {
                 controller.fighting.attack(m.myUnit, m.otherUnit)
             }
             is ColorTick -> {
-                addArgs = Struct{attackTarget: NEAREST, healTarget: LOW_HP}
-                state.get(unit) -> fightEntity.get(unit)
-                controller.fighting.update(m.unit, addArgs)
+//                addArgs = Struct { attackTarget: NEAREST, healTarget: LOW_HP }
+//                state.get(unit) -> fightEntity.get(unit)
+//                controller.fighting.update(m.unit, addArgs)
+                // TODO: unit update in fighting logic
             }
             else -> unreachable
         }

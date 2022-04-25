@@ -1,10 +1,10 @@
 package ru.hse.sd.rgb.views
 
-import ru.hse.sd.rgb.Direction
-import ru.hse.sd.rgb.Messagable
-import ru.hse.sd.rgb.Message
-import ru.hse.sd.rgb.entities.common.GameEntity
-import ru.hse.sd.rgb.levelloading.LevelDescription
+import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.Messagable
+import ru.hse.sd.rgb.utils.Message
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gameloaders.LevelDescription
 import java.util.concurrent.atomic.AtomicReference
 
 abstract class View : Messagable() {
@@ -35,10 +35,7 @@ abstract class View : Messagable() {
     }
 
     protected abstract class PlayingState(
-        protected val drawables: MutableMap<GameEntity, GameEntityViewSnapshot>,
-        protected val wGrid: Int,
-        protected val hGrid: Int,
-        protected val bgColor: RGB
+        protected val drawables: MutableMap<GameEntity, GameEntityViewSnapshot>
     ) : ViewState()
 
     protected abstract class PlayingInventoryState : ViewState()
@@ -55,5 +52,5 @@ data class EntityMoved(val gameEntity: GameEntity) : Message() {
 
 data class GameViewStarted(val level: LevelDescription) : Message() {
     val drawables: MutableMap<GameEntity, GameEntityViewSnapshot> =
-        level.entities.associateWith { it.viewEntity.takeViewSnapshot() }.toMutableMap()
+        level.allEntities.associateWith { it.viewEntity.takeViewSnapshot() }.toMutableMap()
 }

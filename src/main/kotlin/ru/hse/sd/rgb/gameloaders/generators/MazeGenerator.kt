@@ -1,6 +1,6 @@
-package ru.hse.sd.rgb.levelloading.generators
+package ru.hse.sd.rgb.gameloaders.generators
 
-import ru.hse.sd.rgb.Cell
+import ru.hse.sd.rgb.utils.Cell
 import kotlin.random.Random
 import kotlin.random.nextInt
 
@@ -49,7 +49,7 @@ private fun splitChamber(
     fun trySplitHorizontally(): Pair<Chamber, Chamber>? {
         val dy = c.ru.y - c.lb.y + 1
         val variance = dy - minSize * 2
-        if (variance <= 0) return null
+        if (variance <= 0) return null // TODO: fight duplicated code fragment
         val ry = random.nextInt(variance)
         val yWall = c.lb.y + minSize + ry
 

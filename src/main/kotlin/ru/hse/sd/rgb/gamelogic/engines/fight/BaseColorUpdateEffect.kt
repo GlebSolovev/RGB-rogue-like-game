@@ -1,11 +1,10 @@
-package ru.hse.sd.rgb.basecolorupdate
+package ru.hse.sd.rgb.gamelogic.engines.fight
 
-import ru.hse.sd.rgb.entities.common.GameUnit
-import ru.hse.sd.rgb.logic.FightLogic
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 
 // Entity, where do you want to fight?
 enum class AttackType { NO_ATTACK, HERO_TARGET, RANDOM_TARGET }
-enum class HealType { NO_HEAL, LOWEST_HP_TARGET, RANDOM_TARGET }
+enum class HealType { NO_HEAL, LOWEST_HP_TARGET, RANDOM_TARGET } // TODO: use in script effects
 
 data class ControlParams(val attackType: AttackType, val healType: HealType)
 

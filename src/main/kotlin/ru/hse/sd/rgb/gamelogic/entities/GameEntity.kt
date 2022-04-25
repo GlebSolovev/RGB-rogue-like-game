@@ -1,13 +1,12 @@
-package ru.hse.sd.rgb.entities.common
+package ru.hse.sd.rgb.gamelogic.entities
 
-import ru.hse.sd.rgb.*
+import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
 
-abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
+abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
 
     abstract inner class ViewEntity {
         protected abstract fun convertUnit(unit: GameUnit): ViewUnit
@@ -25,7 +24,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         abstract fun getUnitDirection(unit: GameUnit, dir: Direction): Direction
     }
 
-    abstract inner class FightEntity {
+    abstract inner class FightEntity { // TODO: for fight logic and behaviour state machines, effects
         abstract fun isUnitActive(unit: GameUnit): Boolean
     }
 
@@ -35,16 +34,16 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     val units: MutableSet<GameUnit> = Collections.newSetFromMap(ConcurrentHashMap())
 
     init {
-        val cells = colorCells.map { it.cell }.toSet()
+        val cells = colorHpCells.map { it.cell }.toSet()
         val shifts = setOf(GridShift(-1, 0), GridShift(1, 0), GridShift(0, 1), GridShift(0, -1))
-        outer@ for ((cell, color) in colorCells) {
+        outer@ for ((color, hp, cell) in colorHpCells) {
             for (shift in shifts) {
                 if (cell + shift !in cells) {
-                    units.add(GameUnit(this, cell, color, true))
+                    units.add(GameUnit(this, cell, hp, color))
                     continue@outer
                 }
             }
-            units.add(GameUnit(this, cell, color, false))
+            units.add(GameUnit(this, cell, hp, color))
         }
     }
 

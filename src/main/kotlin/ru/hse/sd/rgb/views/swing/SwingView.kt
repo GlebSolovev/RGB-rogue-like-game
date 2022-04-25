@@ -1,8 +1,8 @@
 package ru.hse.sd.rgb.views.swing
 
-import ru.hse.sd.rgb.*
-import ru.hse.sd.rgb.Ticker.Companion.Ticker
-import ru.hse.sd.rgb.entities.common.GameEntity
+import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.*
 import java.awt.*
 import java.awt.event.*
@@ -55,7 +55,7 @@ class SwingView : View() {
         wGrid: Int,
         hGrid: Int,
         bgColor: RGB,
-    ) : PlayingState(drawables, wGrid, hGrid, bgColor) {
+    ) : PlayingState(drawables) {
 
         init {
             val wPx = panel.width
@@ -73,7 +73,7 @@ class SwingView : View() {
         }
 
         override fun next(m: Message): ViewState = when (m) {
-            is Ticker.Tick -> this.also {
+            is Tick -> this.also {
                 panel.repaint()
             }
             is UserMoved -> this.also {
@@ -106,9 +106,9 @@ class SwingView : View() {
         }
 
         override fun next(m: Message): ViewState = when (m) {
-            is Ticker.Tick -> this.also { panel.repaint() }
+            is Tick -> this.also { panel.repaint() }
             is GameViewStarted -> {
-                val (w, h, _, bgColor) = m.level
+                val (w, h, _, _, bgColor) = m.level
                 SwingPlayingState(m.drawables, w, h, bgColor)
             }
             is UserQuit -> this.also {
@@ -123,7 +123,7 @@ class SwingView : View() {
     private val ticker: Ticker = Ticker(10) // TODO: magic constant
 
     fun initialize() {
-        window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE // TODO: maybe save smth on exit?
+        window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE // TODO: maybe save something on exit?
         window.extendedState = JFrame.MAXIMIZED_BOTH
         window.isUndecorated = true
         window.isFocusable = true

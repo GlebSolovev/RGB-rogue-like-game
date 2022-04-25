@@ -1,16 +1,16 @@
-package ru.hse.sd.rgb.logic
+package ru.hse.sd.rgb.gamelogic.engines.physics
 
 import kotlinx.coroutines.sync.Mutex
-import ru.hse.sd.rgb.Cell
-import ru.hse.sd.rgb.Direction
-import ru.hse.sd.rgb.entities.common.CollidedWith
-import ru.hse.sd.rgb.entities.common.GameEntity
-import ru.hse.sd.rgb.entities.common.GameUnit
-import ru.hse.sd.rgb.get
-import ru.hse.sd.rgb.plus
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.gamelogic.entities.CollidedWith
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
+import ru.hse.sd.rgb.utils.get
+import ru.hse.sd.rgb.utils.plus
 import kotlin.random.Random
 
-class PhysicsLogic(val h: Int, val w: Int) {
+class PhysicsLogic(private val h: Int, private val w: Int) {
 
     companion object {
         const val RANDOM_TARGET_ATTEMPTS = 1000000
@@ -73,7 +73,7 @@ class PhysicsLogic(val h: Int, val w: Int) {
         }
     }
 
-    suspend fun deleteUnit(unit: GameUnit) {
+    suspend fun deleteUnit(unit: GameUnit) { // TODO: delete entity?
         withLockedArea(setOf(unit.cell)) {
             worldGrid[unit.cell].remove(unit)
         }
@@ -84,7 +84,7 @@ class PhysicsLogic(val h: Int, val w: Int) {
         val entityCells = entity.units.map { it.cell }.toSet()
         repeat(RANDOM_TARGET_ATTEMPTS) {
             val cell = Cell(random.nextInt(w), random.nextInt(h))
-            if(!entityCells.contains(cell)) return cell
+            if (!entityCells.contains(cell)) return cell
         }
         throw IllegalStateException("$RANDOM_TARGET_ATTEMPTS attempts exceeded")
     }

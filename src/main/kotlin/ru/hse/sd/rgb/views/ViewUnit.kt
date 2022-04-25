@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.views
 
-import ru.hse.sd.rgb.entities.common.GameUnit
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 
 // is a snapshot

@@ -1,16 +1,13 @@
-package ru.hse.sd.rgb.levelloading
+package ru.hse.sd.rgb.gameloaders
 
-import ru.hse.sd.rgb.logic.BaseColorId
-import ru.hse.sd.rgb.logic.BaseColorStats
-import ru.hse.sd.rgb.views.RGB
+import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorId
+import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
 
 data class BaseColorsDescription(
     val baseColorStats: Map<BaseColorId, BaseColorStats>,
     val attackFromTo: Map<Pair<BaseColorId, BaseColorId>, Int>
 )
 
-data class
-
 fun loadColors(filename: String): BaseColorsDescription {
-
+    TODO()
 }

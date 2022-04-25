@@ -1,18 +1,23 @@
-package ru.hse.sd.rgb.basecolorupdate
+package ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects
 
-import ru.hse.sd.rgb.controller
-import ru.hse.sd.rgb.entities.Fireball
-import ru.hse.sd.rgb.entities.common.ColorCell
-import ru.hse.sd.rgb.entities.common.GameUnit
-import ru.hse.sd.rgb.logic.FightLogic
-import ru.hse.sd.rgb.randomCell
-import ru.hse.sd.rgb.unreachable
+import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
+import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
+import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
+import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Fireball
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
+import ru.hse.sd.rgb.gamelogic.engines.fight.FightLogic
+import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
+import ru.hse.sd.rgb.utils.randomCell
+import ru.hse.sd.rgb.utils.unreachable
 
 class FireballEffect(
     private val count: Int,
     private val movePeriodMillis: Long,
+    private val fireballHp: Int,
     private val isControllable: Boolean
 ) : BaseColorUpdateEffect {
+
     override suspend fun activate(
         unit: GameUnit,
         controlParams: ControlParams,
@@ -27,7 +32,7 @@ class FireballEffect(
                 AttackType.RANDOM_TARGET -> controller.physics.generateRandomTarget(unit.parent)
                 else -> unreachable
             }
-            val fireball = Fireball(ColorCell(unit.gameColor, unit.cell), movePeriodMillis, targetCell)
+            val fireball = Fireball(ColorHpCell(unit.gameColor, fireballHp, unit.cell), movePeriodMillis, targetCell)
             controller.creation.tryAddToWorld(fireball)
         }
     }

@@ -1,8 +1,9 @@
-package ru.hse.sd.rgb.entities
+package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.*
-import ru.hse.sd.rgb.Ticker.Companion.Ticker
-import ru.hse.sd.rgb.entities.common.*
+import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.entities.*
+import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.EntityMoved
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -10,12 +11,13 @@ import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlin.math.abs
 
 class Fireball(
-    colorCell: ColorCell,
-    private val movePeriodMillis: Long,
+    colorHpCell: ColorHpCell,
+    movePeriodMillis: Long,
     private val targetCell: Cell
-) : GameEntity(setOf(colorCell)) {
+) : GameEntity(setOf(colorHpCell)) {
 
     val ticker = Ticker(movePeriodMillis, MoveTick()).also { it.start() }
+    // TODO: possible update ticker via effects
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {

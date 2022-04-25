@@ -1,16 +1,21 @@
-package ru.hse.sd.rgb
+package ru.hse.sd.rgb.gamelogic
 
 import kotlinx.coroutines.*
-import ru.hse.sd.rgb.entities.Hero
-import ru.hse.sd.rgb.entities.common.GameStarted
-import ru.hse.sd.rgb.levelloading.loadLevel
-import ru.hse.sd.rgb.logic.CreationLogic
-import ru.hse.sd.rgb.logic.FightLogic
-import ru.hse.sd.rgb.logic.PhysicsLogic
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
+import ru.hse.sd.rgb.gamelogic.entities.GameStarted
+import ru.hse.sd.rgb.gameloaders.loadLevel
+import ru.hse.sd.rgb.gamelogic.engines.fight.FightLogic
+import ru.hse.sd.rgb.gamelogic.engines.creation.CreationLogic
+import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsLogic
+import ru.hse.sd.rgb.utils.Messagable
+import ru.hse.sd.rgb.utils.Message
+import ru.hse.sd.rgb.utils.Ticker
+import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.GameViewStarted
 import ru.hse.sd.rgb.views.UserQuit
 import ru.hse.sd.rgb.views.View
 import ru.hse.sd.rgb.views.swing.SwingView
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
@@ -67,11 +72,11 @@ class Controller : Messagable() {
         view.receive(View.SubscribeToQuit(this@Controller))
 
         val level = loadLevel(filename)
-//        delay(1.seconds)
+//        delay(1.seconds) // helps to see loading screen
 
         val physics = PhysicsLogic(level.h, level.w)
-        val fighting = FightLogic()
-        val creation = CreationLogic(physics)
+        val fighting = FightLogic(ConcurrentHashMap(), ConcurrentHashMap()) // TODO: pass loaded maps
+        val creation = CreationLogic(physics, fighting)
         val hero = level.hero
 
         for (entity in level.allEntities) {
@@ -92,6 +97,8 @@ class Controller : Messagable() {
         Ticker.resetAll()
         exitProcess(0)
     }
+
+    // TODO: fight duplicated code below
 
     val creation: CreationLogic
         get() {

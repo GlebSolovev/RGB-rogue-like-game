@@ -1,14 +1,14 @@
-package ru.hse.sd.rgb.levelloading
+package ru.hse.sd.rgb.gameloaders
 
-import ru.hse.sd.rgb.Cell
-import ru.hse.sd.rgb.GameColor
-import ru.hse.sd.rgb.WrongConfigError
-import ru.hse.sd.rgb.entities.Hero
-import ru.hse.sd.rgb.entities.Wall
-import ru.hse.sd.rgb.entities.common.ColorCell
-import ru.hse.sd.rgb.entities.common.GameEntity
-import ru.hse.sd.rgb.levelloading.generators.generateLevel
-import ru.hse.sd.rgb.views.RGB
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
+import ru.hse.sd.rgb.utils.WrongConfigError
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gameloaders.generators.generateLevel
+import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
+import ru.hse.sd.rgb.utils.RGB
 import java.io.File
 import java.util.*
 
@@ -54,8 +54,10 @@ fun loadLevel(filename: String?): LevelDescription {
 private const val HERO_NAME = "hero"
 private const val WALL_NAME = "wall"
 
-private data class EntityBuilder(val isMulti: Boolean, val creator: (Set<ColorCell>) -> GameEntity) {
-    val colorCells = mutableSetOf<ColorCell>()
+private const val DEFAULT_HP = 10 // TODO: read from config
+
+private data class EntityBuilder(val isMulti: Boolean, val creator: (Set<ColorHpCell>) -> GameEntity) {
+    val colorCells = mutableSetOf<ColorHpCell>()
 }
 
 private fun readRGB(scanner: Scanner) = RGB(scanner.nextInt(), scanner.nextInt(), scanner.nextInt())
@@ -105,9 +107,9 @@ private fun readEntitiesDescriptions(
             val entityBuilder = shortNameBuilders[entityShortName] ?: throw WrongConfigError("entity not found")
             val color = colorMap[colorName] ?: throw WrongConfigError("color not found")
             if (entityBuilder.isMulti) {
-                entityBuilder.colorCells.add(ColorCell(Cell(x, y), color))
+                entityBuilder.colorCells.add(ColorHpCell(color, DEFAULT_HP, Cell(x, y)))
             } else {
-                entities.add(entityBuilder.creator(setOf(ColorCell(Cell(x, y), color))))
+                entities.add(entityBuilder.creator(setOf(ColorHpCell(color, DEFAULT_HP, Cell(x, y)))))
             }
         }
     }

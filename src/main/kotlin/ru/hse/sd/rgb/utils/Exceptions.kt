@@ -1,4 +1,4 @@
-package ru.hse.sd.rgb
+package ru.hse.sd.rgb.utils
 
 open class GameError(msg: String, cause: Throwable? = null) : Error(msg, cause)
 
