@@ -32,6 +32,7 @@ class Hero(
 
     override fun onGameStart() {
         controller.view.receive(View.SubscribeToMovement(this))
+        controller.view.receive(View.SubscribeToInventory(this))
     }
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
@@ -84,7 +85,11 @@ class Hero(
                 // TODO: place item in world
                 sendInvUpdate()
             }
-            else -> unreachable
+            is ColorTick -> this
+            else -> {
+                println(m)
+                unreachable
+            }
         }
     }
 

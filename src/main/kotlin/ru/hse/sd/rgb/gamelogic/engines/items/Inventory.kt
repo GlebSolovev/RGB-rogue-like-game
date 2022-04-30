@@ -10,6 +10,7 @@ data class InventorySwingAppearance(
     val gridColor: Color,
     val highlightColor: Color,
     val scale: Double,
+    val itemBgAlpha: Int,
 )
 
 data class InventoryViewSnapshot(
@@ -27,7 +28,7 @@ class Inventory(
     private val items: Grid2D<Item?> = Grid2D(w, h) { _, _, -> null }
 
     inner class ViewInventory {
-        private val swingAppearance = InventorySwingAppearance(50, Color.WHITE, Color.YELLOW, 0.9)
+        private val swingAppearance = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200)
 
         fun takeViewSnapshot() = InventoryViewSnapshot(
             items.map { it?.viewItem }, // TODO: should be concurrent?

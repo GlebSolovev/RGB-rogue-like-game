@@ -20,9 +20,9 @@ class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
         val PASSAGE_RANGE = 3..5
         val COLOR_RANGE = 0..50
 
-        const val MAX_HERO_CELL_RANDOM_ATTEMPTS = 1000
+        const val MAX_HERO_CELL_RANDOM_ATTEMPTS = 1000000
         const val DEFAULT_HERO_HP = 5
-        val DEFAULT_HERO_COLOR = RGB(40, 40, 40)
+        val DEFAULT_HERO_COLOR = RGB(150, 0, 0)
         const val DEFAULT_WALL_HP = 9999
         val DEFAULT_WALL_COLOR = RGB(255, 255, 255)
         val DEFAULT_INV_DESC = InventoryDescription(5, 5)
@@ -66,7 +66,7 @@ class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
                 return@repeat
             heroCell = null
         }
-        if (heroCell == null) throw IllegalStateException("too many attempts")
+        if (heroCell == null) throw IllegalStateException("too many attempts") // TODO: happens a lot
         val hero = Hero(
             setOf(ColorHpCell(GameColor(RandomParams.DEFAULT_HERO_COLOR), RandomParams.DEFAULT_HERO_HP, heroCell!!)),
             RandomParams.DEFAULT_INV_DESC

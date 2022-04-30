@@ -122,13 +122,20 @@ class SwingView : View() {
         private val gameDrawables: DrawablesMap
     ) : PlayingInventoryState() {
 
+        private val invPanel: GameInventoryPanel
+
         init {
-            val panel = GameInventoryPanel(
-                panel as GamePanel,
+            invPanel = GameInventoryPanel(
+                panel.width,
+                panel.height,
                 inventoryViewSnapshot,
                 playingData!!.invData
             )
-            switchPanel(panel)
+//            switchPanel(invPanel) // TODO: do switch
+            invPanel.isOpaque = false
+            panel.add(invPanel)
+            invPanel.setSize(panel.width, panel.height)
+            invPanel.setLocation(0,0 )
         }
 
         override fun next(m: Message): ViewState = when (m) {
@@ -142,10 +149,10 @@ class SwingView : View() {
                 inventoryListeners.forEach { it.receive(m) }
             }
             is InventoryClosed -> SwingPlayingState(gameDrawables).also {
-                inventoryListeners.forEach { it.receive(m) }
+                panel.remove(invPanel)
             }
             is InventoryUpdated -> this.also {
-                (panel as GameInventoryPanel).invSnapshot = m.invSnapshot
+                invPanel.invSnapshot = m.invSnapshot
             }
             is UserSelect -> this.also {
                 inventoryListeners.forEach { it.receive(m) }

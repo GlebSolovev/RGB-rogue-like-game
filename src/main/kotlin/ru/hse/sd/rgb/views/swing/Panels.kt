@@ -56,7 +56,8 @@ open class GamePanel(
 }
 
 class GameInventoryPanel(
-    gamePanel: GamePanel,
+    w: Int,
+    h: Int,
     invSnapshot: InventoryViewSnapshot,
     invData: SwingView.SwingInventoryData
 ) : JPanel() {
@@ -71,17 +72,15 @@ class GameInventoryPanel(
     private val invGridH: Int = invData.invGridH
 
     init {
-        this.add(gamePanel)
-
         val scale = invSnapshot.swingAppearance.scale
         val wGrid = invSnapshot.itemsGrid.w
         val hGrid = invSnapshot.itemsGrid.h
 
-        val wPx = width * scale
-        val hPx = height * scale
+        val wPx = w * scale
+        val hPx = h * scale
 
-        val extraOffsetX = width * (1.0 - scale) / 2.0
-        val extraOffsetY = height * (1.0 - scale) / 2.0
+        val extraOffsetX = w * (1.0 - scale) / 2.0
+        val extraOffsetY = h * (1.0 - scale) / 2.0
 
         val (tileSize, offsetX, offsetY) = if (wPx / (wGrid + 2) > hPx / (hGrid + 2)) {
             val tileSize = hPx / (hGrid + 2)
@@ -105,22 +104,34 @@ class GameInventoryPanel(
 
     override fun paintComponent(graphics: Graphics) {
         val g = graphics as Graphics2D
+
         g.color = Color(0, 0, 0, invSnapshot.swingAppearance.bgAlpha)
         g.fillRect(0, 0, width, height)
-        g.color = Color.WHITE
-        g.stroke = BasicStroke(3.0f)
 
         checkInventoryDimensions()
 
+        g.stroke = BasicStroke(3.0f)
         for (gy in 0 until invGridH) {
             for (gx in 0 until invGridW) {
                 val pxX = invOffsetX + gx * itemSize
                 val pxY = invOffsetY + gy * itemSize
+
+                g.color = Color(0, 0, 0, invSnapshot.swingAppearance.itemBgAlpha)
+                g.fillRect(pxX, pxY, itemSize, itemSize)
+
+                g.color = invSnapshot.swingAppearance.gridColor
                 g.drawRect(pxX, pxY, itemSize, itemSize)
+
                 val item = invSnapshot.itemsGrid[Cell(gx, gy)]
                 if (item != null) g.drawImage(item.getSwingAppearance(), pxX, pxY, itemSize, itemSize, null)
             }
         }
+
+        g.color = invSnapshot.swingAppearance.highlightColor
+        val selCell = invSnapshot.selectedCell
+        val pxX = invOffsetX + selCell.x * itemSize
+        val pxY = invOffsetY + selCell.y * itemSize
+        g.drawRect(pxX, pxY, itemSize, itemSize)
     }
 
 }
