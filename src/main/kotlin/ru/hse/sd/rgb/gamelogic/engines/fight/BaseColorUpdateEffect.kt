@@ -13,7 +13,7 @@ interface BaseColorUpdateEffect {
     suspend fun activate(
         unit: GameUnit,
         controlParams: ControlParams,
-        unsafeMethods: FightLogic.UnsafeMethods
+        unsafeMethods: FightEngine.UnsafeMethods
     ) // use only unsafeMethods to interact with FightLogic
 
 }

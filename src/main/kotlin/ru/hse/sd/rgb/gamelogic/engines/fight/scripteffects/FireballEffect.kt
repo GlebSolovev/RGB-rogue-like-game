@@ -6,7 +6,7 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Fireball
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.gamelogic.engines.fight.FightLogic
+import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.utils.randomCell
 import ru.hse.sd.rgb.utils.unreachable
@@ -21,7 +21,7 @@ class FireballEffect(
     override suspend fun activate(
         unit: GameUnit,
         controlParams: ControlParams,
-        unsafeMethods: FightLogic.UnsafeMethods
+        unsafeMethods: FightEngine.UnsafeMethods
     ) {
         val attackType = if (!isControllable) AttackType.RANDOM_TARGET else controlParams.attackType
         if (attackType == AttackType.NO_ATTACK) return

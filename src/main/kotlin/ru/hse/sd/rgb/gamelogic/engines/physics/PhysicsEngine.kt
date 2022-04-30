@@ -10,7 +10,7 @@ import ru.hse.sd.rgb.utils.get
 import ru.hse.sd.rgb.utils.plus
 import kotlin.random.Random
 
-class PhysicsLogic(private val h: Int, private val w: Int) {
+class PhysicsEngine(private val w: Int, private val h: Int) {
 
     companion object {
         const val RANDOM_TARGET_ATTEMPTS = 1000000

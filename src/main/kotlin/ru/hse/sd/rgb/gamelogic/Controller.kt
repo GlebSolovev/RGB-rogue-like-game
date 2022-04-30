@@ -1,12 +1,10 @@
 package ru.hse.sd.rgb.gamelogic
 
 import kotlinx.coroutines.*
+import ru.hse.sd.rgb.gameloaders.Engines
+import ru.hse.sd.rgb.gameloaders.Loader
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.gamelogic.entities.GameStarted
-import ru.hse.sd.rgb.gameloaders.loadLevel
-import ru.hse.sd.rgb.gamelogic.engines.fight.FightLogic
-import ru.hse.sd.rgb.gamelogic.engines.creation.CreationLogic
-import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsLogic
 import ru.hse.sd.rgb.utils.Messagable
 import ru.hse.sd.rgb.utils.Message
 import ru.hse.sd.rgb.utils.Ticker
@@ -15,16 +13,31 @@ import ru.hse.sd.rgb.views.GameViewStarted
 import ru.hse.sd.rgb.views.UserQuit
 import ru.hse.sd.rgb.views.View
 import ru.hse.sd.rgb.views.swing.SwingView
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
-val viewCoroutineScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
-val gameCoroutineScope =
-    CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher())
+val exceptionHandler = CoroutineExceptionHandler { _, e ->
+    e.printStackTrace()
+    onException()
+}
 
-class Controller : Messagable() {
+val viewCoroutineScope = CoroutineScope(
+    Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+            + exceptionHandler
+)
+val gameCoroutineScope = CoroutineScope(
+    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()
+            + exceptionHandler
+)
+
+fun onException() {
+    gameCoroutineScope.cancel()
+    viewCoroutineScope.cancel()
+    exitProcess(5)
+}
+
+class Controller(val view: View) : Messagable() {
 
     private var stateRef: AtomicReference<ControllerState> = AtomicReference(GameInitState())
 
@@ -34,26 +47,61 @@ class Controller : Messagable() {
 
     private abstract class ControllerState {
         abstract suspend fun next(m: Message)
+
+        open val engines: Engines
+            get() = throw IllegalStateException("no engines in this state")
+
+        open val hero: Hero
+            get() = throw IllegalStateException("no hero will save you")
     }
 
     private inner class GameInitState : ControllerState() {
+        val loader = Loader(levelFilename, null)
+
+        override lateinit var engines: Engines
+        override lateinit var hero: Hero
+
         override suspend fun next(m: Message): Unit = when (m) {
             is StartControllerMessage -> {
-                start()
+                startGame()
             }
             is UserQuit -> {
                 quit()
             }
             else -> unreachable
         }
+
+        private suspend fun startGame() {
+            viewCoroutineScope.launch {
+                view.initialize()
+                view.messagingRoutine()
+            }
+            view.receive(View.SubscribeToQuit(this@Controller))
+//            delay(1.seconds) // helps to see loading screen
+
+            // load engines before loading entities
+            engines = loader.loadEngines()
+
+            val level = loader.loadLevel()
+            val (gameDesc, _) = level
+            hero = gameDesc.hero
+            for (entity in gameDesc.allEntities) {
+                if (!creation.tryAddToWorld(entity)) throw IllegalStateException("invalid level")
+            }
+
+            view.receive(GameViewStarted(level))
+            for (entity in gameDesc.allEntities) {
+                gameCoroutineScope.launch { entity.messagingRoutine() }
+                entity.receive(GameStarted())
+            }
+
+            stateRef.set(GamePlayingState(engines, hero))
+        }
     }
 
     private inner class GamePlayingState(
-        val creation: CreationLogic,
-        val physics: PhysicsLogic,
-        val fighting: FightLogic,
-        val view: View,
-        val hero: Hero,
+        override val engines: Engines,
+        override val hero: Hero
     ) : ControllerState() {
         override suspend fun next(m: Message): Unit = when (m) {
             is FinishControllerMessage, is UserQuit -> { // TODO: finish screen
@@ -63,81 +111,35 @@ class Controller : Messagable() {
         }
     }
 
-    private suspend fun start() {
-        val view = SwingView()
-        viewCoroutineScope.launch {
-            view.initialize()
-            view.messagingRoutine()
-        }
-        view.receive(View.SubscribeToQuit(this@Controller))
-
-        val level = loadLevel(filename)
-//        delay(1.seconds) // helps to see loading screen
-
-        val physics = PhysicsLogic(level.h, level.w)
-        val fighting = FightLogic(ConcurrentHashMap(), ConcurrentHashMap()) // TODO: pass loaded maps
-        val creation = CreationLogic(physics, fighting)
-        val hero = level.hero
-
-        for (entity in level.allEntities) {
-            if (!creation.tryAddToWorld(entity)) throw IllegalStateException("invalid level")
-        }
-
-        stateRef.set(GamePlayingState(creation, physics, fighting, view, hero))
-
-        view.receive(GameViewStarted(level))
-        for (entity in level.allEntities) {
-            gameCoroutineScope.launch { entity.messagingRoutine() }
-            entity.receive(GameStarted())
-        }
-    }
-
     private fun quit(): Nothing {
         gameCoroutineScope.cancel()
         Ticker.resetAll()
         exitProcess(0)
     }
 
-    // TODO: fight duplicated code below
-
-    val creation: CreationLogic
-        get() {
-            val state = stateRef.get()
-            return if (state is GamePlayingState) state.creation else throw IllegalStateException()
-        }
-
-    val physics: PhysicsLogic
-        get() {
-            val state = stateRef.get()
-            return if (state is GamePlayingState) state.physics else throw IllegalStateException()
-        }
-
-    val fighting: FightLogic
-        get() {
-            val state = stateRef.get()
-            return if (state is GamePlayingState) state.fighting else throw IllegalStateException()
-        }
-
-    val view: View // TODO: should be global for Controller
-        get() {
-            val state = stateRef.get()
-            return if (state is GamePlayingState) state.view else throw IllegalStateException()
-        }
+    val physics
+        get() = stateRef.get().engines.physics
+    val fighting
+        get() = stateRef.get().engines.fighting
+    val creation
+        get() = stateRef.get().engines.creation
 
     val hero: Hero
-        get() {
-            val state = stateRef.get()
-            return if (state is GamePlayingState) state.hero else throw IllegalStateException()
-        }
+        get() = stateRef.get().hero
 }
 
-var controller = Controller()
-val filename: String? = null // "src/test/resources/sampleLevel.description" // TODO: CLI argument
+var controller = Controller(SwingView()) // TODO: DI
+val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
 
 class StartControllerMessage : Message()
 data class FinishControllerMessage(val isWin: Boolean) : Message()
 
 fun main() = runBlocking {
     controller.receive(StartControllerMessage())
-    controller.messagingRoutine()
+    try {
+        controller.messagingRoutine()
+    } catch (t: Throwable) {
+        t.printStackTrace()
+        onException()
+    }
 }

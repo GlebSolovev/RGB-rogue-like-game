@@ -18,7 +18,7 @@ data class BaseColorStats(
     val updateEffects: List<BaseColorUpdateEffect>
 )
 
-class FightLogic(
+class FightEngine(
     private val baseColorStats: ConcurrentHashMap<BaseColorId, BaseColorStats>,
     private val attackFromTo: ConcurrentHashMap<Pair<BaseColorId, BaseColorId>, Int>
 ) {

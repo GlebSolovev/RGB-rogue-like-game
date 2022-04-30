@@ -1,14 +1,14 @@
 package ru.hse.sd.rgb.gamelogic.engines.creation
 
-import ru.hse.sd.rgb.gamelogic.engines.fight.FightLogic
-import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsLogic
+import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
+import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 
-class CreationLogic(private val physics: PhysicsLogic, private val fightLogic: FightLogic) {
+class CreationEngine(private val physics: PhysicsEngine, private val fightEngine: FightEngine) {
 
     suspend fun tryAddToWorld(entity: GameEntity): Boolean {
         if (!physics.tryPopulate(entity)) return false
-        entity.units.forEach { unit -> fightLogic.registerUnit(unit) }
+        entity.units.forEach { unit -> fightEngine.registerUnit(unit) }
         return true
     }
 
