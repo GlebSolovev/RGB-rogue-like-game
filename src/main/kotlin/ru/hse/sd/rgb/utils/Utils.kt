@@ -1,7 +1,9 @@
 package ru.hse.sd.rgb.utils
 
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.random.Random
+import kotlin.reflect.KProperty
 
 data class RGB(val r: Int, val g: Int, val b: Int)
 
@@ -37,3 +39,6 @@ operator fun <T, U, V> Map<Pair<T, U>, V>.get(t: T, u: U) = this[t to u]
 fun <T> Set<T>.randomElement(random: Random = Random) = this.shuffled(random).firstOrNull()
 
 fun GameEntity.randomCell(random: Random = Random) = this.units.randomElement(random)!!.cell
+
+operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>) : Y = this.get()
+operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y) { this.set(value) }

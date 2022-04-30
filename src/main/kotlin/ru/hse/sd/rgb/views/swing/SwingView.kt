@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.views.swing
 
+import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
-import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.*
 import java.awt.*
@@ -23,6 +23,8 @@ class SwingView : View() {
             KeyEvent.VK_D, KeyEvent.VK_RIGHT -> UserMoved(Direction.RIGHT)
             KeyEvent.VK_I -> UserToggledInventory()
             KeyEvent.VK_ESCAPE -> UserQuit()
+            KeyEvent.VK_ENTER -> UserSelect()
+            KeyEvent.VK_Q -> UserDrop()
             else -> return
         }
         this.receive(message)
@@ -50,16 +52,37 @@ class SwingView : View() {
         window.repaint()
     }
 
+    private data class SwingGameData(
+        val gameGridW: Int,
+        val gameGridH: Int,
+        val gameBgColor: RGB,
+    )
+
+    data class SwingInventoryData(
+        val invGridW: Int,
+        val invGridH: Int,
+    )
+
+    private data class SwingPlayingData(
+        val gameData: SwingGameData,
+        val invData: SwingInventoryData
+    )
+
+    private var playingData: SwingPlayingData? = null
+
+    // automaton start
+
     private inner class SwingPlayingState(
-        drawables: MutableMap<GameEntity, GameEntityViewSnapshot>,
-        wGrid: Int,
-        hGrid: Int,
-        bgColor: RGB,
-    ) : PlayingState(drawables) {
+        gameDrawables: DrawablesMap,
+    ) : PlayingState(gameDrawables) {
 
         init {
+            drawables.putAll(gameDrawables)
+            val (wGrid, hGrid, bgColor) = playingData!!.gameData
+
             val wPx = panel.width
             val hPx = panel.height
+            // theoretically (with camera) these values should be calculated once for entire view
             val (tileSize, offsetX, offsetY) = if (wPx / (wGrid + 2) > hPx / (hGrid + 2)) {
                 val tileSize = hPx / (hGrid + 2)
                 val offsetX = (wPx - wGrid * tileSize) / 2
@@ -79,23 +102,58 @@ class SwingView : View() {
             is UserMoved -> this.also {
                 movementListeners.forEach { it.receive(m) }
             }
-            is UserToggledInventory -> SwingPlayingInventoryState().also {
+            is UserToggledInventory -> this.also {
                 inventoryListeners.forEach { it.receive(m) }
             }
+            is InventoryOpened -> SwingPlayingInventoryState(m.invSnapshot, drawables)
             is UserQuit -> this.also {
                 quitListeners.forEach { it.receive(m) }
             }
             is EntityMoved -> this.also {
                 drawables[m.gameEntity] = m.nextSnapshot
             }
-            else -> this
+            else -> unreachable
         }
 
     }
 
-    private inner class SwingPlayingInventoryState : PlayingInventoryState() {
-        override fun next(m: Message): ViewState {
-            TODO("Not yet implemented")
+    private inner class SwingPlayingInventoryState(
+        inventoryViewSnapshot: InventoryViewSnapshot,
+        private val gameDrawables: DrawablesMap
+    ) : PlayingInventoryState() {
+
+        init {
+            val panel = GameInventoryPanel(
+                panel as GamePanel,
+                inventoryViewSnapshot,
+                playingData!!.invData
+            )
+            switchPanel(panel)
+        }
+
+        override fun next(m: Message): ViewState = when (m) {
+            is Tick -> this.also {
+                panel.repaint()
+            }
+            is UserMoved -> this.also {
+                movementListeners.forEach { it.receive(m) }
+            }
+            is UserToggledInventory -> this.also {
+                inventoryListeners.forEach { it.receive(m) }
+            }
+            is InventoryClosed -> SwingPlayingState(gameDrawables).also {
+                inventoryListeners.forEach { it.receive(m) }
+            }
+            is InventoryUpdated -> this.also {
+                (panel as GameInventoryPanel).invSnapshot = m.invSnapshot
+            }
+            is UserSelect -> this.also {
+                inventoryListeners.forEach { it.receive(m) }
+            }
+            is UserDrop -> this.also {
+                inventoryListeners.forEach { it.receive(m) }
+            }
+            else -> unreachable
         }
     }
 
@@ -108,8 +166,17 @@ class SwingView : View() {
         override fun next(m: Message): ViewState = when (m) {
             is Tick -> this.also { panel.repaint() }
             is GameViewStarted -> {
-                val (w, h, _, _, bgColor) = m.level
-                SwingPlayingState(m.drawables, w, h, bgColor)
+                val (gameDesc, invDesc) = m.level
+                playingData = SwingPlayingData(
+                    SwingGameData(
+                        gameDesc.gameGridW, gameDesc.gameGridH, gameDesc.gameBgColor
+                    ),
+                    SwingInventoryData(
+                        invDesc.invGridW, invDesc.invGridH
+                    )
+                )
+
+                SwingPlayingState(m.drawables)
             }
             is UserQuit -> this.also {
                 quitListeners.forEach { it.receive(m) }
@@ -118,11 +185,13 @@ class SwingView : View() {
         }
     }
 
+    // automaton end
+
     override var state: AtomicReference<ViewState> = AtomicReference(SwingLoadingState())
 
     private val ticker: Ticker = Ticker(10) // TODO: magic constant
 
-    fun initialize() {
+    override fun initialize() {
         window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE // TODO: maybe save something on exit?
         window.extendedState = JFrame.MAXIMIZED_BOTH
         window.isUndecorated = true

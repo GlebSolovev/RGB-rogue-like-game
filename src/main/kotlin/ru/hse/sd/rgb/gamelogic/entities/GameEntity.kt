@@ -20,12 +20,14 @@ abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
 
     abstract inner class PhysicalEntity {
         abstract val isSolid: Boolean // if true, only this entity can occupy its cells
+        // same as 'no one can pass through this entity'
 
         abstract fun getUnitDirection(unit: GameUnit, dir: Direction): Direction
     }
 
     abstract inner class FightEntity { // TODO: for fight logic and behaviour state machines, effects
         abstract fun isUnitActive(unit: GameUnit): Boolean
+        // TODO: add isImmortal flag (and check it in FightLogic)
     }
 
     abstract val viewEntity: ViewEntity

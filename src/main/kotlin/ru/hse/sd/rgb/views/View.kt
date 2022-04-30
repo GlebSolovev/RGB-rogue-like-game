@@ -5,9 +5,15 @@ import ru.hse.sd.rgb.utils.Messagable
 import ru.hse.sd.rgb.utils.Message
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gameloaders.LevelDescription
+import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
+typealias DrawablesMap = ConcurrentHashMap<GameEntity, GameEntityViewSnapshot>
+
 abstract class View : Messagable() {
+
+    open fun initialize() {}
 
     // swing draws from internal thread
     protected abstract val state: AtomicReference<ViewState>
@@ -35,7 +41,8 @@ abstract class View : Messagable() {
     }
 
     protected abstract class PlayingState(
-        protected val drawables: MutableMap<GameEntity, GameEntityViewSnapshot>
+        // panels may be accessed from different thread
+        protected val drawables: DrawablesMap
     ) : ViewState()
 
     protected abstract class PlayingInventoryState : ViewState()
@@ -45,12 +52,22 @@ abstract class View : Messagable() {
 data class UserMoved(val dir: Direction) : Message()
 class UserToggledInventory : Message()
 class UserQuit : Message()
+class UserSelect : Message()
+class UserDrop : Message()
 
 data class EntityMoved(val gameEntity: GameEntity) : Message() {
     val nextSnapshot: GameEntityViewSnapshot = gameEntity.viewEntity.takeViewSnapshot()
 }
 
 data class GameViewStarted(val level: LevelDescription) : Message() {
-    val drawables: MutableMap<GameEntity, GameEntityViewSnapshot> =
-        level.allEntities.associateWith { it.viewEntity.takeViewSnapshot() }.toMutableMap()
+    val drawables: DrawablesMap =
+        DrawablesMap(level.gameDesc.allEntities.associateWith { it.viewEntity.takeViewSnapshot() })
 }
+
+class InventoryOpened(inventory: Inventory) : Message() {
+    val invSnapshot = inventory.viewInventory.takeViewSnapshot()
+}
+class InventoryUpdated(inventory: Inventory) : Message() {
+    val invSnapshot = inventory.viewInventory.takeViewSnapshot()
+}
+class InventoryClosed : Message()
