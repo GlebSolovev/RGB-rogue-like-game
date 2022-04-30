@@ -74,8 +74,8 @@ class GameInventoryPanel(
         this.add(gamePanel)
 
         val scale = invSnapshot.swingAppearance.scale
-        val hGrid = invSnapshot.itemsGrid.size
-        val wGrid = invSnapshot.itemsGrid[0].size // TODO: Grid2D wrapper
+        val wGrid = invSnapshot.itemsGrid.w
+        val hGrid = invSnapshot.itemsGrid.h
 
         val wPx = width * scale
         val hPx = height * scale
@@ -99,7 +99,7 @@ class GameInventoryPanel(
     }
 
     private fun checkInventoryDimensions() {
-        if (invGridH != invSnapshot.itemsGrid.size || invGridW != invSnapshot.itemsGrid[0].size)
+        if (invGridW != invSnapshot.itemsGrid.w || invGridH != invSnapshot.itemsGrid.h)
             throw IllegalArgumentException("inventory dimensions changed")
     }
 

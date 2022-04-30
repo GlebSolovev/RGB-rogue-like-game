@@ -1,5 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
@@ -11,6 +13,8 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.utils.randomCell
 import ru.hse.sd.rgb.utils.unreachable
 
+@Serializable
+@SerialName("fireball")
 class FireballEffect(
     private val count: Int,
     private val movePeriodMillis: Long,

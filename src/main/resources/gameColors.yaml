@@ -1,0 +1,30 @@
+baseColors:
+  - name: "FIRE RED"
+    rgb:
+      r: 120
+      g: 0
+      b: 0
+    updatePeriodMillis: 1000
+    updateEffects:
+      - !<fireball>
+        count: 1
+        movePeriodMillis: 100
+        fireballHp: 1 # TODO: shouldn't have any
+        isControllable: true
+
+  - name: "FLAME RED"
+    rgb:
+      r: 220
+      g: 0
+      b: 0
+    updatePeriodMillis: 1000
+    updateEffects:
+      - !<fireball>
+        count: 3
+        movePeriodMillis: 100
+        fireballHp: 1 # TODO: shouldn't have any
+        isControllable: true
+
+interactionMatrix:
+  - [1, 1]
+  - [1, 1]

@@ -1,18 +1,17 @@
 package ru.hse.sd.rgb.gameloaders.generators
 
 import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.Grid2D
 import kotlin.random.Random
 import kotlin.random.nextInt
 
 fun generateMaze(
-    widthRange: IntRange,
-    heightRange: IntRange,
+    w: Int,
+    h: Int,
     minPathSizeRange: IntRange,
     passageSizeRange: IntRange,
     random: Random = Random
-): List<List<Boolean>> {
-    val w = random.nextInt(widthRange)
-    val h = random.nextInt(heightRange)
+): Grid2D<Boolean> {
     val minPathSize = random.nextInt(minPathSizeRange)
     val passageSize = random.nextInt(passageSizeRange)
     return generateMaze(w, h, minPathSize, passageSize, random)
@@ -26,8 +25,8 @@ fun generateMaze(
     minPathSize: Int,
     passageSize: Int,
     random: Random = Random
-): List<List<Boolean>> {
-    val grid = List(h) { MutableList(w) { false } }
+): Grid2D<Boolean> {
+    val grid = Grid2D(w, h) { _, _ -> false }
     splitChamber(Chamber(Cell(0, 0), Cell(w - 1, h - 1)), grid, minPathSize, passageSize, random)
     return grid
 }
@@ -40,7 +39,7 @@ private data class Chamber(val lb: Cell, val ru: Cell) {
 
 private fun splitChamber(
     c: Chamber,
-    grid: List<MutableList<Boolean>>,
+    grid: Grid2D<Boolean>,
     minSize: Int,
     passageSize: Int,
     random: Random
@@ -61,8 +60,8 @@ private fun splitChamber(
             xStart until xStart + passageSize
         }
 
-        for (x in c.lb.x..c.ru.x) grid[yWall][x] = true
-        for (x in xHole) grid[yWall][x] = false
+        for (x in c.lb.x..c.ru.x) grid[x, yWall] = true
+        for (x in xHole) grid[x, yWall] = false
 
         return Pair(
             Chamber(c.lb, Cell(c.ru.x, yWall - 1)),
@@ -85,8 +84,8 @@ private fun splitChamber(
             yStart until yStart + passageSize
         }
 
-        for (y in c.lb.y..c.ru.y) grid[y][xHole] = true
-        for (y in yHole) grid[y][xHole] = false
+        for (y in c.lb.y..c.ru.y) grid[xHole, y] = true
+        for (y in yHole) grid[xHole, y] = false
 
         return Pair(
             Chamber(c.lb, Cell(xHole - 1, c.ru.y)),

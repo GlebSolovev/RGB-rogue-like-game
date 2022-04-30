@@ -37,6 +37,9 @@ fun onException() {
     exitProcess(5)
 }
 
+val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
+const val colorsFilename: String = "src/main/resources/gameColors.yaml"
+
 class Controller(val view: View) : Messagable() {
 
     private var stateRef: AtomicReference<ControllerState> = AtomicReference(GameInitState())
@@ -56,7 +59,7 @@ class Controller(val view: View) : Messagable() {
     }
 
     private inner class GameInitState : ControllerState() {
-        val loader = Loader(levelFilename, null)
+        val loader = Loader(levelFilename, colorsFilename)
 
         override lateinit var engines: Engines
         override lateinit var hero: Hero
@@ -129,7 +132,6 @@ class Controller(val view: View) : Messagable() {
 }
 
 var controller = Controller(SwingView()) // TODO: DI
-val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
 
 class StartControllerMessage : Message()
 data class FinishControllerMessage(val isWin: Boolean) : Message()

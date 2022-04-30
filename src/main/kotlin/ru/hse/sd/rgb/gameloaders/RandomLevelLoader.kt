@@ -8,7 +8,6 @@ import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.RGB
-import ru.hse.sd.rgb.utils.get
 import kotlin.random.Random
 import kotlin.random.nextInt
 
@@ -42,8 +41,7 @@ class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
     override fun loadLevelDescription(): LevelDescription {
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
         val maze = generateMaze(
-            RandomParams.WIDTH_RANGE,
-            RandomParams.HEIGHT_RANGE,
+            w, h,
             RandomParams.MIN_SIZE_RANGE,
             RandomParams.PASSAGE_RANGE,
             random
@@ -53,7 +51,7 @@ class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
         val bgColor = RGB(r, g, b)
 
         val entities = mutableSetOf<GameEntity>()
-        for (x in 0 until w) for (y in 0 until h) if (maze[y][x]) entities.add(
+        for (x in 0 until w) for (y in 0 until h) if (maze[x, y]) entities.add(
             Wall(
                 GameColor(RandomParams.DEFAULT_WALL_COLOR),
                 RandomParams.DEFAULT_WALL_HP,

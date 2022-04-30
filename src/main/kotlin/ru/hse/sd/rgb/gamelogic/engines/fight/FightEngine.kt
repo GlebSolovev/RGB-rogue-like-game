@@ -2,15 +2,20 @@ package ru.hse.sd.rgb.gamelogic.engines.fight
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
 import ru.hse.sd.rgb.gamelogic.entities.ReceivedAttack
+import ru.hse.sd.rgb.utils.Grid2D
 import ru.hse.sd.rgb.utils.RGB
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
 
 typealias BaseColorId = Int
+private typealias BaseColorStatsMap = ConcurrentHashMap<BaseColorId, BaseColorStats>
+private typealias BaseColorInteractionMatrix = ConcurrentHashMap<Pair<BaseColorId, BaseColorId>, Int>
 
+@Serializable
 data class BaseColorStats(
     val name: String,
     val rgb: RGB,
@@ -19,9 +24,16 @@ data class BaseColorStats(
 )
 
 class FightEngine(
-    private val baseColorStats: ConcurrentHashMap<BaseColorId, BaseColorStats>,
-    private val attackFromTo: ConcurrentHashMap<Pair<BaseColorId, BaseColorId>, Int>
+    baseColors: List<BaseColorStats>,
+    interactionMatrix: Grid2D<Int>
 ) {
+    private val baseColorStats = BaseColorStatsMap()
+    private val attackFromTo = BaseColorInteractionMatrix()
+
+    init {
+        baseColors.withIndex().associateTo(baseColorStats) { (i, c) -> Pair(i, c) }
+        interactionMatrix.withCoords().associateTo(attackFromTo) { (x, y, v) -> Pair(Pair(x, y), v) }
+    }
 
     private val unitMutexes = ConcurrentHashMap<GameUnitId, Mutex>()
     private val unsafeMethods: UnsafeMethods = UnsafeMethodsImpl()

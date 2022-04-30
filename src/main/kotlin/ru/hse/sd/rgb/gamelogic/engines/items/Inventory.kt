@@ -13,7 +13,7 @@ data class InventorySwingAppearance(
 )
 
 data class InventoryViewSnapshot(
-    val itemsGrid: List<List<Item.ViewItem?>>,
+    val itemsGrid: Grid2D<Item.ViewItem?>,
     val selectedCell: Cell,
 
     val swingAppearance: InventorySwingAppearance
@@ -24,13 +24,13 @@ class Inventory(
     private val h: Int,
 ) {
     private var selectedCell: Cell = Cell(0, 0)
-    private val items: List<MutableList<Item?>> = List(w) { MutableList(h) { null } }
+    private val items: Grid2D<Item?> = Grid2D(w, h) { _, _, -> null }
 
     inner class ViewInventory {
         private val swingAppearance = InventorySwingAppearance(50, Color.WHITE, Color.YELLOW, 0.9)
 
         fun takeViewSnapshot() = InventoryViewSnapshot(
-            items.map { it.map { it?.viewItem } }, // TODO: should be concurrent?
+            items.map { it?.viewItem }, // TODO: should be concurrent?
             selectedCell,
             swingAppearance
         )

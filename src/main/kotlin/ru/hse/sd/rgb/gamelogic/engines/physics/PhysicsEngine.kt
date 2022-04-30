@@ -1,13 +1,10 @@
 package ru.hse.sd.rgb.gamelogic.engines.physics
 
 import kotlinx.coroutines.sync.Mutex
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.gamelogic.entities.CollidedWith
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.get
-import ru.hse.sd.rgb.utils.plus
+import ru.hse.sd.rgb.utils.*
 import kotlin.random.Random
 
 class PhysicsEngine(private val w: Int, private val h: Int) {
@@ -16,9 +13,9 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         const val RANDOM_TARGET_ATTEMPTS = 1000000
     }
 
-    private val worldGrid = List(h) { List(w) { mutableSetOf<GameUnit>() } } // TODO: check concurrency
+    private val worldGrid = Grid2D(w, h) { _, _ -> mutableSetOf<GameUnit>() } // TODO: check concurrency
 
-    private val worldGridLocks = List(h) { List(w) { Mutex() } }
+    private val worldGridLocks = Grid2D(w, h) { _, _ -> Mutex() }
 
     // take mutexes on cells not units!!!
     private suspend inline fun <R> withLockedArea(area: Set<Cell>, crossinline block: () -> R): R {
