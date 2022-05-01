@@ -30,11 +30,18 @@ val ignore = Unit
 val unreachable: Nothing
     get() = throw RuntimeException("reached unreachable")
 
+fun unreachable(info: Any): Nothing {
+    System.err.println("unreachable! info: $info")
+    unreachable
+}
+
 operator fun <T, U, V> Map<Pair<T, U>, V>.get(t: T, u: U) = this[t to u]
 
 fun <T> Set<T>.randomElement(random: Random = Random) = this.shuffled(random).firstOrNull()
 
 fun GameEntity.randomCell(random: Random = Random) = this.units.randomElement(random)!!.cell
 
-operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>) : Y = this.get()
-operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y) { this.set(value) }
+operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>): Y = this.get()
+operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y) {
+    this.set(value)
+}

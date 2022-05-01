@@ -53,6 +53,9 @@ class Fireball(
                 controller.creation.tryDie(this)
             }
             is ColorTick -> ignore
+            is ReceivedAttack -> {
+                // TODO
+            }
             else -> unreachable
         }
     }

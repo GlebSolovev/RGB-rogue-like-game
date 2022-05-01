@@ -2,6 +2,9 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
+import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
+import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
@@ -17,7 +20,7 @@ class Hero(
 ) : GameEntity(colorHpCells) {
 
     inner class PhysicalHero : PhysicalEntity() {
-        override val isSolid = true
+        override val isSolid = false
         override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = dir
     }
 
@@ -57,12 +60,21 @@ class Hero(
 //                addArgs = Struct { attackTarget: NEAREST, healTarget: LOW_HP }
 //                state.get(unit) -> fightEntity.get(unit)
 //                controller.fighting.update(m.unit, addArgs)
+
+                controller.fighting.update(m.unit, ControlParams(AttackType.RANDOM_TARGET, HealType.NO_HEAL))
+
                 // TODO: unit update in fighting logic
             }
             is UserToggledInventory -> InventoryState().also {
                 controller.view.receive(InventoryOpened(inventory))
             }
-            else -> unreachable
+            is ReceivedAttack -> this.also {
+                // TODO
+            }
+            else -> {
+                println(m)
+                unreachable
+            }
         }
     }
 

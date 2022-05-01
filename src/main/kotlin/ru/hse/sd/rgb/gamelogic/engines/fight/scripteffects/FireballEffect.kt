@@ -12,6 +12,7 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.utils.randomCell
 import ru.hse.sd.rgb.utils.unreachable
+import ru.hse.sd.rgb.views.EntityMoved
 
 @Serializable
 @SerialName("fireball")
@@ -37,7 +38,8 @@ class FireballEffect(
                 else -> unreachable
             }
             val fireball = Fireball(ColorHpCell(unit.gameColor, fireballHp, unit.cell), movePeriodMillis, targetCell)
-            controller.creation.tryAddToWorld(fireball)
+            if (controller.creation.tryAddToWorld(fireball))
+                controller.view.receive(EntityMoved(fireball)) // TODO: created instead of moved
         }
     }
 }

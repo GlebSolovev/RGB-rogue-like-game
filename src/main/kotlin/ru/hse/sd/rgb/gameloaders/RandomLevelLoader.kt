@@ -22,7 +22,7 @@ class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
 
         const val MAX_HERO_CELL_RANDOM_ATTEMPTS = 1000000
         const val DEFAULT_HERO_HP = 5
-        val DEFAULT_HERO_COLOR = RGB(150, 0, 0)
+        val DEFAULT_HERO_COLOR = RGB(250, 0, 0)
         const val DEFAULT_WALL_HP = 9999
         val DEFAULT_WALL_COLOR = RGB(255, 255, 255)
         val DEFAULT_INV_DESC = InventoryDescription(5, 5)

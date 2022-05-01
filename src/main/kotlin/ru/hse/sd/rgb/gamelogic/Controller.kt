@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import ru.hse.sd.rgb.gameloaders.Engines
 import ru.hse.sd.rgb.gameloaders.Loader
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.gamelogic.entities.GameStarted
 import ru.hse.sd.rgb.utils.Messagable
 import ru.hse.sd.rgb.utils.Message
 import ru.hse.sd.rgb.utils.Ticker
@@ -80,7 +79,7 @@ class Controller(val view: View) : Messagable() {
                 view.messagingRoutine()
             }
             view.receive(View.SubscribeToQuit(this@Controller))
-//            delay(1.seconds) // helps to see loading screen
+            // delay(700) // helps to see loading screen
 
             // load engines before loading entities
             engines = loader.loadEngines()
@@ -88,14 +87,9 @@ class Controller(val view: View) : Messagable() {
             val level = loader.loadLevel()
             val (gameDesc, _) = level
             hero = gameDesc.hero
-            for (entity in gameDesc.allEntities) {
-                if (!creation.tryAddToWorld(entity)) throw IllegalStateException("invalid level")
-            }
 
-            view.receive(GameViewStarted(level))
-            for (entity in gameDesc.allEntities) {
-                gameCoroutineScope.launch { entity.messagingRoutine() }
-                entity.receive(GameStarted())
+            creation.addAllToWorld(gameDesc.allEntities) {
+                view.receive(GameViewStarted(level))
             }
 
             stateRef.set(GamePlayingState(engines, hero))

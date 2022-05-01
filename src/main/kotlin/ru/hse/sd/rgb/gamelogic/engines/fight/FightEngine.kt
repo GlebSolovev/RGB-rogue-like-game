@@ -57,7 +57,7 @@ class FightEngine(
 
     }
 
-    private suspend inline fun <R> withLockedUnits(units: Set<GameUnit>, crossinline block: () -> R): R {
+    private suspend inline fun <R> withLockedUnits(units: Set<GameUnit>, crossinline block: suspend () -> R): R {
         val sortedUnits = units.toSortedSet(Comparator.comparing(GameUnit::id))
         try {
             for (unit in sortedUnits) unitMutexes[unit.id]!!.lock()
@@ -114,14 +114,13 @@ class FightEngine(
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
         // TODO: fight green fireballs and dead locks
         withLockedUnits(setOf(unit)) {
-            // TODO: fix "Suspension functions can be called only within coroutine body"
             for (updateEffect in unit.gameColor.cachedBaseColorId.stats.updateEffects)
-                TODO()
-//                updateEffect.activate(
-//                    unit,
-//                    controlParams,
-//                    unsafeMethods
-//                )
+                updateEffect.activate(
+                    unit,
+                    controlParams,
+                    unsafeMethods
+                )
+//                TODO()
         }
     }
 

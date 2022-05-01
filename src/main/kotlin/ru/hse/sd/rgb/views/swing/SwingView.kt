@@ -112,7 +112,7 @@ class SwingView : View() {
             is EntityMoved -> this.also {
                 drawables[m.gameEntity] = m.nextSnapshot
             }
-            else -> unreachable
+            else -> unreachable(m)
         }
 
     }
@@ -160,7 +160,7 @@ class SwingView : View() {
             is UserDrop -> this.also {
                 inventoryListeners.forEach { it.receive(m) }
             }
-            else -> unreachable
+            else -> unreachable(m)
         }
     }
 

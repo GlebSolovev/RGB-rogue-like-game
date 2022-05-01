@@ -18,7 +18,7 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
     private val worldGridLocks = Grid2D(w, h) { _, _ -> Mutex() }
 
     // take mutexes on cells not units!!!
-    private suspend inline fun <R> withLockedArea(area: Set<Cell>, crossinline block: () -> R): R {
+    private suspend inline fun <R> withLockedArea(area: Set<Cell>, crossinline block: suspend () -> R): R {
         val sortedArea = area.toSortedSet(Comparator.comparing(Cell::x).thenComparing(Cell::y))
         try {
             for (cell in sortedArea) worldGridLocks[cell].lock()
