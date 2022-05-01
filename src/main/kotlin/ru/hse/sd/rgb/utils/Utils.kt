@@ -45,3 +45,8 @@ operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>): Y = this
 operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y) {
     this.set(value)
 }
+
+fun generateRandomColor(random: Random = Random): RGB =
+    List(3) { random.nextInt(256) }.let { (r, g, b) -> RGB(r, g, b) }
+
+fun Random.nextChance(probability: Double): Boolean = this.nextDouble() < probability

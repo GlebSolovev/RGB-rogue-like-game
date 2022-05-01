@@ -6,8 +6,7 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.RGB
+import ru.hse.sd.rgb.utils.*
 import kotlin.random.Random
 
 class RandomLevelLoader private constructor(
@@ -19,10 +18,8 @@ class RandomLevelLoader private constructor(
     private val heroHp: Int,
     private val heroColor: RGB,
     private val heroInventory: InventoryDescription,
-    private val generatorRandom: Random
+    private val random: Random
 ) : LevelLoader {
-
-    private val MAX_HERO_CELL_RANDOM_ATTEMPTS = 1000000
 
     private var basicParams: LevelBasicParams? = null
 
@@ -40,24 +37,34 @@ class RandomLevelLoader private constructor(
             levelFactory.createWall(Cell(x, y))
         )
 
-        var heroCell: Cell? = null
-        repeat(MAX_HERO_CELL_RANDOM_ATTEMPTS) {
-            heroCell = Cell(generatorRandom.nextInt(w), generatorRandom.nextInt(h))
-            if (!maze[heroCell!!])
-                return@repeat
-            heroCell = null
-        }
-        if (heroCell == null) throw IllegalStateException("too many attempts") // TODO: happens a lot
+        val heroCell: Cell = getEmptyCells(w, h, entities).randomElement(random)
+            ?: throw IllegalStateException("no empty cells to spawn hero")
         val hero = Hero(
-            setOf(ColorHpCell(GameColor(heroColor), heroHp, heroCell!!)),
+            setOf(ColorHpCell(GameColor(heroColor), heroHp, heroCell)),
             heroInventory
         )
         entities.add(hero)
+
+        val currentEmptyCells = getEmptyCells(w, h, entities)
+        maze.withCoords().forEach { (x, y, _) ->
+            if (random.nextChance(levelFactory.glitchSpawnRate)) {
+                val cell = Cell(x, y)
+                if (cell in currentEmptyCells) {
+                    val glitch = levelFactory.createGlitch(cell)
+                    entities.add(glitch)
+                }
+            }
+        }
 
         return LevelDescription(
             GameWorldDescription(w, h, entities, hero, levelFactory.bgColor),
             heroInventory
         )
+    }
+
+    private fun getEmptyCells(w: Int, h: Int, entities: Set<GameEntity>): Set<Cell> {
+        val occupiedCells: Set<Cell> = entities.flatMap { it.units.map { it.cell } }.toSet()
+        return Grid2D<Cell>(w, h) { x, y -> Cell(x, y) }.toSet() subtract occupiedCells
     }
 
     // ------------ builder ------------
@@ -94,7 +101,7 @@ class RandomLevelLoader private constructor(
             heroHp = heroHp,
             heroColor = heroColor,
             heroInventory = heroInventory,
-            generatorRandom = random
+            random = random
         )
 
         private object DefaultParams {
@@ -111,6 +118,8 @@ class RandomLevelLoader private constructor(
                 override val bgColor: RGB = RGB(0, 0, 0)
                 override val wallColor: RGB = RGB(100, 100, 100)
                 override val wallHp: Int = 999
+                override val glitchHp = 1
+                override val glitchSpawnRate = 0.0
             }
         }
     }
