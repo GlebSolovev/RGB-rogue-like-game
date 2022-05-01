@@ -160,6 +160,10 @@ class SwingView : View() {
             is UserDrop -> this.also {
                 inventoryListeners.forEach { it.receive(m) }
             }
+            is EntityMoved -> this.also {
+                gameDrawables[m.gameEntity] = m.nextSnapshot
+            }
+            // TODO: a lot of duplicating PlayingState
             else -> unreachable(m)
         }
     }

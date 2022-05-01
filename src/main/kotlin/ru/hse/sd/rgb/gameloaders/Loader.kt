@@ -1,6 +1,5 @@
 package ru.hse.sd.rgb.gameloaders
 
-import FileLevelLoader
 import ru.hse.sd.rgb.gamelogic.engines.creation.CreationEngine
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
@@ -53,10 +52,13 @@ interface ColorLoader {
     fun loadColors(): BaseColorParams
 }
 
-class Loader(levelFilename: String?, colorsFilename: String) {
+class Loader(
+    private val levelLoader: LevelLoader,
+    private val colorLoader: ColorLoader
+) {
 
-    private val levelLoader: LevelLoader = if (levelFilename != null) FileLevelLoader(levelFilename) else RandomLevelLoader()
-    private val colorLoader: ColorLoader = FileColorLoader(colorsFilename) // TODO
+//    private val levelLoader: LevelLoader = if (levelFilename != null) FileLevelLoader(levelFilename) else RandomLevelLoader()
+//    private val colorLoader: ColorLoader = FileColorLoader(colorsFilename) // TODO
 
     fun loadEngines(): Engines {
         val (w, h) = levelLoader.loadBasicParams()
