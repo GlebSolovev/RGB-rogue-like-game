@@ -1,27 +1,24 @@
 package ru.hse.sd.rgb.gameloaders
 
+import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
 import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.RGB
 import kotlin.random.Random
-import kotlin.random.nextInt
 
 class RandomLevelLoader private constructor(
     private val width: Int,
     private val height: Int,
     private val chamberMinSize: Int,
     private val passageSize: Int,
-    private val bgColor: RGB,
+    private val levelFactory: LevelContentFactory,
     private val heroHp: Int,
     private val heroColor: RGB,
     private val heroInventory: InventoryDescription,
-    private val wallHp: Int,
-    private val wallColor: RGB,
     private val generatorRandom: Random
 ) : LevelLoader {
 
@@ -40,7 +37,7 @@ class RandomLevelLoader private constructor(
 
         val entities = mutableSetOf<GameEntity>()
         for (x in 0 until w) for (y in 0 until h) if (maze[x, y]) entities.add(
-            Wall(GameColor(wallColor), wallHp, Cell(x, y))
+            levelFactory.createWall(Cell(x, y))
         )
 
         var heroCell: Cell? = null
@@ -58,7 +55,7 @@ class RandomLevelLoader private constructor(
         entities.add(hero)
 
         return LevelDescription(
-            GameWorldDescription(w, h, entities, hero, bgColor),
+            GameWorldDescription(w, h, entities, hero, levelFactory.bgColor),
             heroInventory
         )
     }
@@ -83,24 +80,20 @@ class RandomLevelLoader private constructor(
         var chamberMinSize: Int = random(DefaultParams.MIN_SIZE_RANGE)
         var passageSize: Int = random(DefaultParams.PASSAGE_RANGE)
 
-        var bgColor: RGB = List(3) { random.nextInt(DefaultParams.COLOR_RANGE) }.let { (r, g, b) -> RGB(r, g, b) }
-        var heroHp: Int = DefaultParams.DEFAULT_HERO_HP
-        var heroColor: RGB = DefaultParams.DEFAULT_HERO_COLOR
-        var heroInventory: InventoryDescription = DefaultParams.DEFAULT_INV_DESC
-        var wallHp: Int = DefaultParams.DEFAULT_WALL_HP
-        var wallColor: RGB = DefaultParams.DEFAULT_WALL_COLOR
+        var factory: LevelContentFactory = DefaultParams.LEVEL_FACTORY
+        var heroHp: Int = DefaultParams.HERO_HP
+        var heroColor: RGB = DefaultParams.HERO_COLOR
+        var heroInventory: InventoryDescription = DefaultParams.INV_DESC
 
         fun build(): LevelLoader = RandomLevelLoader(
             width = width,
             height = height,
             chamberMinSize = chamberMinSize,
             passageSize = passageSize,
-            bgColor = bgColor,
+            levelFactory = factory,
             heroHp = heroHp,
             heroColor = heroColor,
             heroInventory = heroInventory,
-            wallHp = wallHp,
-            wallColor = wallColor,
             generatorRandom = random
         )
 
@@ -109,15 +102,16 @@ class RandomLevelLoader private constructor(
             val HEIGHT_RANGE = 25..40
             val MIN_SIZE_RANGE = 4..7
             val PASSAGE_RANGE = 3..5
-            val COLOR_RANGE = 0..50
 
-            const val DEFAULT_HERO_HP = 5
-            val DEFAULT_HERO_COLOR = RGB(250, 0, 0)
+            const val HERO_HP = 5
+            val HERO_COLOR = RGB(250, 0, 0)
+            val INV_DESC = InventoryDescription(5, 5)
 
-            // TODO: abstract factory replaces default wall, default mob, ...
-            const val DEFAULT_WALL_HP = 9999
-            val DEFAULT_WALL_COLOR = RGB(255, 255, 255)
-            val DEFAULT_INV_DESC = InventoryDescription(5, 5)
+            val LEVEL_FACTORY = object : LevelContentFactory() {
+                override val bgColor: RGB = RGB(0, 0, 0)
+                override val wallColor: RGB = RGB(100, 100, 100)
+                override val wallHp: Int = 999
+            }
         }
     }
 
