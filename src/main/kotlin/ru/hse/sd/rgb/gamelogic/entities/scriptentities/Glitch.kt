@@ -46,6 +46,7 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorHpCell(GameColor(RGB(0
             val adjacentCells =
                 cells.flatMap { cell -> Direction.values().map { cell + it.toShift() } }.toSet() subtract cells
             val targetCell = adjacentCells.randomElement(random)!!
+            // TODO: fix OOB
             if (controller.physics.isEmpty(setOf(targetCell))) {
                 val clone = clone(targetCell)
                 if (controller.creation.tryAddToWorld(clone)) {
