@@ -45,3 +45,8 @@ operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>): Y = this
 operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y) {
     this.set(value)
 }
+
+fun <T, R> Collection<T>.getAllSame(keyExtractor: (T) -> R): R? {
+    val firstKey = keyExtractor(this.firstOrNull() ?: return null)
+    return if (this.all { keyExtractor(it) == firstKey }) firstKey else null
+}

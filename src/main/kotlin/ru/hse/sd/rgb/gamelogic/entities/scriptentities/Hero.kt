@@ -9,6 +9,7 @@ import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.Message
+import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -33,7 +34,7 @@ class Hero(
     override val physicalEntity = PhysicalHero()
     override val viewEntity = ViewHero()
 
-    override fun onGameStart() {
+    override fun onLifeStart() {
         controller.view.receive(View.SubscribeToMovement(this))
         controller.view.receive(View.SubscribeToInventory(this))
     }
@@ -50,26 +51,21 @@ class Hero(
         override suspend fun next(m: Message) = when (m) {
             is UserMoved -> this.also {
                 val moved = controller.physics.tryMove(this@Hero, m.dir)
-                if (moved) controller.view.receive(EntityMoved(this@Hero))
+                if (moved) controller.view.receive(EntityUpdated(this@Hero))
             }
             is CollidedWith -> this.also {
                 controller.fighting.attack(m.myUnit, m.otherUnit)
                 // TODO: pick item instead of attacking
             }
             is ColorTick -> this.also {
-//                addArgs = Struct { attackTarget: NEAREST, healTarget: LOW_HP }
-//                state.get(unit) -> fightEntity.get(unit)
-//                controller.fighting.update(m.unit, addArgs)
-
                 controller.fighting.update(m.unit, ControlParams(AttackType.RANDOM_TARGET, HealType.NO_HEAL))
-
-                // TODO: unit update in fighting logic
             }
             is UserToggledInventory -> InventoryState().also {
                 controller.view.receive(InventoryOpened(inventory))
             }
             is ReceivedAttack -> this.also {
-                // TODO
+                ignore // TODO
+//                if (m.isFatal) controller.creation.die(this@Hero)
             }
             else -> {
                 println(m)
@@ -97,7 +93,13 @@ class Hero(
                 // TODO: place item in world
                 sendInvUpdate()
             }
-            is ColorTick -> this
+            is ColorTick -> this.also {
+                controller.fighting.update(m.unit, ControlParams(AttackType.RANDOM_TARGET, HealType.NO_HEAL))
+            }
+            is ReceivedAttack -> this.also {
+                ignore // TODO
+//                if (m.isFatal) controller.creation.die(this@Hero)
+            }
             else -> {
                 println(m)
                 unreachable

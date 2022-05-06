@@ -1,17 +1,22 @@
 package ru.hse.sd.rgb.gamelogic.engines.creation
 
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.gamelogic.entities.GameStarted
+import ru.hse.sd.rgb.gamelogic.entities.LifeEnded
+import ru.hse.sd.rgb.gamelogic.entities.LifeStarted
 import ru.hse.sd.rgb.gamelogic.gameCoroutineScope
+import java.util.concurrent.ConcurrentHashMap
 
 class CreationEngine(private val physics: PhysicsEngine, private val fightEngine: FightEngine) {
 
+    private val entityCoroutines = ConcurrentHashMap<GameEntity, Job>()
+
     suspend fun tryAddToWorld(entity: GameEntity): Boolean {
         if (tryAddWithoutNotify(entity)) {
-            entity.receive(GameStarted())
+            entity.receive(LifeStarted())
             return true
         }
         return false
@@ -20,7 +25,7 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     private suspend fun tryAddWithoutNotify(entity: GameEntity): Boolean {
         if (!physics.tryPopulate(entity)) return false
         entity.units.forEach { unit -> fightEngine.registerUnit(unit) }
-        gameCoroutineScope.launch { entity.messagingRoutine() }
+        entityCoroutines[entity] = gameCoroutineScope.launch { entity.messagingRoutine() }
         return true
     }
 
@@ -30,22 +35,18 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
         }
         preStartAction()
         for (entity in entities) {
-            entity.receive(GameStarted())
+            entity.receive(LifeStarted())
         }
     }
 
-//    // must be called first before removing unit from units set of Entity
-//    suspend fun deleteUnitFromWorld(unit: GameUnit) {
-//        fightLogic.unregisterUnit(unit)
-//
-//    }
-//
-//    suspend fun deleteFromWorld(entity: GameEntity) {
-//        entity.units.forEach { unit -> fightLogic.unregisterUnit(unit) }
-//    }
-
-    fun tryDie(entity: GameEntity) {
-//        TODO()
+    // entity must not react on new events after calling with method
+    suspend fun die(entity: GameEntity) {
+        val dieRoutine: suspend () -> Unit = {
+            entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
+            physics.remove(entity)
+            entityCoroutines.remove(entity)!!.cancel()
+        }
+        entity.receive(LifeEnded(dieRoutine))
     }
 
 }

@@ -55,19 +55,20 @@ class UserQuit : Message()
 class UserSelect : Message()
 class UserDrop : Message()
 
-data class EntityMoved(val gameEntity: GameEntity) : Message() {
-    val nextSnapshot: GameEntityViewSnapshot = gameEntity.viewEntity.takeViewSnapshot()
+data class EntityUpdated(val gameEntity: GameEntity) : Message() {
+    val newSnapshot: GameEntityViewSnapshot = gameEntity.viewEntity.takeViewSnapshot()
 }
 
-data class GameViewStarted(val level: LevelDescription) : Message() {
-    val drawables: DrawablesMap =
-        DrawablesMap(level.gameDesc.allEntities.associateWith { it.viewEntity.takeViewSnapshot() })
-}
+data class EntityRemoved(val gameEntity: GameEntity) : Message()
+
+data class GameViewStarted(val level: LevelDescription) : Message()
 
 class InventoryOpened(inventory: Inventory) : Message() {
     val invSnapshot = inventory.viewInventory.takeViewSnapshot()
 }
+
 class InventoryUpdated(inventory: Inventory) : Message() {
     val invSnapshot = inventory.viewInventory.takeViewSnapshot()
 }
+
 class InventoryClosed : Message()

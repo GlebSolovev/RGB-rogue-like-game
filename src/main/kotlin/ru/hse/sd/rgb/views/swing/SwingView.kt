@@ -109,8 +109,11 @@ class SwingView : View() {
             is UserQuit -> this.also {
                 quitListeners.forEach { it.receive(m) }
             }
-            is EntityMoved -> this.also {
-                drawables[m.gameEntity] = m.nextSnapshot
+            is EntityUpdated -> this.also {
+                drawables[m.gameEntity] = m.newSnapshot
+            }
+            is EntityRemoved -> this.also {
+                drawables.remove(m.gameEntity)!!
             }
             else -> unreachable(m)
         }
@@ -119,7 +122,7 @@ class SwingView : View() {
 
     private inner class SwingPlayingInventoryState(
         inventoryViewSnapshot: InventoryViewSnapshot,
-        private val gameDrawables: DrawablesMap
+        private val drawables: DrawablesMap
     ) : PlayingInventoryState() {
 
         private val invPanel: GameInventoryPanel
@@ -138,6 +141,7 @@ class SwingView : View() {
             invPanel.setLocation(0,0 )
         }
 
+        // TODO: fight code duplicated in message handling
         override fun next(m: Message): ViewState = when (m) {
             is Tick -> this.also {
                 panel.repaint()
@@ -148,7 +152,7 @@ class SwingView : View() {
             is UserToggledInventory -> this.also {
                 inventoryListeners.forEach { it.receive(m) }
             }
-            is InventoryClosed -> SwingPlayingState(gameDrawables).also {
+            is InventoryClosed -> SwingPlayingState(drawables).also {
                 panel.remove(invPanel)
             }
             is InventoryUpdated -> this.also {
@@ -159,6 +163,12 @@ class SwingView : View() {
             }
             is UserDrop -> this.also {
                 inventoryListeners.forEach { it.receive(m) }
+            }
+            is EntityUpdated -> this.also {
+                drawables[m.gameEntity] = m.newSnapshot
+            }
+            is EntityRemoved -> this.also {
+                drawables.remove(m.gameEntity)!!
             }
             else -> unreachable(m)
         }
@@ -183,7 +193,7 @@ class SwingView : View() {
                     )
                 )
 
-                SwingPlayingState(m.drawables)
+                SwingPlayingState(DrawablesMap())
             }
             is UserQuit -> this.also {
                 quitListeners.forEach { it.receive(m) }
