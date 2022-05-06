@@ -53,6 +53,7 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
 
     private val DEFAULT_HP = 10 // TODO: read from config
     private val INV_DESC = InventoryDescription(5, 5) // TODO: read from config
+    private val DEFAULT_HERO_MOVE_PERIOD_LIMIT: Long = 50
 
     private data class EntityBuilder(val isMulti: Boolean, val creator: (Set<ColorHpCell>) -> GameEntity) {
         val colorCells = mutableSetOf<ColorHpCell>()
@@ -71,7 +72,7 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
         }
         shortNameBuilders[shortName] = when (entityName) {
             HERO_NAME -> {
-                EntityBuilder(isMulti) { s -> Hero(s, INV_DESC) }
+                EntityBuilder(isMulti) { s -> Hero(s, INV_DESC, DEFAULT_HERO_MOVE_PERIOD_LIMIT) }
             }
             WALL_NAME -> {
                 EntityBuilder(isMulti) { s -> Wall(s) }

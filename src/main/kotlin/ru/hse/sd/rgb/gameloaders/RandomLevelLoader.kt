@@ -17,6 +17,7 @@ class RandomLevelLoader private constructor(
     private val heroHp: Int,
     private val heroColor: RGB,
     private val heroInventory: InventoryDescription,
+    private val heroMovePeriodLimit: Long,
     private val random: Random
 ) : LevelLoader {
 
@@ -40,7 +41,8 @@ class RandomLevelLoader private constructor(
             ?: throw IllegalStateException("no empty cells to spawn hero")
         val hero = Hero(
             setOf(ColorHpCell(heroColor, heroHp, heroCell)),
-            heroInventory
+            heroInventory,
+            heroMovePeriodLimit
         )
         entities.add(hero)
 
@@ -63,7 +65,7 @@ class RandomLevelLoader private constructor(
 
     private fun getEmptyCells(w: Int, h: Int, entities: Set<GameEntity>): Set<Cell> {
         val occupiedCells: Set<Cell> = entities.flatMap { it.units.map { it.cell } }.toSet()
-        return Grid2D<Cell>(w, h) { x, y -> Cell(x, y) }.toSet() subtract occupiedCells
+        return Grid2D(w, h) { x, y -> Cell(x, y) }.toSet() subtract occupiedCells
     }
 
     // ------------ builder ------------
@@ -90,6 +92,7 @@ class RandomLevelLoader private constructor(
         var heroHp: Int = DefaultParams.HERO_HP
         var heroColor: RGB = DefaultParams.HERO_COLOR
         var heroInventory: InventoryDescription = DefaultParams.INV_DESC
+        var heroMovePeriodLimit: Long = DefaultParams.HERO_MOVE_PERIOD_LIMIT
 
         fun build(): LevelLoader = RandomLevelLoader(
             width = width,
@@ -100,6 +103,7 @@ class RandomLevelLoader private constructor(
             heroHp = heroHp,
             heroColor = heroColor,
             heroInventory = heroInventory,
+            heroMovePeriodLimit = heroMovePeriodLimit,
             random = random
         )
 
@@ -112,6 +116,7 @@ class RandomLevelLoader private constructor(
             const val HERO_HP = 5
             val HERO_COLOR = RGB(250, 0, 0)
             val INV_DESC = InventoryDescription(5, 5)
+            const val HERO_MOVE_PERIOD_LIMIT = 50L
 
             val LEVEL_FACTORY = object : LevelContentFactory() {
                 override val bgColor: RGB = RGB(0, 0, 0)

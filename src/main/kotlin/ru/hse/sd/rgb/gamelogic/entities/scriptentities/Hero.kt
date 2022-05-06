@@ -17,7 +17,8 @@ import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
 class Hero(
     colorHpCells: Set<ColorHpCell>,
-    invDesc: InventoryDescription
+    invDesc: InventoryDescription,
+    private var singleDirMovePeriodLimit: Long
 ) : GameEntity(colorHpCells) {
 
     inner class PhysicalHero : PhysicalEntity() {
@@ -48,8 +49,18 @@ class Hero(
     }
 
     private inner class PlayingState : HeroState() {
+
+        private var lastMoveTime = System.currentTimeMillis()
+        private lateinit var lastMoveDir: Direction
+
         override suspend fun next(m: Message) = when (m) {
             is UserMoved -> this.also {
+                val curMoveTime = System.currentTimeMillis()
+                if (!::lastMoveDir.isInitialized) lastMoveDir = m.dir
+                if (lastMoveDir == m.dir && curMoveTime - lastMoveTime <= singleDirMovePeriodLimit) return@also
+                lastMoveTime = curMoveTime
+                lastMoveDir = m.dir
+
                 val moved = controller.physics.tryMove(this@Hero, m.dir)
                 if (moved) controller.view.receive(EntityUpdated(this@Hero))
             }
