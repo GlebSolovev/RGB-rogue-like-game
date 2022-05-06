@@ -59,13 +59,18 @@ class FightEngine(
 
     }
 
-    private suspend inline fun <R> withLockedUnits(units: Set<GameUnit>, crossinline block: suspend () -> R): R {
+    private suspend inline fun <R> withLockedUnits(units: Set<GameUnit>, crossinline block: suspend () -> R): R? {
         val sortedUnits = units.toSortedSet(Comparator.comparing(GameUnit::id))
+        val lockedMutexes = mutableListOf<Mutex>()
         try {
-            for (unit in sortedUnits) unitMutexes[unit.id]!!.lock()
+            for (unit in sortedUnits) {
+                val mutex = unitMutexes[unit.id] ?: return null
+                mutex.lock() // is ok if this mutex is already removed from map
+                lockedMutexes.add(mutex)
+            }
             return block()
         } finally {
-            for (unit in sortedUnits.reversed()) unitMutexes[unit.id]!!.unlock()
+            for (mutex in lockedMutexes.reversed()) mutex.unlock()
         }
     }
 
@@ -93,7 +98,7 @@ class FightEngine(
         }
     }
 
-    suspend fun unregisterUnit(unit: GameUnit) { // TODO: use in CreationLogic
+    suspend fun unregisterUnit(unit: GameUnit) {
         val mutex = unitMutexes[unit.id]!!
         mutex.withLock {
             unitCachedBaseColorIds.remove(unit.id)
@@ -117,15 +122,16 @@ class FightEngine(
     }
 
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
-        // TODO: fight green fireballs and dead locks
         withLockedUnits(setOf(unit)) {
-            for (updateEffect in unit.cachedBaseColorId.stats.updateEffects)
+            val initialBaseColorId = unit.cachedBaseColorId
+            for (updateEffect in initialBaseColorId.stats.updateEffects) {
                 updateEffect.activate(
                     unit,
                     controlParams,
                     unsafeMethods
                 )
-//                TODO(): add check if base color changed between activates
+                if (unit.cachedBaseColorId != initialBaseColorId) break
+            }
         }
     }
 
