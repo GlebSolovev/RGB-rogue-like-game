@@ -35,7 +35,9 @@ class FightEngine(
         interactionMatrix.withCoords().associateTo(attackFromTo) { (x, y, v) -> Pair(Pair(x, y), v) }
     }
 
+
     private val unitMutexes = ConcurrentHashMap<GameUnitId, Mutex>()
+    private val unitCachedBaseColorIds = ConcurrentHashMap<GameUnitId, BaseColorId>() // TODO: AtomicRef ?
     private val unsafeMethods: UnsafeMethods = UnsafeMethodsImpl()
 
     interface UnsafeMethods {
@@ -46,12 +48,12 @@ class FightEngine(
     // TODO: is it a good idea?
     private inner class UnsafeMethodsImpl : UnsafeMethods {
         override fun unsafeChangeRGB(unit: GameUnit, newRgb: RGB) {
-            unit.gameColor.rgb = newRgb
-            unit.gameColor.cachedBaseColorId = resolveBaseColor(unit.gameColor.rgb)
+            unit.gameColor = newRgb
+            unitCachedBaseColorIds[unit.id] = resolveBaseColor(unit.gameColor)
         }
 
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
-            to.hp -= computeAttack(from.gameColor, to.gameColor)
+            to.hp -= computeAttack(from, to)
             to.parent.receive(ReceivedAttack(to, from, to.hp < 0))
         }
 
@@ -79,20 +81,23 @@ class FightEngine(
         return (this l1Norm baseColorRGB).toDouble() / (r2 + g2 + b2)
     }
 
-    private fun computeAttack(from: GameColor, to: GameColor): Int {
-        val similarityCoefficient = from.rgb similarityTo to.cachedBaseColorId
+    private fun computeAttack(from: GameUnit, to: GameUnit): Int {
+        val similarityCoefficient = from.gameColor similarityTo to.cachedBaseColorId
         return (attackFromTo[from.cachedBaseColorId to to.cachedBaseColorId]!! * similarityCoefficient).toInt()
     }
 
     suspend fun registerUnit(unit: GameUnit) {
         val mutex = Mutex()
-        mutex.withLock { unitMutexes.put(unit.id, mutex)?.let { throw IllegalStateException("double unit register") } }
+        mutex.withLock {
+            unitMutexes.put(unit.id, mutex)?.let { throw IllegalStateException("double unit register") }
+        }
     }
 
     suspend fun unregisterUnit(unit: GameUnit) { // TODO: use in CreationLogic
         val mutex = unitMutexes[unit.id]!!
         mutex.withLock {
-            unitMutexes.remove(unit.id)
+            unitCachedBaseColorIds.remove(unit.id)
+            unitMutexes.remove(unit.id) ?: throw IllegalStateException("attempt to unregister not registered unit")
         }
     }
 
@@ -114,19 +119,22 @@ class FightEngine(
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
         // TODO: fight green fireballs and dead locks
         withLockedUnits(setOf(unit)) {
-            for (updateEffect in unit.gameColor.cachedBaseColorId.stats.updateEffects)
+            for (updateEffect in unit.cachedBaseColorId.stats.updateEffects)
                 updateEffect.activate(
                     unit,
                     controlParams,
                     unsafeMethods
                 )
-//                TODO()
+//                TODO(): add check if base color changed between activates
         }
     }
 
-    fun getBaseColorStats(baseColorId: BaseColorId): BaseColorStats = baseColorId.stats
+    fun getBaseColorStats(unit: GameUnit): BaseColorStats = unit.cachedBaseColorId.stats
 
     private val BaseColorId.stats
-        get() = baseColorStats[this]!!
+        get() = baseColorStats[this] ?: throw IllegalStateException("no base color with such id")
+
+    private val GameUnit.cachedBaseColorId
+        get() = unitCachedBaseColorIds.getOrPut(this.id) { resolveBaseColor(this.gameColor) }
 }
 

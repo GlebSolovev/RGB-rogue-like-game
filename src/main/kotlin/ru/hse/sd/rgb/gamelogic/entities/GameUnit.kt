@@ -1,8 +1,8 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
 import ru.hse.sd.rgb.gamelogic.controller
-import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
 import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.RGB
 import ru.hse.sd.rgb.utils.Tick
 import ru.hse.sd.rgb.utils.Ticker
 import java.util.concurrent.atomic.AtomicLong
@@ -13,11 +13,11 @@ data class GameUnit(
     val parent: GameEntity,
     var cell: Cell,
     var hp: Int,
-    val gameColor: GameColor,
+    var gameColor: RGB,
 ) {
 
     private val colorTicker = Ticker(
-        controller.fighting.getBaseColorStats(gameColor.cachedBaseColorId).updatePeriodMillis,
+        controller.fighting.getBaseColorStats(this).updatePeriodMillis,
         parent,
         ColorTick(this)
     ).also { it.start() } // TODO: update when base color changes
@@ -34,6 +34,6 @@ data class GameUnit(
 
 }
 
-data class ColorHpCell(val color: GameColor, val hp: Int, val cell: Cell)
+data class ColorHpCell(val color: RGB, val hp: Int, val cell: Cell)
 
 data class ColorTick(val unit: GameUnit) : Tick()

@@ -8,7 +8,7 @@ import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 abstract class ViewUnit(parentUnit: GameUnit) { // TODO: add layers?
 
     val cell = parentUnit.cell
-    val rgb = parentUnit.gameColor.rgb
+    val rgb = parentUnit.gameColor
 
     abstract val swingAppearance: SwingUnitAppearance
 

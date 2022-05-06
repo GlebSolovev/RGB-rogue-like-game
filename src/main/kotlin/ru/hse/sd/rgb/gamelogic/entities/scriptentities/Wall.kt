@@ -1,20 +1,16 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
-import ru.hse.sd.rgb.utils.Message
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.Direction
-import ru.hse.sd.rgb.utils.ignore
+import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
 class Wall(colorHpCells: Set<ColorHpCell>) : GameEntity(colorHpCells) {
 
-    constructor(color: GameColor, hp: Int, cell: Cell) : this(setOf(ColorHpCell(color, hp, cell)))
+    constructor(color: RGB, hp: Int, cell: Cell) : this(setOf(ColorHpCell(color, hp, cell)))
 
     override val physicalEntity: PhysicalEntity = object : PhysicalEntity() {
         override val isSolid: Boolean = true

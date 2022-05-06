@@ -1,7 +1,6 @@
 package ru.hse.sd.rgb.gameloaders
 
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
-import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
@@ -53,7 +52,7 @@ class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
         val entities = mutableSetOf<GameEntity>()
         for (x in 0 until w) for (y in 0 until h) if (maze[x, y]) entities.add(
             Wall(
-                GameColor(RandomParams.DEFAULT_WALL_COLOR),
+                RandomParams.DEFAULT_WALL_COLOR,
                 RandomParams.DEFAULT_WALL_HP,
                 Cell(x, y)
             )
@@ -68,7 +67,7 @@ class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
         }
         if (heroCell == null) throw IllegalStateException("too many attempts") // TODO: happens a lot
         val hero = Hero(
-            setOf(ColorHpCell(GameColor(RandomParams.DEFAULT_HERO_COLOR), RandomParams.DEFAULT_HERO_HP, heroCell!!)),
+            setOf(ColorHpCell(RandomParams.DEFAULT_HERO_COLOR, RandomParams.DEFAULT_HERO_HP, heroCell!!)),
             RandomParams.DEFAULT_INV_DESC
         )
         entities.add(hero)

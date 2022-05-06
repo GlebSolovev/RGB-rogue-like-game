@@ -1,5 +1,4 @@
 import ru.hse.sd.rgb.gameloaders.*
-import ru.hse.sd.rgb.gamelogic.engines.fight.GameColor
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
@@ -31,7 +30,7 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
         repeat(shortNameCount) { readShortNameDescription(scanner, shortNameBuilders) }
 
         val colorCount = scanner.nextInt()
-        val colorMap = mutableMapOf<String, GameColor>()
+        val colorMap = mutableMapOf<String, RGB>()
         repeat(colorCount) { readColorDescription(scanner, colorMap) }
 
         readEntitiesDescriptions(w, h, scanner, shortNameBuilders, colorMap, entities)
@@ -81,11 +80,10 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
         }
     }
 
-    private fun readColorDescription(scanner: Scanner, colorMap: MutableMap<String, GameColor>) {
+    private fun readColorDescription(scanner: Scanner, colorMap: MutableMap<String, RGB>) {
         val colorName = scanner.next()
         if (colorName.length != 1) throw WrongConfigError("color name length must be 1")
-        val rgb = readRGB(scanner)
-        colorMap[colorName] = GameColor(rgb)
+        colorMap[colorName] = readRGB(scanner)
     }
 
     private fun readEntitiesDescriptions(
@@ -93,7 +91,7 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
         h: Int,
         scanner: Scanner,
         shortNameBuilders: MutableMap<String, EntityBuilder>,
-        colorMap: MutableMap<String, GameColor>,
+        colorMap: MutableMap<String, RGB>,
         entities: MutableSet<GameEntity>
     ) {
         for (y in 0 until h) {
