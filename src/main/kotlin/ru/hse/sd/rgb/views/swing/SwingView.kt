@@ -138,7 +138,7 @@ class SwingView : View() {
             invPanel.isOpaque = false
             panel.add(invPanel)
             invPanel.setSize(panel.width, panel.height)
-            invPanel.setLocation(0,0 )
+            invPanel.setLocation(0, 0)
         }
 
         // TODO: fight code duplicated in message handling

@@ -50,3 +50,8 @@ fun <T, R> Collection<T>.getAllSame(keyExtractor: (T) -> R): R? {
     val firstKey = keyExtractor(this.firstOrNull() ?: return null)
     return if (this.all { keyExtractor(it) == firstKey }) firstKey else null
 }
+
+fun generateRandomColor(random: Random = Random): RGB =
+    List(3) { random.nextInt(256) }.let { (r, g, b) -> RGB(r, g, b) }
+
+fun Random.nextChance(probability: Double): Boolean = this.nextDouble() < probability

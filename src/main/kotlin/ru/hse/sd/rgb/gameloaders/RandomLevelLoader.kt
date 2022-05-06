@@ -1,81 +1,126 @@
 package ru.hse.sd.rgb.gameloaders
 
+import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
 import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.RGB
+import ru.hse.sd.rgb.utils.*
 import kotlin.random.Random
-import kotlin.random.nextInt
 
-class RandomLevelLoader(private val random: Random = Random) : LevelLoader {
-
-    private object RandomParams {
-        val WIDTH_RANGE = 70..90
-        val HEIGHT_RANGE = 25..40
-        val MIN_SIZE_RANGE = 4..7
-        val PASSAGE_RANGE = 3..5
-        val COLOR_RANGE = 0..50
-
-        const val MAX_HERO_CELL_RANDOM_ATTEMPTS = 1000000
-        const val DEFAULT_HERO_HP = 5
-        val DEFAULT_HERO_COLOR = RGB(250, 0, 0)
-        const val DEFAULT_WALL_HP = 9999
-        val DEFAULT_WALL_COLOR = RGB(255, 255, 255)
-        val DEFAULT_INV_DESC = InventoryDescription(5, 5)
-    }
+class RandomLevelLoader private constructor(
+    private val width: Int,
+    private val height: Int,
+    private val chamberMinSize: Int,
+    private val passageSize: Int,
+    private val levelFactory: LevelContentFactory,
+    private val heroHp: Int,
+    private val heroColor: RGB,
+    private val heroInventory: InventoryDescription,
+    private val random: Random
+) : LevelLoader {
 
     private var basicParams: LevelBasicParams? = null
 
     override fun loadBasicParams(): LevelBasicParams {
-        basicParams = LevelBasicParams(
-            random.nextInt(RandomParams.WIDTH_RANGE),
-            random.nextInt(RandomParams.HEIGHT_RANGE),
-        )
+        basicParams = LevelBasicParams(width, height)
         return basicParams!!
     }
 
     override fun loadLevelDescription(): LevelDescription {
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
-        val maze = generateMaze(
-            w, h,
-            RandomParams.MIN_SIZE_RANGE,
-            RandomParams.PASSAGE_RANGE,
-            random
-        )
-
-        val (r, g, b) = List(3) { random.nextInt(RandomParams.COLOR_RANGE) }
-        val bgColor = RGB(r, g, b)
+        val maze = generateMaze(w, h, chamberMinSize, passageSize)
 
         val entities = mutableSetOf<GameEntity>()
         for (x in 0 until w) for (y in 0 until h) if (maze[x, y]) entities.add(
-            Wall(
-                RandomParams.DEFAULT_WALL_COLOR,
-                RandomParams.DEFAULT_WALL_HP,
-                Cell(x, y)
-            )
+            levelFactory.createWall(Cell(x, y))
         )
 
-        var heroCell: Cell? = null
-        repeat(RandomParams.MAX_HERO_CELL_RANDOM_ATTEMPTS) {
-            heroCell = Cell(random.nextInt(w), random.nextInt(h))
-            if (!maze[heroCell!!])
-                return@repeat
-            heroCell = null
-        }
-        if (heroCell == null) throw IllegalStateException("too many attempts") // TODO: happens a lot
+        val heroCell: Cell = getEmptyCells(w, h, entities).randomElement(random)
+            ?: throw IllegalStateException("no empty cells to spawn hero")
         val hero = Hero(
-            setOf(ColorHpCell(RandomParams.DEFAULT_HERO_COLOR, RandomParams.DEFAULT_HERO_HP, heroCell!!)),
-            RandomParams.DEFAULT_INV_DESC
+            setOf(ColorHpCell(heroColor, heroHp, heroCell)),
+            heroInventory
         )
         entities.add(hero)
 
+        val currentEmptyCells = getEmptyCells(w, h, entities)
+        maze.withCoords().forEach { (x, y, _) ->
+            if (random.nextChance(levelFactory.glitchSpawnRate)) {
+                val cell = Cell(x, y)
+                if (cell in currentEmptyCells) {
+                    val glitch = levelFactory.createGlitch(cell)
+                    entities.add(glitch)
+                }
+            }
+        }
+
         return LevelDescription(
-            GameWorldDescription(w, h, entities, hero, bgColor),
-            RandomParams.DEFAULT_INV_DESC
+            GameWorldDescription(w, h, entities, hero, levelFactory.bgColor),
+            heroInventory
         )
+    }
+
+    private fun getEmptyCells(w: Int, h: Int, entities: Set<GameEntity>): Set<Cell> {
+        val occupiedCells: Set<Cell> = entities.flatMap { it.units.map { it.cell } }.toSet()
+        return Grid2D<Cell>(w, h) { x, y -> Cell(x, y) }.toSet() subtract occupiedCells
+    }
+
+    // ------------ builder ------------
+
+    companion object {
+        fun builder(block: Builder.() -> Unit) = builder(Random, block)
+        fun builder(random: Random, block: Builder.() -> Unit) = Builder(random, block).build()
+    }
+
+    class Builder private constructor(private val random: Random) {
+
+        constructor(random: Random, init: Builder.() -> Unit) : this(random) {
+            init()
+        }
+
+        fun random(range: IntRange) = random.nextInt(range.first, range.last)
+
+        var width: Int = random(DefaultParams.WIDTH_RANGE)
+        var height: Int = random(DefaultParams.HEIGHT_RANGE)
+        var chamberMinSize: Int = random(DefaultParams.MIN_SIZE_RANGE)
+        var passageSize: Int = random(DefaultParams.PASSAGE_RANGE)
+
+        var factory: LevelContentFactory = DefaultParams.LEVEL_FACTORY
+        var heroHp: Int = DefaultParams.HERO_HP
+        var heroColor: RGB = DefaultParams.HERO_COLOR
+        var heroInventory: InventoryDescription = DefaultParams.INV_DESC
+
+        fun build(): LevelLoader = RandomLevelLoader(
+            width = width,
+            height = height,
+            chamberMinSize = chamberMinSize,
+            passageSize = passageSize,
+            levelFactory = factory,
+            heroHp = heroHp,
+            heroColor = heroColor,
+            heroInventory = heroInventory,
+            random = random
+        )
+
+        private object DefaultParams {
+            val WIDTH_RANGE = 70..90
+            val HEIGHT_RANGE = 25..40
+            val MIN_SIZE_RANGE = 4..7
+            val PASSAGE_RANGE = 3..5
+
+            const val HERO_HP = 5
+            val HERO_COLOR = RGB(250, 0, 0)
+            val INV_DESC = InventoryDescription(5, 5)
+
+            val LEVEL_FACTORY = object : LevelContentFactory() {
+                override val bgColor: RGB = RGB(0, 0, 0)
+                override val wallColor: RGB = RGB(100, 100, 100)
+                override val wallHp: Int = 999
+                override val glitchHp = 1
+                override val glitchSpawnRate = 0.0
+            }
+        }
     }
 
 }

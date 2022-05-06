@@ -1,13 +1,12 @@
 package ru.hse.sd.rgb.gamelogic
 
 import kotlinx.coroutines.*
-import ru.hse.sd.rgb.gameloaders.Engines
-import ru.hse.sd.rgb.gameloaders.Loader
+import ru.hse.sd.rgb.gameloaders.*
+import ru.hse.sd.rgb.gameloaders.FileColorLoader
+import ru.hse.sd.rgb.gameloaders.RandomLevelLoader
+import ru.hse.sd.rgb.gameloaders.factories.FieryFactory
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.utils.Messagable
-import ru.hse.sd.rgb.utils.Message
-import ru.hse.sd.rgb.utils.Ticker
-import ru.hse.sd.rgb.utils.unreachable
+import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.GameViewStarted
 import ru.hse.sd.rgb.views.UserQuit
 import ru.hse.sd.rgb.views.View
@@ -58,7 +57,16 @@ class Controller(val view: View) : Messagable() {
     }
 
     private inner class GameInitState : ControllerState() {
-        val loader = Loader(levelFilename, colorsFilename)
+
+        val levelLoader = RandomLevelLoader.builder {
+            width = 70
+            height = random(50..60)
+            heroInventory = InventoryDescription(8, 4)
+            factory = FieryFactory()
+        }
+        val colorLoader = FileColorLoader(colorsFilename)
+
+        val loader = Loader(levelLoader, colorLoader)
 
         override lateinit var engines: Engines
         override lateinit var hero: Hero

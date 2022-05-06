@@ -118,6 +118,12 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
 //        }
     }
 
+    suspend fun isEmpty(cells: Set<Cell>): Boolean {
+        return withLockedArea(cells) {
+            cells.all { worldGrid[it].isEmpty() }
+        }
+    }
+
     // won't hit entity instantly
     fun generateRandomTarget(entity: GameEntity, random: Random = Random): Cell {
         val entityCells = entity.units.map { it.cell }.toSet()
