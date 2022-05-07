@@ -113,8 +113,8 @@ class RandomLevelLoader private constructor(
             val MIN_SIZE_RANGE = 4..7
             val PASSAGE_RANGE = 3..5
 
-            const val HERO_HP = 5
-            val HERO_COLOR = RGB(250, 0, 0)
+            const val HERO_HP = 10
+            val HERO_COLOR = RGB(220, 0, 0)
             val INV_DESC = InventoryDescription(5, 5)
             const val HERO_MOVE_PERIOD_LIMIT = 50L
 

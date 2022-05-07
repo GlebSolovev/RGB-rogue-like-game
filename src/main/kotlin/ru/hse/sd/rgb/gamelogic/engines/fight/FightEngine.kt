@@ -10,6 +10,7 @@ import ru.hse.sd.rgb.utils.Grid2D
 import ru.hse.sd.rgb.utils.RGB
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 typealias BaseColorId = Int
 private typealias BaseColorStatsMap = ConcurrentHashMap<BaseColorId, BaseColorStats>
@@ -27,6 +28,9 @@ class FightEngine(
     baseColors: List<BaseColorStats>,
     interactionMatrix: Grid2D<Int>
 ) {
+    // TODO: find better norm
+    private val colorNorm: (RGB, RGB) -> Double = ::lowCostApproxNorm
+
     private val baseColorStats = BaseColorStatsMap()
     private val attackFromTo = BaseColorInteractionMatrix()
 
@@ -34,7 +38,6 @@ class FightEngine(
         baseColors.withIndex().associateTo(baseColorStats) { (i, c) -> Pair(i, c) }
         interactionMatrix.withCoords().associateTo(attackFromTo) { (x, y, v) -> Pair(Pair(x, y), v) }
     }
-
 
     private val unitMutexes = ConcurrentHashMap<GameUnitId, Mutex>()
     private val unitCachedBaseColorIds = ConcurrentHashMap<GameUnitId, BaseColorId>() // TODO: AtomicRef ?
@@ -74,16 +77,28 @@ class FightEngine(
         }
     }
 
-    private infix fun RGB.l1Norm(otherRgb: RGB): Int {
-        val (r1, g1, b1) = this
+    private fun l1Norm(rgb: RGB, otherRgb: RGB): Double {
+        val (r1, g1, b1) = rgb
         val (r2, g2, b2) = otherRgb
-        return abs(r1 - r2) + abs(g1 - g2) + abs(b1 - b2)
+        return (abs(r1 - r2) + abs(g1 - g2) + abs(b1 - b2)).toDouble()
+    }
+
+    private fun lowCostApproxNorm(rgb: RGB, otherRgb: RGB): Double {
+        val (r1, g1, b1) = rgb
+        val (r2, g2, b2) = otherRgb
+        val (deltaR, deltaG, deltaB) = listOf(abs(r1 - r2), abs(g1 - g2), abs(b1 - b2))
+        val rMedian = (r1 + r2) / 2.0
+        return sqrt(
+            (2 + rMedian / 256) * deltaR * deltaR
+                    + 4 * deltaG * deltaG
+                    + (2 + (255 - rMedian) / 256) * deltaB * deltaB
+        )
     }
 
     private infix fun RGB.similarityTo(baseColorId: BaseColorId): Double {
         val baseColorRGB = baseColorId.stats.rgb
         val (r2, g2, b2) = baseColorRGB
-        return (this l1Norm baseColorRGB).toDouble() / (r2 + g2 + b2)
+        return colorNorm(this, baseColorRGB) / (1 + r2 + g2 + b2)
     }
 
     private fun computeAttack(from: GameUnit, to: GameUnit): Int {
@@ -106,8 +121,8 @@ class FightEngine(
         }
     }
 
-    fun resolveBaseColor(rgb: RGB): BaseColorId =
-        baseColorStats.minWithOrNull(Comparator.comparing { it.value.rgb l1Norm rgb })!!.key
+    private fun resolveBaseColor(rgb: RGB): BaseColorId =
+        baseColorStats.minWithOrNull(Comparator.comparing { colorNorm(it.value.rgb, rgb) })!!.key
 
     suspend fun changeRGB(unit: GameUnit, newRgb: RGB) {
         withLockedUnits(setOf(unit)) {
