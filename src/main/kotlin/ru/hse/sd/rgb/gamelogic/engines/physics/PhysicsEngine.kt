@@ -20,11 +20,16 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
     // take mutexes on cells not units!!!
     private suspend inline fun <R> withLockedArea(area: Set<Cell>, crossinline block: suspend () -> R): R {
         val sortedArea = area.toSortedSet(Comparator.comparing(Cell::x).thenComparing(Cell::y))
+        val lockedMutexes = mutableListOf<Mutex>()
         try {
-            for (cell in sortedArea) worldGridLocks[cell].lock()
+            for (cell in sortedArea) {
+                val mutex = worldGridLocks[cell]
+                mutex.lock()
+                lockedMutexes.add(mutex)
+            }
             return block()
         } finally {
-            for (cell in sortedArea.reversed()) worldGridLocks[cell].unlock()
+            for (mutex in lockedMutexes.reversed()) mutex.unlock()
         }
     }
 
@@ -107,17 +112,6 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         withLockedArea(cells) {
             units.forEach { worldGrid[it.cell].remove(it) }
         }
-    }
-
-    fun tryExpand(entity: GameEntity, newUnits: Set<GameUnit>): Boolean {
-        TODO()
-    }
-
-    suspend fun deleteUnit(unit: GameUnit) {
-        TODO()
-//        withLockedArea(setOf(unit.cell)) {
-//            worldGrid[unit.cell].remove(unit)
-//        }
     }
 
     // won't hit entity instantly
