@@ -41,17 +41,8 @@ abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
     // TODO: maybe make private and not concurrent
 
     init {
-        val cells = colorHpCells.map { it.cell }.toSet()
-        val shifts = setOf(GridShift(-1, 0), GridShift(1, 0), GridShift(0, 1), GridShift(0, -1))
-        outer@ for ((color, hp, cell) in colorHpCells) {
-            for (shift in shifts) {
-                if (cell + shift !in cells) {
-                    units.add(GameUnit(this, cell, hp, color))
-                    continue@outer
-                }
-            }
-            units.add(GameUnit(this, cell, hp, color))
-        }
+        println("ENTITY HUIT: $this")
+        units.addAll(colorHpCells.map { (color, hp, cell) -> GameUnit(this, cell, hp, color).also { println("UNIT RODILSYA: $it") } })
     }
 
     var lifeCycleState: EntityLifeCycleState by AtomicReference(EntityLifeCycleState.NOT_STARTED)

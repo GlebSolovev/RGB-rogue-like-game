@@ -9,18 +9,13 @@ import java.util.concurrent.atomic.AtomicLong
 
 typealias GameUnitId = Long
 
-data class GameUnit(
+class GameUnit(
     val parent: GameEntity,
     var cell: Cell,
     var hp: Int,
     var gameColor: RGB,
 ) {
-
-    private val colorTicker = Ticker(
-        controller.fighting.getBaseColorStats(this).updatePeriodMillis,
-        parent,
-        ColorTick(this)
-    ).also { it.start() } // TODO: update when base color changes
+    // WARNING!!! Do not shuffle initialization order!
 
     companion object {
         private val globalId = AtomicLong(0)
@@ -28,10 +23,17 @@ data class GameUnit(
 
     val id: GameUnitId = globalId.incrementAndGet()
 
+    private val colorTicker = Ticker(
+        controller.fighting.getBaseColorStats(this).updatePeriodMillis,
+        parent,
+        ColorTick(this)
+    ).also {
+        it.start()
+    } // TODO: update when base color changes
+
     override fun equals(other: Any?) = this === other || id == (other as? GameUnit)?.id
 
     override fun hashCode(): Int = id.hashCode()
-
 }
 
 data class ColorHpCell(val color: RGB, val hp: Int, val cell: Cell)
