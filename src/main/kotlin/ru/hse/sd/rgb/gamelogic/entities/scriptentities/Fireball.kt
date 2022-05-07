@@ -11,10 +11,10 @@ import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlin.math.abs
 
 class Fireball(
-    colorHpCell: ColorHpCell,
+    colorCell: ColorCellNoHp,
     movePeriodMillis: Long,
     private val targetCell: Cell
-) : GameEntity(setOf(colorHpCell)) {
+) : GameEntity(setOf(colorCell)) {
 
     val ticker = Ticker(movePeriodMillis, MoveTick()).also { it.start() }
     // TODO: possible update ticker via effects
@@ -28,6 +28,10 @@ class Fireball(
     override val physicalEntity = object : PhysicalEntity() {
         override val isSolid = false
         override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = dir
+    }
+
+    override val fightEntity = object : FightEntity() {
+        override fun isUnitActive(unit: GameUnit): Boolean = true
     }
 
     private lateinit var lastDir: Direction

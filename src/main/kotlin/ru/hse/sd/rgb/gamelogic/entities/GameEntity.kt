@@ -10,7 +10,7 @@ import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
-abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
+abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
     abstract inner class ViewEntity {
         protected abstract fun convertUnit(unit: GameUnit): ViewUnit
@@ -29,19 +29,24 @@ abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
         abstract fun getUnitDirection(unit: GameUnit, dir: Direction): Direction
     }
 
-    abstract inner class FightEntity { // TODO: for fight logic and behaviour state machines, effects
+    abstract inner class FightEntity {
         abstract fun isUnitActive(unit: GameUnit): Boolean
-        // TODO: add isImmortal flag (and check it in FightLogic)
     }
 
     abstract val viewEntity: ViewEntity
     abstract val physicalEntity: PhysicalEntity
+    abstract val fightEntity: FightEntity
 
     val units: MutableSet<GameUnit> = Collections.newSetFromMap(ConcurrentHashMap())
     // TODO: maybe make private and not concurrent
 
     init {
-        units.addAll(colorHpCells.map { (color, hp, cell) -> GameUnit(this, cell, hp, color) })
+        units.addAll(colorCells.map { cell ->
+            when (cell) {
+                is ColorCellHp -> HpGameUnit(this, cell)
+                is ColorCellNoHp -> NoHpGameUnit(this, cell)
+            }
+        })
     }
 
     var lifeCycleState: EntityLifeCycleState by AtomicReference(EntityLifeCycleState.NOT_STARTED)

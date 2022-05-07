@@ -11,8 +11,7 @@ abstract class LevelContentFactory {
     abstract val glitchSpawnRate: Double
 
     protected abstract val wallColor: RGB
-    protected abstract val wallHp: Int
-    open fun createWall(cell: Cell): Wall = Wall(wallColor, wallHp, cell)
+    open fun createWall(cell: Cell): Wall = Wall(wallColor, cell)
 
     protected abstract val glitchHp: Int
     open fun createGlitch(cell: Cell): Glitch = Glitch(cell, glitchHp)

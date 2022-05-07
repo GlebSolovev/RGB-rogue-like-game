@@ -2,7 +2,7 @@ package ru.hse.sd.rgb.gameloaders
 
 import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
-import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
+import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.utils.*
@@ -40,7 +40,7 @@ class RandomLevelLoader private constructor(
         val heroCell: Cell = getEmptyCells(w, h, entities).randomElement(random)
             ?: throw IllegalStateException("no empty cells to spawn hero")
         val hero = Hero(
-            setOf(ColorHpCell(heroColor, heroHp, heroCell)),
+            setOf(ColorCellHp(heroColor, heroCell, heroHp)),
             heroInventory,
             heroMovePeriodLimit
         )
@@ -121,7 +121,6 @@ class RandomLevelLoader private constructor(
             val LEVEL_FACTORY = object : LevelContentFactory() {
                 override val bgColor: RGB = RGB(0, 0, 0)
                 override val wallColor: RGB = RGB(100, 100, 100)
-                override val wallHp: Int = 999
                 override val glitchHp = 1
                 override val glitchSpawnRate = 0.0
             }

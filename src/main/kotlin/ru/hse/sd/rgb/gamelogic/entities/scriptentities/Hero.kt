@@ -16,24 +16,25 @@ import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
 class Hero(
-    colorHpCells: Set<ColorHpCell>,
+    colorCells: Set<ColorCellHp>,
     invDesc: InventoryDescription,
     private var singleDirMovePeriodLimit: Long
-) : GameEntity(colorHpCells) {
+) : GameEntity(colorCells) {
 
-    inner class PhysicalHero : PhysicalEntity() {
-        override val isSolid = false
-        override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = dir
-    }
-
-    inner class ViewHero : ViewEntity() {
+    override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
             override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SQUARE)
         }
     }
 
-    override val physicalEntity = PhysicalHero()
-    override val viewEntity = ViewHero()
+    override val physicalEntity = object : PhysicalEntity() {
+        override val isSolid = false
+        override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = dir
+    }
+
+    override val fightEntity = object : FightEntity() {
+        override fun isUnitActive(unit: GameUnit): Boolean = true
+    }
 
     override fun onLifeStart() {
         controller.view.receive(View.SubscribeToMovement(this))

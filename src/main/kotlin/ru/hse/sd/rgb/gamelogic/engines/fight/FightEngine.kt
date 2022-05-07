@@ -5,6 +5,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
+import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.entities.ReceivedAttack
 import ru.hse.sd.rgb.utils.Grid2D
 import ru.hse.sd.rgb.utils.RGB
@@ -55,9 +56,11 @@ class FightEngine(
         }
 
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
-            val attack = computeAttack(from, to)
-            to.hp -= attack
-            to.parent.receive(ReceivedAttack(to, from, to.hp <= 0))
+            val isFatal = if (to is HpGameUnit) {
+                to.hp -= computeAttack(from, to)
+                to.hp <= 0
+            } else false
+            to.parent.receive(ReceivedAttack(to, from, isFatal))
         }
 
     }
@@ -86,7 +89,7 @@ class FightEngine(
     private infix fun RGB.similarityTo(baseColorId: BaseColorId): Double {
         val baseColorRGB = baseColorId.stats.rgb
         val (r2, g2, b2) = baseColorRGB
-        return max(0.0, 1 - sqrt ((this l1Norm baseColorRGB) / (1 + r2 + g2 + b2)))
+        return max(0.0, 1 - sqrt((this l1Norm baseColorRGB) / (1 + r2 + g2 + b2)))
     }
 
     private fun computeAttack(from: GameUnit, to: GameUnit): Int {

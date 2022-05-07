@@ -13,8 +13,8 @@ import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlin.random.Random
 
-// single-unit (because entities are indivisible)
-class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorHpCell(RGB(0, 0, 0), hp, cell))) {
+// TODO: optimize performance
+class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), cell, hp))) {
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
@@ -24,11 +24,14 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorHpCell(RGB(0, 0, 0), h
 
     override val physicalEntity = object : PhysicalEntity() {
         override val isSolid = false
-
-        override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = dir
+        override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = Direction.NOPE
     }
 
-    private class RepaintTick() : Tick()
+    override val fightEntity = object : FightEntity() {
+        override fun isUnitActive(unit: GameUnit): Boolean = true
+    }
+
+    private class RepaintTick : Tick()
 
     private val repaintTick = RepaintTick()
     private val repaintTicker = Ticker(10, repaintTick).also { it.start() }
@@ -63,8 +66,6 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorHpCell(RGB(0, 0, 0), h
         }
     }
 
-    private fun clone(targetCell: Cell): Glitch {
-        return Glitch(targetCell, units.first().hp)
-    }
+    private fun clone(targetCell: Cell): Glitch = Glitch(targetCell, (units.first() as HpGameUnit).hp)
 
 }

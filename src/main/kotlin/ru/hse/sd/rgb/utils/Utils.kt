@@ -15,7 +15,7 @@ data class GridShift(val dx: Int, val dy: Int)
 operator fun Cell.plus(p: GridShift) = Cell(x + p.dx, y + p.dy)
 
 enum class Direction {
-    UP, LEFT, DOWN, RIGHT;
+    UP, LEFT, DOWN, RIGHT, NOPE;
 
     // (0, 0) is upper-left corner
     fun toShift(): GridShift = when (this) {
@@ -23,6 +23,7 @@ enum class Direction {
         LEFT -> GridShift(-1, 0)
         DOWN -> GridShift(0, 1)
         RIGHT -> GridShift(1, 0)
+        NOPE -> GridShift(0, 0)
     }
 }
 

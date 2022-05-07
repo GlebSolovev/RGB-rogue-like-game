@@ -1,8 +1,8 @@
 import ru.hse.sd.rgb.gameloaders.*
-import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
+import ru.hse.sd.rgb.gamelogic.entities.ColorCell
+import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.RGB
 import ru.hse.sd.rgb.utils.WrongConfigError
@@ -48,6 +48,8 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
 
     // ----------------- private -----------------
 
+    // GREAT TODO: TODO EVERYTHING
+
     private val HERO_NAME = "hero"
     private val WALL_NAME = "wall"
 
@@ -55,8 +57,8 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
     private val INV_DESC = InventoryDescription(5, 5) // TODO: read from config
     private val DEFAULT_HERO_MOVE_PERIOD_LIMIT: Long = 50
 
-    private data class EntityBuilder(val isMulti: Boolean, val creator: (Set<ColorHpCell>) -> GameEntity) {
-        val colorCells = mutableSetOf<ColorHpCell>()
+    private data class EntityBuilder(val isMulti: Boolean, val creator: (Set<ColorCell>) -> GameEntity) {
+        val colorCells = mutableSetOf<ColorCell>()
     }
 
     private fun readRGB(scanner: Scanner) = RGB(scanner.nextInt(), scanner.nextInt(), scanner.nextInt())
@@ -70,15 +72,15 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
             "multi" -> true
             else -> throw WrongConfigError("unknown tag")
         }
-        shortNameBuilders[shortName] = when (entityName) {
-            HERO_NAME -> {
-                EntityBuilder(isMulti) { s -> Hero(s, INV_DESC, DEFAULT_HERO_MOVE_PERIOD_LIMIT) }
-            }
-            WALL_NAME -> {
-                EntityBuilder(isMulti) { s -> Wall(s) }
-            }
-            else -> throw WrongConfigError("unknown entity")
-        }
+//        shortNameBuilders[shortName] = when (entityName) {
+//            HERO_NAME -> {
+//                EntityBuilder(isMulti) { s -> Hero(s, INV_DESC, DEFAULT_HERO_MOVE_PERIOD_LIMIT) }
+//            }
+//            WALL_NAME -> {
+//                EntityBuilder(isMulti) { s -> Wall(s) }
+//            }
+//            else -> throw WrongConfigError("unknown entity")
+//        }
     }
 
     private fun readColorDescription(scanner: Scanner, colorMap: MutableMap<String, RGB>) {
@@ -109,9 +111,9 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
                 val entityBuilder = shortNameBuilders[entityShortName] ?: throw WrongConfigError("entity not found")
                 val color = colorMap[colorName] ?: throw WrongConfigError("color not found")
                 if (entityBuilder.isMulti) {
-                    entityBuilder.colorCells.add(ColorHpCell(color, DEFAULT_HP, Cell(x, y)))
+                    entityBuilder.colorCells.add(ColorCellHp(color, Cell(x, y), DEFAULT_HP))
                 } else {
-                    entities.add(entityBuilder.creator(setOf(ColorHpCell(color, DEFAULT_HP, Cell(x, y)))))
+                    entities.add(entityBuilder.creator(setOf(ColorCellHp(color, Cell(x, y), DEFAULT_HP))))
                 }
             }
         }

@@ -9,11 +9,10 @@ import java.util.concurrent.atomic.AtomicLong
 
 typealias GameUnitId = Long
 
-data class GameUnit(
+sealed class GameUnit(
     val parent: GameEntity,
-    var cell: Cell,
-    var hp: Int,
     var gameColor: RGB,
+    var cell: Cell,
 ) {
     // WARNING!!! Do not shuffle initialization order!
 
@@ -26,7 +25,7 @@ data class GameUnit(
     private val colorTicker = Ticker(
         controller.fighting.getBaseColorStats(this).updatePeriodMillis,
         parent,
-        ColorTick(this)
+        ColorTick(this) // is ok
     ).also {
         it.start()
     } // TODO: update when base color changes
@@ -36,6 +35,43 @@ data class GameUnit(
     override fun hashCode(): Int = id.hashCode()
 }
 
-data class ColorHpCell(val color: RGB, val hp: Int, val cell: Cell)
+class NoHpGameUnit(
+    parent: GameEntity,
+    gameColor: RGB,
+    cell: Cell
+) : GameUnit(parent, gameColor, cell) {
+
+    constructor(parent: GameEntity, colorCellNoHp: ColorCellNoHp) : this(
+        parent,
+        colorCellNoHp.color,
+        colorCellNoHp.cell
+    )
+
+}
+
+class HpGameUnit(
+    parent: GameEntity,
+    gameColor: RGB,
+    cell: Cell,
+    var hp: Int,
+    val maxHp: Int,
+) : GameUnit(parent, gameColor, cell) {
+
+    constructor(parent: GameEntity, colorCellHp: ColorCellHp) : this(
+        parent,
+        colorCellHp.color,
+        colorCellHp.cell,
+        colorCellHp.maxHp,
+        colorCellHp.maxHp
+    )
+
+}
+
+sealed class ColorCell(open val color: RGB, open val cell: Cell)
+
+data class ColorCellNoHp(override val color: RGB, override val cell: Cell) : ColorCell(color, cell)
+
+class ColorCellHp(override val color: RGB, override val cell: Cell, val maxHp: Int) :
+    ColorCell(color, cell)
 
 data class ColorTick(val unit: GameUnit) : Tick()

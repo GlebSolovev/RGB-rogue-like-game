@@ -17,7 +17,6 @@ baseColors:
       - !<fireball>
         count: 1
         movePeriodMillis: 100
-        fireballHp: 1 # TODO: shouldn't have any
         isControllable: true
 
   - name: "FLAME RED"
@@ -30,7 +29,6 @@ baseColors:
       - !<fireball>
         count: 3
         movePeriodMillis: 100
-        fireballHp: 1 # TODO: shouldn't have any
         isControllable: true
 
 interactionMatrix:
