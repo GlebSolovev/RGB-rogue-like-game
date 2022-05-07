@@ -35,9 +35,7 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorHpCell(RGB(0, 0, 0), h
 
     override suspend fun handleGameMessage(m: Message): Unit = when (m) {
         is RepaintTick -> Unit.also {
-            val newUnits = units.map { GameUnit(this, it.cell, it.hp, generateRandomColor(random)) }
-            units.clear()
-            units.addAll(newUnits)
+            units.forEach { unit -> controller.fighting.changeRGB(unit, generateRandomColor(random)) }
             controller.view.receive(EntityUpdated(this))
         }
         is MoveTick -> Unit.also {
