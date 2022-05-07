@@ -1,8 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.gamelogic.entities.ColorHpCell
-import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.gamelogic.entities.GameUnit
+import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -27,6 +26,11 @@ class Wall(colorHpCells: Set<ColorHpCell>) : GameEntity(colorHpCells) {
     }
 
     override suspend fun handleGameMessage(m: Message) {
-        ignore
+        when (m) {
+            is ReceivedAttack -> {
+                if (m.isFatal) controller.creation.die(this)
+            }
+            else -> ignore
+        }
     }
 }

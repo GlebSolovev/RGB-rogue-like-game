@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
+import ru.hse.sd.rgb.gamelogic.FinishControllerMessage
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
@@ -9,7 +10,6 @@ import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.Message
-import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -38,6 +38,11 @@ class Hero(
     override fun onLifeStart() {
         controller.view.receive(View.SubscribeToMovement(this))
         controller.view.receive(View.SubscribeToInventory(this))
+    }
+
+    override fun onLifeEnd() {
+        controller.view.receive(View.UnsubscribeFromInventory(this))
+        controller.view.receive(View.UnsubscribeFromMovement(this))
     }
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
@@ -75,8 +80,10 @@ class Hero(
                 controller.view.receive(InventoryOpened(inventory))
             }
             is ReceivedAttack -> this.also {
-                ignore // TODO
-//                if (m.isFatal) controller.creation.die(this@Hero)
+                if (m.isFatal) {
+                    controller.creation.die(this@Hero)
+                    controller.receive(FinishControllerMessage(false))
+                }
             }
             else -> {
                 println(m)
@@ -104,12 +111,21 @@ class Hero(
                 // TODO: place item in world
                 sendInvUpdate()
             }
+            is CollidedWith -> this.also {
+                controller.fighting.attack(m.myUnit, m.otherUnit)
+            }
             is ColorTick -> this.also {
                 controller.fighting.update(m.unit, ControlParams(AttackType.RANDOM_TARGET, HealType.NO_HEAL))
             }
-            is ReceivedAttack -> this.also {
-                ignore // TODO
-//                if (m.isFatal) controller.creation.die(this@Hero)
+            is ReceivedAttack -> {
+                if (m.isFatal) {
+                    controller.view.receive(InventoryClosed())
+                    controller.creation.die(this@Hero)
+                    controller.receive(FinishControllerMessage(false))
+                    PlayingState()
+                } else {
+                    this
+                }
             }
             else -> {
                 println(m)

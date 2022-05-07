@@ -41,8 +41,7 @@ abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
     // TODO: maybe make private and not concurrent
 
     init {
-        println("ENTITY HUIT: $this")
-        units.addAll(colorHpCells.map { (color, hp, cell) -> GameUnit(this, cell, hp, color).also { println("UNIT RODILSYA: $it") } })
+        units.addAll(colorHpCells.map { (color, hp, cell) -> GameUnit(this, cell, hp, color) })
     }
 
     var lifeCycleState: EntityLifeCycleState by AtomicReference(EntityLifeCycleState.NOT_STARTED)
@@ -56,10 +55,7 @@ abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
                         controller.view.receive(EntityUpdated(this))
                         onLifeStart()
                     }
-                    is LifeEnded -> {
-                        lifeCycleState = EntityLifeCycleState.DEAD
-                        onLifeEnd() // TODO: is needed here?
-                    }
+                    is LifeEnded -> lifeCycleState = EntityLifeCycleState.DEAD
                     else -> ignore
                 }
             }
@@ -85,7 +81,7 @@ abstract class GameEntity(colorHpCells: Set<ColorHpCell>) : Messagable() {
     }
 
     open fun onLifeStart() {}
-    open fun onLifeEnd() {} // TODO: is this method needed?
+    open fun onLifeEnd() {}
 
     abstract suspend fun handleGameMessage(m: Message)
 

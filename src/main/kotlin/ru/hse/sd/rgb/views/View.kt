@@ -27,11 +27,16 @@ abstract class View : Messagable() {
     data class SubscribeToInventory(val listener: Messagable) : Message()
     data class SubscribeToQuit(val listener: Messagable) : Message()
 
+    data class UnsubscribeFromMovement(val listener: Messagable) : Message()
+    data class UnsubscribeFromInventory(val listener: Messagable) : Message()
+
     final override suspend fun handleMessage(m: Message) {
         when (m) {
             is SubscribeToMovement -> movementListeners.add(m.listener)
             is SubscribeToInventory -> inventoryListeners.add(m.listener)
             is SubscribeToQuit -> quitListeners.add(m.listener)
+            is UnsubscribeFromMovement -> movementListeners.remove(m.listener)
+            is UnsubscribeFromInventory -> movementListeners.remove(m.listener)
             else -> state.set(state.get().next(m))
         }
     }

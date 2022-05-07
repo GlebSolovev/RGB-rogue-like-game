@@ -1,6 +1,9 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
+import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
+import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
@@ -33,28 +36,31 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorHpCell(RGB(0, 0, 0), h
 
     private val random = Random
 
-    override suspend fun handleGameMessage(m: Message): Unit = when (m) {
-        is RepaintTick -> Unit.also {
-            units.forEach { unit -> controller.fighting.changeRGB(unit, generateRandomColor(random)) }
-            controller.view.receive(EntityUpdated(this))
-        }
-        is MoveTick -> Unit.also {
-            val cells = units.map { it.cell }.toSet()
-            val adjacentCells =
-                cells.flatMap { cell -> Direction.values().map { cell + it.toShift() } }.toSet() subtract cells
-            val targetCell = adjacentCells.randomElement(random)!!
-            if (targetCell !in units.map { it.cell }.toSet()) {
-                val clone = clone(targetCell)
-                if (controller.creation.tryAddToWorld(clone)) {
-                    controller.view.receive(EntityUpdated(clone))
+    override suspend fun handleGameMessage(m: Message) {
+        when (m) {
+            is RepaintTick -> {
+                units.forEach { unit -> controller.fighting.changeRGB(unit, generateRandomColor(random)) }
+                controller.view.receive(EntityUpdated(this))
+            }
+            is MoveTick -> {
+                val cells = units.map { it.cell }.toSet()
+                val adjacentCells =
+                    cells.flatMap { cell -> Direction.values().map { cell + it.toShift() } }.toSet() subtract cells
+                val targetCell = adjacentCells.randomElement(random)!!
+                if (targetCell !in units.map { it.cell }.toSet()) {
+                    val clone = clone(targetCell)
+                    if (controller.creation.tryAddToWorld(clone)) {
+                        controller.view.receive(EntityUpdated(clone))
+                    }
                 }
             }
+            is CollidedWith -> controller.fighting.attack(m.myUnit, m.otherUnit)
+            is ReceivedAttack -> if (m.isFatal) controller.creation.die(this)
+            is ColorTick -> {
+                controller.fighting.update(m.unit, ControlParams(AttackType.HERO_TARGET, HealType.NO_HEAL))
+            }
+            else -> unreachable(m)
         }
-        // TODO
-        is CollidedWith -> ignore
-        is ColorTick -> ignore
-        is ReceivedAttack -> ignore
-        else -> unreachable(m)
     }
 
     private fun clone(targetCell: Cell): Glitch {

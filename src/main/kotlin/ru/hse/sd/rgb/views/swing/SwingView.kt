@@ -106,6 +106,12 @@ class SwingView : View() {
                 inventoryListeners.forEach { it.receive(m) }
             }
             is InventoryOpened -> SwingPlayingInventoryState(m.invSnapshot, drawables)
+            is UserSelect -> this.also {
+                ignore
+            }
+            is UserDrop -> this.also {
+                ignore
+            }
             is UserQuit -> this.also {
                 quitListeners.forEach { it.receive(m) }
             }
@@ -169,6 +175,9 @@ class SwingView : View() {
             }
             is EntityRemoved -> this.also {
                 drawables.remove(m.gameEntity)!!
+            }
+            is UserQuit -> this.also {
+                quitListeners.forEach { it.receive(m) }
             }
             else -> unreachable(m)
         }

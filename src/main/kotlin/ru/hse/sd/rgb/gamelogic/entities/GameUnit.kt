@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 typealias GameUnitId = Long
 
-class GameUnit(
+data class GameUnit(
     val parent: GameEntity,
     var cell: Cell,
     var hp: Int,
