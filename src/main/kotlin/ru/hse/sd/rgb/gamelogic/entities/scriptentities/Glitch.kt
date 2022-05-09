@@ -13,7 +13,6 @@ import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlin.random.Random
 
-// TODO: optimize performance
 class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), cell, hp))) {
 
     override val viewEntity = object : ViewEntity() {
@@ -23,7 +22,7 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), c
     }
 
     override val physicalEntity = object : PhysicalEntity() {
-        override val isSolid = false
+        override val isSolid = true // warning: exponential growth otherwise
         override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = Direction.NOPE
     }
 
@@ -50,11 +49,10 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), c
                 val adjacentCells =
                     cells.flatMap { cell -> Direction.values().map { cell + it.toShift() } }.toSet() subtract cells
                 val targetCell = adjacentCells.randomElement(random)!!
-                if (targetCell !in units.map { it.cell }.toSet()) {
-                    val clone = clone(targetCell)
-                    if (controller.creation.tryAddToWorld(clone)) {
-                        controller.view.receive(EntityUpdated(clone))
-                    }
+
+                val clone = clone(targetCell)
+                if (controller.creation.tryAddToWorld(clone)) {
+                    controller.view.receive(EntityUpdated(clone))
                 }
             }
             is CollidedWith -> controller.fighting.attack(m.myUnit, m.otherUnit)
