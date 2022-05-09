@@ -8,12 +8,11 @@ import ru.hse.sd.rgb.views.EntityUpdated
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
-import kotlin.math.abs
 
 class Fireball(
     colorCell: ColorCellNoHp,
     movePeriodMillis: Long,
-    private val targetCell: Cell
+    targetCell: Cell
 ) : GameEntity(setOf(colorCell)) {
 
     val ticker = Ticker(movePeriodMillis, MoveTick()).also { it.start() }
@@ -34,30 +33,13 @@ class Fireball(
         override fun isUnitActive(unit: GameUnit): Boolean = true
     }
 
-    private lateinit var lastDir: Direction
-    private var targetReached = false
-
+    private val pathStrategy = Paths2D.straightLine(colorCell.cell, targetCell)
 
     override suspend fun handleGameMessage(m: Message) {
         when (m) {
             is MoveTick -> {
                 val cell = units.first().cell
-
-                if (cell == targetCell)
-                    targetReached = true
-
-                val dx = targetCell.x - cell.x
-                val dy = targetCell.y - cell.y
-                val dir = if (targetReached) lastDir else {
-                    if (abs(dx) > abs(dy)) {
-                        if (dx > 0) Direction.RIGHT else Direction.LEFT
-                    } else {
-                        if (dy > 0) Direction.DOWN else Direction.UP
-                    }
-                }
-                lastDir = dir
-
-                val moved = controller.physics.tryMove(this, dir)
+                val moved = controller.physics.tryMove(this, pathStrategy.next(cell))
                 if (moved) controller.view.receive(EntityUpdated(this))
             }
             is CollidedWith -> {
