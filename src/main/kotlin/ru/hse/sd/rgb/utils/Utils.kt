@@ -1,14 +1,10 @@
 package ru.hse.sd.rgb.utils
 
-import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.reflect.KProperty
-
-@Serializable
-data class RGB(val r: Int, val g: Int, val b: Int)
 
 data class Cell(val x: Int, val y: Int)
 data class GridShift(val dx: Int, val dy: Int)
@@ -56,11 +52,6 @@ fun GameEntity.randomCell(random: Random = Random) = this.units.randomElement(ra
 operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>): Y = this.get()
 operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y) {
     this.set(value)
-}
-
-fun <T, R> Collection<T>.getAllSame(keyExtractor: (T) -> R): R? {
-    val firstKey = keyExtractor(this.firstOrNull() ?: return null)
-    return if (this.all { keyExtractor(it) == firstKey }) firstKey else null
 }
 
 fun generateRandomColor(random: Random = Random): RGB =
