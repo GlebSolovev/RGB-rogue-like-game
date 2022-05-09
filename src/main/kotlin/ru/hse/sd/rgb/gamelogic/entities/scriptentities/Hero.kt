@@ -10,6 +10,7 @@ import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.Message
+import ru.hse.sd.rgb.utils.sameAs
 import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -22,8 +23,27 @@ class Hero(
 ) : GameEntity(colorCells) {
 
     override val viewEntity = object : ViewEntity() {
+        private val scaleFactors = mutableMapOf<GameUnit, Double>()
+
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SQUARE)
+            override val swingAppearance = SwingUnitAppearance(
+                SwingUnitShape.SQUARE,
+                scaleFactors.getOrDefault(unit, 1.0)
+            )
+        }
+
+        override fun applyMessageToAppearance(m: Message) {
+            // TODO: allow to easily reuse this code in other GameEntities (maybe use mixins?)
+            if (m is ReceivedAttack) {
+                val unit = m.myUnit as HpGameUnit
+                val scale = unit.hp.toDouble() / unit.maxHp
+                if (scale sameAs 1.0) {
+                    scaleFactors.remove(unit)
+                } else {
+                    scaleFactors[unit] = scale
+                }
+                controller.view.receive(EntityUpdated(this@Hero))
+            }
         }
     }
 

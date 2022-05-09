@@ -3,6 +3,7 @@ package ru.hse.sd.rgb.utils
 import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 
@@ -56,3 +57,5 @@ fun generateRandomColor(random: Random = Random): RGB =
     List(3) { random.nextInt(256) }.let { (r, g, b) -> RGB(r, g, b) }
 
 fun Random.nextChance(probability: Double): Boolean = this.nextDouble() < probability
+
+infix fun Double.sameAs(d: Double) = abs(this - d) < 1e-8

@@ -73,7 +73,10 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
                         controller.view.receive(EntityRemoved(this))
                         onLifeEnd()
                     }
-                    else -> handleGameMessage(m)
+                    else -> {
+                        handleGameMessage(m)
+                        viewEntity.applyMessageToAppearance(m)
+                    }
                 }
             }
             EntityLifeCycleState.DEAD -> {
@@ -89,7 +92,6 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     open fun onLifeEnd() {}
 
     abstract suspend fun handleGameMessage(m: Message)
-
 }
 
 class LifeStarted : Message()

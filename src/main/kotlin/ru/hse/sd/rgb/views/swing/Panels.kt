@@ -8,6 +8,7 @@ import java.awt.*
 import java.awt.geom.Ellipse2D
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
+import kotlin.math.roundToInt
 
 open class GamePanel(
     private val offsetX: Int,
@@ -22,19 +23,24 @@ open class GamePanel(
         return Pair(offsetX + c.x * tileSize, offsetY + c.y * tileSize)
     }
 
-    private fun convertToSwingShape(s: SwingUnitShape, at: Cell): Shape {
+    private fun convertToSwingShape(s: SwingUnitAppearance, at: Cell): Shape {
         val (pxX, pxY) = convertCellToPixels(at)
-        return when (s) {
-            SwingUnitShape.SQUARE -> Rectangle(pxX, pxY, tileSize, tileSize)
+        val (spX, spY) = Cell(
+            (pxX + (0.5 / s.scale) * tileSize).roundToInt(),
+            (pxY + (0.5 / s.scale) * tileSize).roundToInt()
+        )
+        fun Int.scaled() = (this * s.scale).roundToInt()
+        return when (s.shape) {
+            SwingUnitShape.SQUARE -> Rectangle(spX, spY, tileSize.scaled(), tileSize.scaled())
             SwingUnitShape.CIRCLE -> Ellipse2D.Double(
-                pxX.toDouble(),
-                pxY.toDouble(),
+                spX.toDouble(),
+                spY.toDouble(),
                 tileSize.toDouble(),
                 tileSize.toDouble(),
             )
             SwingUnitShape.TRIANGLE -> Polygon(
-                intArrayOf(pxX, pxX + tileSize / 2, pxX + tileSize),
-                intArrayOf(pxY + tileSize, pxY, pxY + tileSize),
+                intArrayOf(spX, spX + tileSize.scaled() / 2, spX + tileSize.scaled()),
+                intArrayOf(spY + tileSize.scaled(), spY, spY + tileSize.scaled()),
                 3
             )
         }
@@ -46,9 +52,8 @@ open class GamePanel(
         g.fillRect(0, 0, width, height)
         for ((_, viewUnits) in drawables) {
             for (viewUnit in viewUnits) {
-                val (shape) = viewUnit.swingAppearance
                 g.color = viewUnit.rgb.toSwingColor()
-                g.fill(convertToSwingShape(shape, viewUnit.cell))
+                g.fill(convertToSwingShape(viewUnit.swingAppearance, viewUnit.cell))
             }
         }
     }
