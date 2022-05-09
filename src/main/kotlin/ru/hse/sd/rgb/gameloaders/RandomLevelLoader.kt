@@ -37,7 +37,7 @@ class RandomLevelLoader private constructor(
             levelFactory.createWall(Cell(x, y))
         )
 
-        val heroCell: Cell = getEmptyCells(w, h, entities).randomElement(random)
+        val heroCell: Cell = getEmptyCells(w, h, entities).randomElementOrNull(random)
             ?: throw IllegalStateException("no empty cells to spawn hero")
         val hero = Hero(
             setOf(ColorCellHp(heroColor, heroCell, heroHp)),
@@ -110,8 +110,8 @@ class RandomLevelLoader private constructor(
         private object DefaultParams {
             val WIDTH_RANGE = 70..90
             val HEIGHT_RANGE = 25..40
-            val MIN_SIZE_RANGE = 4..7
-            val PASSAGE_RANGE = 3..5
+            val MIN_SIZE_RANGE = 5..10
+            val PASSAGE_RANGE = 3..6
 
             const val HERO_HP = 10
             val HERO_COLOR = RGB(220, 0, 0)

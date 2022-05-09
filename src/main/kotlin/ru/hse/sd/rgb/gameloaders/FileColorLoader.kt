@@ -7,6 +7,7 @@ import kotlinx.serialization.modules.*
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
 import ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects.FireballEffect
+import ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects.WaveEffect
 import ru.hse.sd.rgb.utils.Grid2D
 import ru.hse.sd.rgb.utils.WrongConfigError
 import java.io.File
@@ -20,6 +21,7 @@ data class FileColorsDesc(
 private val module = SerializersModule {
     polymorphic(BaseColorUpdateEffect::class) {
         subclass(FireballEffect::class)
+        subclass(WaveEffect::class)
     }
 }
 

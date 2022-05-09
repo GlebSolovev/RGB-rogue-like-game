@@ -5,7 +5,7 @@ baseColors:
       g: 100
       b: 100
     updatePeriodMillis: 1000000
-    updateEffects: []
+    updateEffects: [ ]
 
   - name: "FIRE RED"
     rgb:
@@ -31,7 +31,19 @@ baseColors:
         movePeriodMillis: 100
         isControllable: true
 
+  - name: "OCEAN BLUE"
+    rgb:
+      r: 0
+      g: 100
+      b: 200
+    updatePeriodMillis: 3000
+    updateEffects:
+      - !<wave>
+        width: 5
+        movePeriodMillis: 150
+
 interactionMatrix:
-  - [1, 1, 1]
-  - [5, 1, 1]
-  - [10, 1, 1]
+  - [ 1, 1, 1, 1 ]
+  - [ 2, 1, 1, 10 ]
+  - [ 2, 1, 1, 10 ]
+  - [ 4, 9, 9, 1 ]

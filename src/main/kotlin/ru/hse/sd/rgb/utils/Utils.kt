@@ -26,6 +26,15 @@ enum class Direction {
         RIGHT -> GridShift(1, 0)
         NOPE -> GridShift(0, 0)
     }
+
+    val isVertical
+        get() = this == UP || this == DOWN
+    val isHorizontal
+        get() = this == LEFT || this == RIGHT
+
+    companion object {
+        fun random() = listOf(UP, LEFT, DOWN, RIGHT).random()
+    }
 }
 
 val ignore = Unit
@@ -39,9 +48,10 @@ fun unreachable(info: Any): Nothing {
 
 operator fun <T, U, V> Map<Pair<T, U>, V>.get(t: T, u: U) = this[t to u]
 
-fun <T> Set<T>.randomElement(random: Random = Random) = this.shuffled(random).firstOrNull()
+fun <T> Collection<T>.randomElementOrNull(random: Random = Random) = this.shuffled(random).firstOrNull()
+fun <T> Collection<T>.randomElement(random: Random = Random) = this.shuffled(random).first()
 
-fun GameEntity.randomCell(random: Random = Random) = this.units.randomElement(random)!!.cell
+fun GameEntity.randomCell(random: Random = Random) = this.units.randomElement(random).cell
 
 operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>): Y = this.get()
 operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y) {

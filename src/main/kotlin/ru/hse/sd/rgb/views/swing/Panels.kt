@@ -38,9 +38,24 @@ open class GamePanel(
                 tileSize.toDouble(),
                 tileSize.toDouble(),
             )
-            SwingUnitShape.TRIANGLE -> Polygon(
+            SwingUnitShape.TRIANGLE_UP -> Polygon(
                 intArrayOf(spX, spX + tileSize.scaled() / 2, spX + tileSize.scaled()),
                 intArrayOf(spY + tileSize.scaled(), spY, spY + tileSize.scaled()),
+                3
+            )
+            SwingUnitShape.TRIANGLE_RIGHT -> Polygon(
+                intArrayOf(spX, spX + tileSize.scaled(), spX),
+                intArrayOf(spY, spY + tileSize.scaled() / 2, spY + tileSize.scaled()),
+                3
+            )
+            SwingUnitShape.TRIANGLE_DOWN -> Polygon(
+                intArrayOf(spX, spX + tileSize.scaled() / 2, spX + tileSize.scaled()),
+                intArrayOf(spY, spY + tileSize.scaled(), spY),
+                3
+            )
+            SwingUnitShape.TRIANGLE_LEFT -> Polygon(
+                intArrayOf(spX, spX + tileSize.scaled(), spX + tileSize.scaled()),
+                intArrayOf(spY + tileSize.scaled() / 2, spY + tileSize.scaled(), spY),
                 3
             )
         }

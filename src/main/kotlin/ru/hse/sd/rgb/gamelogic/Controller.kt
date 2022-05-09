@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import ru.hse.sd.rgb.gameloaders.*
 import ru.hse.sd.rgb.gameloaders.FileColorLoader
 import ru.hse.sd.rgb.gameloaders.RandomLevelLoader
+import ru.hse.sd.rgb.gameloaders.factories.ColdFactory
 import ru.hse.sd.rgb.gameloaders.factories.FieryFactory
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.utils.*
@@ -62,7 +63,8 @@ class Controller(val view: View) : Messagable() {
             width = 70
             height = random(50..60)
             heroInventory = InventoryDescription(8, 4)
-            factory = FieryFactory()
+            factory = ColdFactory()
+            heroColor = RGB(0, 100, 200)
         }
         val colorLoader = FileColorLoader(colorsFilename)
 
