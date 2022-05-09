@@ -26,8 +26,8 @@ open class GamePanel(
     private fun convertToSwingShape(s: SwingUnitAppearance, at: Cell): Shape {
         val (pxX, pxY) = convertCellToPixels(at)
         val (spX, spY) = Cell(
-            (pxX + (0.5 / s.scale) * tileSize).roundToInt(),
-            (pxY + (0.5 / s.scale) * tileSize).roundToInt()
+            (pxX + (1.0 - s.scale) / 2 * tileSize).roundToInt(),
+            (pxY + (1.0 - s.scale) / 2 * tileSize).roundToInt()
         )
         fun Int.scaled() = (this * s.scale).roundToInt()
         return when (s.shape) {
