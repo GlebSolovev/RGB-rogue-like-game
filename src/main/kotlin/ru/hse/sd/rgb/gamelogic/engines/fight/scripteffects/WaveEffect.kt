@@ -10,7 +10,6 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.WavePart
-import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.GridShift
 import ru.hse.sd.rgb.utils.plus
@@ -33,14 +32,15 @@ class WaveEffect(
         val dir = Direction.random()
         val radius = width / 2
         val center = unit.cell + dir.toShift()
-        suspend fun spawnWavePart(target: Cell) {
-            controller.creation.tryAddToWorld(WavePart(ColorCellNoHp(unit.gameColor, target), movePeriodMillis, dir))
-        }
-        spawnWavePart(center)
-        for (t in 1..radius) {
-            spawnWavePart(center + GridShift(if (dir.isVertical) t else 0, if (dir.isHorizontal) t else 0))
-            spawnWavePart(center + GridShift(if (dir.isVertical) -t else 0, if (dir.isHorizontal) -t else 0))
-        }
+
+        fun calcTarget(t: Int) = center + GridShift(if (dir.isVertical) t else 0, if (dir.isHorizontal) t else 0)
+        suspend fun spawnWavePart(t: Int) = controller.creation.tryAddToWorld(
+            WavePart(ColorCellNoHp(unit.gameColor, calcTarget(t)), movePeriodMillis, dir)
+        )
+
+        spawnWavePart(0)
+        for (t in 1..radius) if (!spawnWavePart(t)) break
+        for (t in -1 downTo-radius) if (!spawnWavePart(t)) break
     }
 
 }

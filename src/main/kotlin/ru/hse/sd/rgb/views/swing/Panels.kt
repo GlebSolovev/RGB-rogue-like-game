@@ -10,6 +10,15 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
 import kotlin.math.roundToInt
 
+private fun Graphics2D.enableFancyRendering() {
+    this.setRenderingHints(mapOf(
+        RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY,
+        RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON, // only this option makes nice circles, but it also makes walls tiled
+        RenderingHints.KEY_DITHERING to RenderingHints.VALUE_DITHER_ENABLE,
+        RenderingHints.KEY_INTERPOLATION to RenderingHints.VALUE_INTERPOLATION_BICUBIC,
+    ))
+}
+
 open class GamePanel(
     private val offsetX: Int,
     private val offsetY: Int,
@@ -63,6 +72,7 @@ open class GamePanel(
 
     override fun paintComponent(graphics: Graphics) {
         val g = graphics as Graphics2D
+        g.enableFancyRendering()
         g.color = bgColor
         g.fillRect(0, 0, width, height)
         for ((_, viewUnits) in drawables) {
@@ -124,6 +134,7 @@ class GameInventoryPanel(
 
     override fun paintComponent(graphics: Graphics) {
         val g = graphics as Graphics2D
+        g.enableFancyRendering()
 
         g.color = Color(0, 0, 0, invSnapshot.swingAppearance.bgAlpha)
         g.fillRect(0, 0, width, height)
