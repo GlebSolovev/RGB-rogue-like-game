@@ -60,3 +60,6 @@ fun generateRandomColor(random: Random = Random): RGB =
 fun Random.nextChance(probability: Double): Boolean = this.nextDouble() < probability
 
 infix fun Double.sameAs(d: Double) = abs(this - d) < 1e-8
+
+val Int.d
+    get() = toDouble()

@@ -13,7 +13,12 @@ enum class SwingUnitShape {
     TRIANGLE_UP,
     TRIANGLE_LEFT,
     TRIANGLE_DOWN,
-    TRIANGLE_RIGHT;
+    TRIANGLE_RIGHT,
+    CIRCLE_HALF_UP,
+    CIRCLE_HALF_LEFT,
+    CIRCLE_HALF_DOWN,
+    CIRCLE_HALF_RIGHT
+    ;
 
     companion object {
         fun TRIANGLE(dir: Direction) = when(dir) {
@@ -21,6 +26,12 @@ enum class SwingUnitShape {
             Direction.LEFT -> TRIANGLE_LEFT
             Direction.DOWN -> TRIANGLE_DOWN
             Direction.RIGHT -> TRIANGLE_RIGHT
+        }
+        fun CIRCLE_HALF(dir: Direction) = when(dir) {
+            Direction.UP, Direction.NOPE -> CIRCLE_HALF_UP
+            Direction.LEFT -> CIRCLE_HALF_LEFT
+            Direction.DOWN -> CIRCLE_HALF_DOWN
+            Direction.RIGHT -> CIRCLE_HALF_RIGHT
         }
     }
 }

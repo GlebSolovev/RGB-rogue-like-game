@@ -20,7 +20,7 @@ class WavePart(
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
             override val swingAppearance: SwingUnitAppearance
-                get() = SwingUnitAppearance(SwingUnitShape.TRIANGLE(dir))
+                get() = SwingUnitAppearance(SwingUnitShape.CIRCLE_HALF(dir))
         }
     }
 

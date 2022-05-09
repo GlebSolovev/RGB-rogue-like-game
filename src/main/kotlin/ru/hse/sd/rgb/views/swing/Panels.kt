@@ -5,6 +5,7 @@ import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.DrawablesMap
 import java.awt.*
+import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
@@ -67,6 +68,19 @@ open class GamePanel(
                 intArrayOf(spY + tileSize.scaled() / 2, spY + tileSize.scaled(), spY),
                 3
             )
+            SwingUnitShape.CIRCLE_HALF_UP -> Arc2D.Double(
+                spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 0.0, 180.0, Arc2D.PIE
+            )
+            SwingUnitShape.CIRCLE_HALF_LEFT -> Arc2D.Double(
+                spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 90.0, 180.0, Arc2D.PIE
+            )
+            SwingUnitShape.CIRCLE_HALF_DOWN -> Arc2D.Double(
+                spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 180.0, 180.0, Arc2D.PIE
+            )
+            SwingUnitShape.CIRCLE_HALF_RIGHT -> Arc2D.Double(
+                spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 270.0, 180.0, Arc2D.PIE
+            )
+
         }
     }
 
