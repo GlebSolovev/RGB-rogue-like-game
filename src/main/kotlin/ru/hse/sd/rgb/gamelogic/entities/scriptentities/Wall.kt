@@ -1,5 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
+import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.*
@@ -25,6 +26,7 @@ class Wall(colorCells: Set<ColorCellNoHp>) : GameEntity(colorCells) {
 
     override val fightEntity = object : FightEntity() {
         override fun isUnitActive(unit: GameUnit): Boolean = false
+        override val teamId = controller.fighting.newTeamId()
     }
 
     override suspend fun handleGameMessage(m: Message) = ignore

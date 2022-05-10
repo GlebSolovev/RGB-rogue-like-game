@@ -13,7 +13,11 @@ import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlin.random.Random
 
-class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), cell, hp))) {
+class Glitch(
+    cell: Cell,
+    hp: Int,
+    private val teamId: Int
+) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), cell, hp))) {
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
@@ -28,12 +32,13 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), c
 
     override val fightEntity = object : FightEntity() {
         override fun isUnitActive(unit: GameUnit): Boolean = true
+        override val teamId = this@Glitch.teamId
     }
 
     private class RepaintTick : Tick()
 
     private val repaintTick = RepaintTick()
-    private val repaintTicker = Ticker(10, repaintTick).also { it.start() }
+    private val repaintTicker = Ticker(30, repaintTick).also { it.start() }
     private val moveTicker = Ticker(5000, MoveTick()).also { it.start() }
 
     private val random = Random
@@ -64,6 +69,6 @@ class Glitch(cell: Cell, hp: Int) : GameEntity(setOf(ColorCellHp(RGB(0, 0, 0), c
         }
     }
 
-    private fun clone(targetCell: Cell): Glitch = Glitch(targetCell, (units.first() as HpGameUnit).hp)
+    private fun clone(targetCell: Cell): Glitch = Glitch(targetCell, (units.first() as HpGameUnit).hp, teamId)
 
 }

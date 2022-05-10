@@ -35,7 +35,12 @@ class WaveEffect(
 
         fun calcTarget(t: Int) = center + GridShift(if (dir.isVertical) t else 0, if (dir.isHorizontal) t else 0)
         suspend fun spawnWavePart(t: Int) = controller.creation.tryAddToWorld(
-            WavePart(ColorCellNoHp(unit.gameColor, calcTarget(t)), movePeriodMillis, dir)
+            WavePart(
+                ColorCellNoHp(unit.gameColor, calcTarget(t)),
+                movePeriodMillis,
+                dir,
+                unit.parent.fightEntity.teamId
+            )
         )
 
         spawnWavePart(0)

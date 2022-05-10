@@ -12,7 +12,8 @@ import ru.hse.sd.rgb.views.swing.SwingUnitShape
 class Fireball(
     colorCell: ColorCellNoHp,
     movePeriodMillis: Long,
-    targetCell: Cell
+    targetCell: Cell,
+    teamId: Int,
 ) : GameEntity(setOf(colorCell)) {
 
     val ticker = Ticker(movePeriodMillis, MoveTick()).also { it.start() }
@@ -31,6 +32,7 @@ class Fireball(
 
     override val fightEntity = object : FightEntity() {
         override fun isUnitActive(unit: GameUnit): Boolean = false
+        override val teamId = teamId
     }
 
     private val pathStrategy = Paths2D.straightLine(colorCell.cell, targetCell)

@@ -54,6 +54,7 @@ class Hero(
 
     override val fightEntity = object : FightEntity() {
         override fun isUnitActive(unit: GameUnit): Boolean = true
+        override val teamId = controller.fighting.newTeamId()
     }
 
     override fun onLifeStart() {

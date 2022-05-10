@@ -12,7 +12,8 @@ import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
 class WavePart(
     cell: ColorCellNoHp,
     movePeriodMillis: Long,
-    private val dir: Direction
+    private val dir: Direction,
+    teamId: Int,
 ) : GameEntity(setOf(cell)) {
 
     val moveTicker = Ticker(movePeriodMillis, MoveTick()).also { it.start() }
@@ -31,6 +32,7 @@ class WavePart(
 
     override val fightEntity = object : FightEntity() {
         override fun isUnitActive(unit: GameUnit) = false
+        override val teamId = teamId
     }
 
     override suspend fun handleGameMessage(m: Message) {

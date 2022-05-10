@@ -31,6 +31,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
     abstract inner class FightEntity {
         abstract fun isUnitActive(unit: GameUnit): Boolean
+        abstract val teamId: Int
     }
 
     abstract val viewEntity: ViewEntity

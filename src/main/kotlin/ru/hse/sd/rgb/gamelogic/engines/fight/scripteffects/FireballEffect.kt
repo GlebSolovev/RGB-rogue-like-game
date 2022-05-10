@@ -35,7 +35,12 @@ class FireballEffect(
                 AttackType.RANDOM_TARGET -> controller.physics.generateRandomTarget(unit.parent)
                 else -> unreachable
             }
-            val fireball = Fireball(ColorCellNoHp(unit.gameColor, unit.cell), movePeriodMillis, targetCell)
+            val fireball = Fireball(
+                ColorCellNoHp(unit.gameColor, unit.cell),
+                movePeriodMillis,
+                targetCell,
+                unit.parent.fightEntity.teamId
+            )
             controller.creation.tryAddToWorld(fireball)
         }
     }

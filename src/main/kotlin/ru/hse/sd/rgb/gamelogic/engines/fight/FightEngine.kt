@@ -10,6 +10,7 @@ import ru.hse.sd.rgb.gamelogic.entities.ReceivedAttack
 import ru.hse.sd.rgb.utils.Grid2D
 import ru.hse.sd.rgb.utils.RGB
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -56,6 +57,7 @@ class FightEngine(
         }
 
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
+            if (from.parent.fightEntity.teamId == to.parent.fightEntity.teamId) return
             val isFatal = if (to is HpGameUnit) {
                 to.hp -= computeAttack(from, to)
                 to.hp <= 0
@@ -148,5 +150,9 @@ class FightEngine(
 
     private val GameUnit.cachedBaseColorId
         get() = unitCachedBaseColorIds.getOrPut(this.id) { resolveBaseColor(this.gameColor) }
+
+    private val teamGenerator = AtomicInteger(0)
+
+    fun newTeamId() = teamGenerator.incrementAndGet()
 }
 
