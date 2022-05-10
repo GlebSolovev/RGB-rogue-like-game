@@ -1,6 +1,8 @@
 package ru.hse.sd.rgb.utils
 
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.abs
 import kotlin.random.Random
@@ -63,3 +65,5 @@ infix fun Double.sameAs(d: Double) = abs(this - d) < 1e-8
 
 val Int.d
     get() = toDouble()
+
+fun <T> ConcurrentHashSet(): MutableSet<T> = Collections.newSetFromMap(ConcurrentHashMap())

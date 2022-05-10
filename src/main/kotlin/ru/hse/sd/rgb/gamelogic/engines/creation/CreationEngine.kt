@@ -8,6 +8,7 @@ import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.LifeEnded
 import ru.hse.sd.rgb.gamelogic.entities.LifeStarted
 import ru.hse.sd.rgb.gamelogic.gameCoroutineScope
+import ru.hse.sd.rgb.utils.Ticker
 import java.util.concurrent.ConcurrentHashMap
 
 class CreationEngine(private val physics: PhysicsEngine, private val fightEngine: FightEngine) {
@@ -45,6 +46,7 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
             entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
             physics.remove(entity)
             entityCoroutines.remove(entity)!!.cancel()
+            Ticker.stopTickers(entity)
         }
         entity.receive(LifeEnded(dieRoutine))
     }

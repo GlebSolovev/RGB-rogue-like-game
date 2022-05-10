@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.utils
 
 import kotlinx.coroutines.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 open class Tick : Message()
@@ -34,9 +35,19 @@ class Ticker(
         }
     }
 
-
     companion object {
-        fun Messagable.Ticker(periodMillis: Long, tick: Tick = Tick()) = Ticker(periodMillis, this, tick)
+        private val tickers = ConcurrentHashMap<Messagable, MutableSet<Ticker>>()
+
+        fun Messagable.createTicker(periodMillis: Long, tick: Tick = Tick()): Ticker {
+            val t = Ticker(periodMillis, this, tick)
+            tickers.getOrPut(this@createTicker) { ConcurrentHashSet() }.add(t)
+            return t
+        }
+
+        fun stopTickers(m: Messagable) {
+            val ts = tickers.remove(m)!!
+            for (t in ts) t.stop()
+        }
 
         private var tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
 

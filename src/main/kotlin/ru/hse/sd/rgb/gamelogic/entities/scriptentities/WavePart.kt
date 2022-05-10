@@ -7,7 +7,7 @@ import ru.hse.sd.rgb.views.EntityUpdated
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
-import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 
 class WavePart(
     cell: ColorCellNoHp,
@@ -16,7 +16,7 @@ class WavePart(
     teamId: Int,
 ) : GameEntity(setOf(cell)) {
 
-    val moveTicker = Ticker(movePeriodMillis, MoveTick()).also { it.start() }
+    val moveTicker = createTicker(movePeriodMillis, MoveTick()).also { it.start() }
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {

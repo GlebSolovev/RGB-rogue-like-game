@@ -5,7 +5,7 @@ import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.Message
 import ru.hse.sd.rgb.utils.Tick
-import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.views.EntityUpdated
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -37,8 +37,8 @@ class LaserPart(
     private class DieTick : Tick() // TODO: private ticks were bad for some reason?
     private class ContinueTick : Tick()
 
-    val continueTicker = Ticker(6, ContinueTick()).also { it.start() }
-    val dieTicker = Ticker(persistMillis, DieTick()).also { it.start() }
+    val continueTicker = createTicker(6, ContinueTick()).also { it.start() }
+    val dieTicker = createTicker(persistMillis, DieTick()).also { it.start() }
     private var didContinue = false
     private var didDie = false
 

@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
@@ -16,7 +16,7 @@ class Fireball(
     teamId: Int,
 ) : GameEntity(setOf(colorCell)) {
 
-    val ticker = Ticker(movePeriodMillis, MoveTick()).also { it.start() }
+    val ticker = createTicker(movePeriodMillis, MoveTick()).also { it.start() }
     // TODO: possible update ticker via effects
 
     override val viewEntity = object : ViewEntity() {

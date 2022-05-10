@@ -6,7 +6,7 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.utils.Ticker.Companion.Ticker
+import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.views.EntityUpdated
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -38,8 +38,8 @@ class Glitch(
     private class RepaintTick : Tick()
 
     private val repaintTick = RepaintTick()
-    private val repaintTicker = Ticker(30, repaintTick).also { it.start() }
-    private val moveTicker = Ticker(5000, MoveTick()).also { it.start() }
+    private val repaintTicker = createTicker(30, repaintTick).also { it.start() }
+    private val moveTicker = createTicker(5000, MoveTick()).also { it.start() }
 
     private val random = Random
 
