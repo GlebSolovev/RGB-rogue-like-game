@@ -64,7 +64,7 @@ class Controller(val view: View) : Messagable() {
             height = random(50..60)
             heroInventory = InventoryDescription(8, 4)
             factory = ColdFactory()
-            heroColor = RGB(220, 0, 0)
+            heroColor = RGB(140, 0, 200)
         }
         val colorLoader = FileColorLoader(colorsFilename)
 

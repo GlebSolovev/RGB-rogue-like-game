@@ -12,12 +12,14 @@ import javax.swing.JPanel
 import kotlin.math.roundToInt
 
 private fun Graphics2D.enableFancyRendering() {
-    this.setRenderingHints(mapOf(
-        RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY,
-        RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON, // only this option makes nice circles, but it also makes walls tiled
-        RenderingHints.KEY_DITHERING to RenderingHints.VALUE_DITHER_ENABLE,
-        RenderingHints.KEY_INTERPOLATION to RenderingHints.VALUE_INTERPOLATION_BICUBIC,
-    ))
+    this.setRenderingHints(
+        mapOf(
+            RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY,
+            RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON, // only this option makes nice circles, but it also makes walls tiled
+            RenderingHints.KEY_DITHERING to RenderingHints.VALUE_DITHER_ENABLE,
+            RenderingHints.KEY_INTERPOLATION to RenderingHints.VALUE_INTERPOLATION_BICUBIC,
+        )
+    )
 }
 
 open class GamePanel(
@@ -80,7 +82,18 @@ open class GamePanel(
             SwingUnitShape.CIRCLE_HALF_RIGHT -> Arc2D.Double(
                 spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 270.0, 180.0, Arc2D.PIE
             )
-
+            SwingUnitShape.RECTANGLE_VERTICAL -> Rectangle(
+                spX + tileSize.scaled() / 4,
+                spY,
+                tileSize.scaled() / 2,
+                tileSize.scaled()
+            )
+            SwingUnitShape.RECTANGLE_HORIZONTAL -> Rectangle(
+                spX,
+                spY + tileSize.scaled() / 4,
+                tileSize.scaled(),
+                tileSize.scaled() / 2
+            )
         }
     }
 

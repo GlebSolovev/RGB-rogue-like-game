@@ -85,6 +85,8 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
             units.forEach { myUnit ->
                 worldGrid[myUnit.cell].remove(myUnit)
                 myUnit.cell += unitsShifts[myUnit]!!
+                myUnit.lastMoveDir = entity.physicalEntity.getUnitDirection(myUnit, dir)
+                // TODO in line above: reuse unitsShifts (operator `+` for cell and direction?)
                 for (otherUnit in worldGrid[myUnit.cell]) sendCollidedWith(myUnit, otherUnit)
                 worldGrid[myUnit.cell].add(myUnit)
             }

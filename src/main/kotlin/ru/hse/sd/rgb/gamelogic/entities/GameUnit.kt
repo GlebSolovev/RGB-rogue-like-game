@@ -1,10 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
 import ru.hse.sd.rgb.gamelogic.controller
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.RGB
-import ru.hse.sd.rgb.utils.Tick
-import ru.hse.sd.rgb.utils.Ticker
+import ru.hse.sd.rgb.utils.*
 import java.util.concurrent.atomic.AtomicLong
 
 typealias GameUnitId = Long
@@ -13,6 +10,7 @@ sealed class GameUnit(
     val parent: GameEntity,
     var gameColor: RGB,
     var cell: Cell,
+    var lastMoveDir: Direction = Direction.random()
 ) {
     // WARNING!!! Do not shuffle initialization order!
 

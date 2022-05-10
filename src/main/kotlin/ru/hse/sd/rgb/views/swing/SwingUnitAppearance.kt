@@ -17,7 +17,9 @@ enum class SwingUnitShape {
     CIRCLE_HALF_UP,
     CIRCLE_HALF_LEFT,
     CIRCLE_HALF_DOWN,
-    CIRCLE_HALF_RIGHT
+    CIRCLE_HALF_RIGHT,
+    RECTANGLE_HORIZONTAL,
+    RECTANGLE_VERTICAL,
     ;
 
     companion object {
@@ -32,6 +34,10 @@ enum class SwingUnitShape {
             Direction.LEFT -> CIRCLE_HALF_LEFT
             Direction.DOWN -> CIRCLE_HALF_DOWN
             Direction.RIGHT -> CIRCLE_HALF_RIGHT
+        }
+        fun RECTANGLE(dir: Direction) = when(dir) {
+            Direction.UP, Direction.DOWN, Direction.NOPE -> RECTANGLE_VERTICAL
+            Direction.LEFT, Direction.RIGHT -> RECTANGLE_HORIZONTAL
         }
     }
 }
