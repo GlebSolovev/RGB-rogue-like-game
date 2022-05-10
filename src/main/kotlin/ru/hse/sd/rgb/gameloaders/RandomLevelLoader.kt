@@ -33,9 +33,18 @@ class RandomLevelLoader private constructor(
         val maze = generateMaze(w, h, chamberMinSize, passageSize)
 
         val entities = mutableSetOf<GameEntity>()
-        for (x in 0 until w) for (y in 0 until h) if (maze[x, y]) entities.add(
+        for (x in 1 until w - 1) for (y in 1 until h - 1) if (maze[x, y]) entities.add(
             levelFactory.createWall(Cell(x, y))
         )
+        // add outline walls (BREAKABLE)
+        for (x in 0 until w) {
+            entities.add(levelFactory.createWall(Cell(x, 0)))
+            entities.add(levelFactory.createWall(Cell(x, h - 1)))
+        }
+        for (y in 1 until h - 1) {
+            entities.add(levelFactory.createWall(Cell(0, y)))
+            entities.add(levelFactory.createWall(Cell(w - 1, y)))
+        }
 
         val heroCell: Cell = getEmptyCells(w, h, entities).randomElementOrNull(random)
             ?: throw IllegalStateException("no empty cells to spawn hero")
