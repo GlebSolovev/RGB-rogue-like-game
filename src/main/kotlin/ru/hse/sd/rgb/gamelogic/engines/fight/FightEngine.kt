@@ -57,9 +57,11 @@ class FightEngine(
         }
 
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
-            if (from.parent.fightEntity.teamId == to.parent.fightEntity.teamId) return
             val isFatal = if (to is HpGameUnit) {
-                to.hp -= computeAttack(from, to)
+                val atk = computeAttack(from, to)
+                if (atk > 0 && from.parent.fightEntity.teamId == to.parent.fightEntity.teamId) return
+                to.hp -= atk
+                if (to.hp > to.maxHp) to.hp = to.maxHp
                 to.hp <= 0
             } else false
             to.parent.receive(ReceivedAttack(to, from, isFatal))
