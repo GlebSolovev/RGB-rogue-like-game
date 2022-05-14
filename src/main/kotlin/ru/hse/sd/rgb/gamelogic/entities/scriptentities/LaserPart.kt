@@ -49,7 +49,7 @@ class LaserPart(
                 val clone = clone()
                 if (controller.creation.tryAddToWorld(clone)) {
                     controller.view.receive(EntityUpdated(clone))
-                    clone.receive(MoveTick())
+                    clone.receive(MoveTick()) // TODO: rename MoveTick
                 }
                 didContinue = true
                 continueTicker.stop()

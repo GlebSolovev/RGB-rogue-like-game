@@ -47,6 +47,7 @@ class FightEngine(
     interface UnsafeMethods {
         fun unsafeChangeRGB(unit: GameUnit, newRgb: RGB)
         fun unsafeAttack(from: GameUnit, to: GameUnit)
+        // TODO: unsafeHeal
     }
 
     // TODO: is it a good idea?

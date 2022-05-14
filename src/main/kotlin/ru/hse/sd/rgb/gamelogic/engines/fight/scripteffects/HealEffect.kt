@@ -38,7 +38,7 @@ class HealEffect(
             }
         } ?: return
 
-        unsafeMethods.unsafeAttack(unit, targetUnit) // TODO: this is a cursed api
+        unsafeMethods.unsafeAttack(unit, targetUnit)
     }
 
 }

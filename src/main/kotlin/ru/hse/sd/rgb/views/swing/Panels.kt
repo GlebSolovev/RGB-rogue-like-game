@@ -83,16 +83,16 @@ open class GamePanel(
                 spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 270.0, 180.0, Arc2D.PIE
             )
             SwingUnitShape.RECTANGLE_VERTICAL -> Rectangle(
-                spX + tileSize.scaled() / 4,
+                spX + tileSize.scaled() / 3,
                 spY,
-                tileSize.scaled() / 2,
+                tileSize.scaled() / 3,
                 tileSize.scaled()
             )
             SwingUnitShape.RECTANGLE_HORIZONTAL -> Rectangle(
                 spX,
-                spY + tileSize.scaled() / 4,
+                spY + tileSize.scaled() / 3,
                 tileSize.scaled(),
-                tileSize.scaled() / 2
+                tileSize.scaled() / 3
             )
         }
     }
