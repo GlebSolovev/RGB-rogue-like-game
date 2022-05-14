@@ -96,7 +96,7 @@ class Hero(
                 // TODO: pick item instead of attacking
             }
             is ColorTick -> this.also {
-                controller.fighting.update(m.unit, ControlParams(AttackType.RANDOM_TARGET, HealType.LOWEST_HP_TARGET))
+                controller.fighting.update(m.unit, ControlParams(AttackType.LAST_MOVE_DIR, HealType.LOWEST_HP_TARGET))
                 // TODO: add default control params
             }
             is UserToggledInventory -> InventoryState().also {

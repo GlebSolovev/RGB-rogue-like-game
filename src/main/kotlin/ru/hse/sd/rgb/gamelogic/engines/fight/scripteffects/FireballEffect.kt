@@ -10,8 +10,7 @@ import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Fireball
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
-import ru.hse.sd.rgb.utils.randomCell
-import ru.hse.sd.rgb.utils.unreachable
+import ru.hse.sd.rgb.utils.*
 
 @Serializable
 @SerialName("fireball")
@@ -33,8 +32,12 @@ class FireballEffect(
             val targetCell = when (attackType) {
                 AttackType.HERO_TARGET -> controller.hero.randomCell()
                 AttackType.RANDOM_TARGET -> controller.physics.generateRandomTarget(unit.parent)
+                AttackType.LAST_MOVE_DIR ->
+                    if (it == 0) unit.cell + unit.lastMoveDir.toShift()
+                    else controller.physics.generateRandomTarget(unit.parent)
                 else -> unreachable
             }
+
             val fireball = Fireball(
                 ColorCellNoHp(unit.gameColor, unit.cell),
                 movePeriodMillis,

@@ -42,6 +42,8 @@ class WavePart(
                 if (moved) controller.view.receive(EntityUpdated(this))
             }
             is CollidedWith -> {
+                val otherEntity = m.otherUnit.parent
+                if (otherEntity.fightEntity.teamId == this.fightEntity.teamId && !otherEntity.physicalEntity.isSolid) return
                 controller.fighting.attack(m.myUnit, m.otherUnit)
                 controller.creation.die(this)
             }

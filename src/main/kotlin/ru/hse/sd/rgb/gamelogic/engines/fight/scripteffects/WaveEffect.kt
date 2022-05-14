@@ -10,15 +10,15 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.WavePart
-import ru.hse.sd.rgb.utils.Direction
-import ru.hse.sd.rgb.utils.GridShift
-import ru.hse.sd.rgb.utils.plus
+import ru.hse.sd.rgb.utils.*
+import kotlin.math.abs
 
 @Serializable
 @SerialName("wave")
 class WaveEffect(
     private val width: Int,
     private val movePeriodMillis: Long,
+    private val isControllable: Boolean
 ) : BaseColorUpdateEffect {
 
     override suspend fun activate(
@@ -26,10 +26,21 @@ class WaveEffect(
         controlParams: ControlParams,
         unsafeMethods: FightEngine.UnsafeMethods
     ) {
-        if (controlParams.attackType == AttackType.NO_ATTACK) return
+        val attackType = if (!isControllable) AttackType.RANDOM_TARGET else controlParams.attackType
+        if (attackType == AttackType.NO_ATTACK) return
         if (width % 2 != 1) throw IllegalArgumentException("width must be odd")
 
-        val dir = Direction.random()
+        fun calcDirTo(targetCell: Cell): Direction {
+            val dx = unit.cell.x - targetCell.x
+            val dy = unit.cell.y - targetCell.y
+            return if (abs(dx) < abs(dy)) if(dx > 0) Direction.RIGHT else Direction.LEFT else if(dy > 0) Direction.UP else Direction.DOWN
+        }
+        val dir = when (attackType) {
+            AttackType.HERO_TARGET -> calcDirTo(controller.hero.randomCell())
+            AttackType.RANDOM_TARGET -> Direction.random()
+            AttackType.LAST_MOVE_DIR -> unit.lastMoveDir
+            else -> unreachable
+        }
         val radius = width / 2
         val center = unit.cell + dir.toShift()
 

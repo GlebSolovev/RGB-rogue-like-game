@@ -10,7 +10,7 @@ baseColors:
     updateEffects:
       - !<fireball>
         count: 1
-        movePeriodMillis: 100
+        movePeriodMillis: 50
         isControllable: true
 
   - name: "FLAME RED"
@@ -19,16 +19,45 @@ baseColors:
     updateEffects:
       - !<fireball>
         count: 3
-        movePeriodMillis: 100
+        movePeriodMillis: 50
         isControllable: true
+
+  - name: "HELL RED"
+    rgb: 255 0 0
+    updatePeriodMillis: 1000
+    updateEffects:
+      - !<fireball>
+        count: 66
+        movePeriodMillis: 50
+        isControllable: true
+      # TODO: SMOLDER
+
+  - name: "SEA BLUE"
+    rgb: 0 100 170
+    updatePeriodMillis: 2000
+    updateEffects:
+      - !<wave>
+        width: 3
+        movePeriodMillis: 200
+        isControllable: false
 
   - name: "OCEAN BLUE"
     rgb: 0 100 200
-    updatePeriodMillis: 3000
+    updatePeriodMillis: 2000
     updateEffects:
       - !<wave>
         width: 5
         movePeriodMillis: 150
+        isControllable: true
+
+  - name: "CARIBBEAN BLUE"
+    rgb: 20 220 230
+    updatePeriodMillis: 500
+    updateEffects:
+      - !<wave>
+        width: 9
+        movePeriodMillis: 100
+        isControllable: true
 
   - name: "PLASMA VIOLET"
     rgb: 140 0 200
@@ -48,10 +77,13 @@ baseColors:
 #   from
 # t  . .
 # o  . .
-interactionMatrix: # TODO: better serialization
-  - [ 1, 2, 2, 4, 7, -1 ]
-  - [ 1, 1, 1, 9, 1, -1 ]
-  - [ 1, 1, 1, 9, 1, -1 ]
-  - [ 1, 10, 10, 1, 2, -1 ]
-  - [ 7, 1, 1, 3, 0, -1 ]
-  - [ 1, 5, 5, 1, 4, -1 ]
+interactionMatrix: # TODO: better serialization!!!
+  - [ 1, 2, 2, 6, 3, 4, 5, 7, -1 ]
+  - [ 1, 1, 1, 6, 8, 9, 15, 1, -1 ]
+  - [ 1, 1, 1, 6, 8, 9, 15, 1, -1 ]
+  - [ 6, 6, 6, 6, 6, 6, 6, 6, 6 ]
+  - [ 1, 11, 11, 6, 1, 1, 1, 2, -1 ]
+  - [ 1, 10, 10, 6, 1, 1, 1, 2, -1 ]
+  - [ 1, 5, 6, 6, 1, 1, 1, 2, -3 ]
+  - [ 1, 1, 1, 6, 2, 3, 5, 0, -1 ]
+  - [ 1, 5, 5, 6, 1, 1, 1, 4, -1 ]

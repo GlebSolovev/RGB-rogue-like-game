@@ -2,12 +2,10 @@ package ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
-import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
-import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
-import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
+import ru.hse.sd.rgb.gamelogic.engines.fight.*
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
+import ru.hse.sd.rgb.utils.unreachable
 
 @Serializable
 @SerialName("heal")
@@ -21,8 +19,9 @@ class HealEffect(
         unsafeMethods: FightEngine.UnsafeMethods
     ) {
         val healType = if (isControllable) controlParams.healType else HealType.RANDOM_TARGET
+        if (healType == HealType.NO_HEAL) return
+
         val targetUnit: GameUnit = when (healType) {
-            HealType.NO_HEAL -> null
             HealType.LOWEST_HP_TARGET -> {
                 unit.parent.units
                     .asSequence()
@@ -36,6 +35,7 @@ class HealEffect(
                     .shuffled()
                     .firstOrNull()
             }
+            else -> unreachable
         } ?: return
 
         unsafeMethods.unsafeAttack(unit, targetUnit)

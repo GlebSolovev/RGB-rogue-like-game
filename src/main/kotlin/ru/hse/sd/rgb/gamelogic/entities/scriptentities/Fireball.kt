@@ -45,6 +45,7 @@ class Fireball(
                 if (moved) controller.view.receive(EntityUpdated(this))
             }
             is CollidedWith -> {
+                if (m.otherUnit.parent.fightEntity.teamId == this.fightEntity.teamId) return
                 controller.fighting.attack(m.myUnit, m.otherUnit)
                 controller.creation.die(this)
             }
