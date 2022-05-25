@@ -61,7 +61,7 @@ class Controller(val view: View) : Messagable() {
         val levelLoader = RandomLevelLoader.builder {
             width = 70
             height = random(50..60)
-            chamberMinSize = 50
+            chamberMinSize = 10
             heroInventory = InventoryDescription(8, 4)
             factory = FieryFactory()
             heroColor = RGB(20, 220, 230)

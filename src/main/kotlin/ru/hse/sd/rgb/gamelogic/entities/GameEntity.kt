@@ -27,6 +27,15 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         // same as 'no one can pass through this entity'
 
         abstract fun getUnitDirection(unit: GameUnit, dir: Direction): Direction
+
+        open fun filterIncompatibleUnits(
+            physicalEntity: GameEntity.PhysicalEntity,
+            units: Set<GameUnit>
+        ): Set<GameUnit> {
+            return if ((physicalEntity.isSolid && units.isNotEmpty()) ||
+                units.any { it.parent.physicalEntity.isSolid }
+            ) units else emptySet()
+        }
     }
 
     abstract inner class FightEntity {

@@ -26,8 +26,11 @@ class Glitch(
     }
 
     override val physicalEntity = object : PhysicalEntity() {
-        override val isSolid = true // warning: exponential growth otherwise
+        override val isSolid = false
         override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = Direction.NOPE
+        override fun filterIncompatibleUnits(physicalEntity: PhysicalEntity, units: Set<GameUnit>): Set<GameUnit> {
+            return units.filter { it.parent is Glitch }.toSet()
+        }
     }
 
     override val fightEntity = object : FightEntity() {
@@ -56,9 +59,8 @@ class Glitch(
                 val targetCell = adjacentCells.randomElement(random)
 
                 val clone = clone(targetCell)
-                if (controller.creation.tryAddToWorld(clone)) {
-                    controller.view.receive(EntityUpdated(clone))
-                }
+                val cloneIsPopulated = controller.creation.tryAddToWorld(clone)
+                if (cloneIsPopulated) controller.view.receive(EntityUpdated(clone))
             }
             is CollidedWith -> controller.fighting.attack(m.myUnit, m.otherUnit)
             is ReceivedAttack -> if (m.isFatal) controller.creation.die(this)

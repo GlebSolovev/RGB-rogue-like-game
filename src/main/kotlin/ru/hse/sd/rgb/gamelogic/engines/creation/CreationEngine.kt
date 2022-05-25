@@ -16,11 +16,10 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     private val entityCoroutines = ConcurrentHashMap<GameEntity, Job>()
 
     suspend fun tryAddToWorld(entity: GameEntity): Boolean {
-        if (tryAddWithoutNotify(entity)) {
+        return if (tryAddWithoutNotify(entity)) {
             entity.receive(LifeStarted())
-            return true
-        }
-        return false
+            true
+        } else false
     }
 
     private suspend fun tryAddWithoutNotify(entity: GameEntity): Boolean {

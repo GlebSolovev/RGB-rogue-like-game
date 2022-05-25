@@ -39,23 +39,19 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         physicalEntity: GameEntity.PhysicalEntity,
         nextCellsForUnits: Map<GameUnit, Cell>
     ): Map<GameUnit, Set<GameUnit>> {
-        val collidedUnits = mutableMapOf<GameUnit, Set<GameUnit>>()
+        val incompatibleUnitsMap = mutableMapOf<GameUnit, Set<GameUnit>>()
 
         for ((unit, nextCell) in nextCellsForUnits) {
             if (!isInBounds(nextCell)) {
-                collidedUnits[unit] = setOf()
+                incompatibleUnitsMap[unit] = setOf()
                 continue
             }
             val nextCellUnits = worldGrid[nextCell]
 
-            if (physicalEntity.isSolid && nextCellUnits.isNotEmpty()) {
-                collidedUnits[unit] = nextCellUnits
-            } else if (nextCellUnits.any { it.parent.physicalEntity.isSolid }) {
-                if (nextCellUnits.size != 1) throw IllegalStateException("more than one solid entity on same cell")
-                collidedUnits[unit] = nextCellUnits
-            }
+            val incompatibleUnits = physicalEntity.filterIncompatibleUnits(physicalEntity, nextCellUnits)
+            if (incompatibleUnits.isNotEmpty()) incompatibleUnitsMap[unit] = incompatibleUnits
         }
-        return collidedUnits
+        return incompatibleUnitsMap
     }
 
     private fun sendCollidedWith(myUnit: GameUnit, otherUnit: GameUnit) {
@@ -63,7 +59,11 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         myUnit.parent.receive(CollidedWith(myUnit, otherUnit))
     }
 
-    suspend fun tryMove(entity: GameEntity, dir: Direction): Boolean {
+    // sends CollidedWith to all next cells units
+    suspend fun tryMove(
+        entity: GameEntity,
+        dir: Direction
+    ): Boolean {
         val units = entity.units
         val cells = units.map { it.cell }.toSet()
         val unitsShifts = units.associateWith { entity.physicalEntity.getUnitDirection(it, dir).toShift() }
@@ -76,24 +76,28 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         }
 
         return withLockedArea(cells union nextCells) {
-            val collidedUnits = checkAvailability(entity.physicalEntity, nextCellsForEdgeUnits)
-            if (collidedUnits.isNotEmpty()) {
-                for ((myUnit, nextCellUnits) in collidedUnits)
-                    for (otherUnit in nextCellUnits) sendCollidedWith(myUnit, otherUnit)
-                return@withLockedArea false
-            }
+            for (myUnit in units)
+                for (otherUnit in worldGrid[myUnit.cell + unitsShifts[myUnit]!!])
+                    if (otherUnit.parent != entity) sendCollidedWith(myUnit, otherUnit)
+
+            if (checkAvailability(
+                    entity.physicalEntity,
+                    nextCellsForEdgeUnits
+                ).isNotEmpty()
+            ) return@withLockedArea false
+
             units.forEach { myUnit ->
                 worldGrid[myUnit.cell].remove(myUnit)
                 myUnit.cell += unitsShifts[myUnit]!!
-                myUnit.lastMoveDir = entity.physicalEntity.getUnitDirection(myUnit, dir)
                 // TODO in line above: reuse unitsShifts (operator `+` for cell and direction?)
-                for (otherUnit in worldGrid[myUnit.cell]) sendCollidedWith(myUnit, otherUnit)
+                myUnit.lastMoveDir = entity.physicalEntity.getUnitDirection(myUnit, dir)
                 worldGrid[myUnit.cell].add(myUnit)
             }
-            return@withLockedArea true
+            true
         }
     }
 
+    // if true, sends CollidedWith to all units
     suspend fun tryPopulate(entity: GameEntity): Boolean {
         val units = entity.units
         val cellsWithUnits = units.associateWith { it.cell }
@@ -101,9 +105,12 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
 
         return withLockedArea(cellsWithUnits.values.toSet()) {
             if (checkAvailability(entity.physicalEntity, cellsWithUnits).isNotEmpty()) return@withLockedArea false
-            units.forEach {
-                worldGrid[it.cell].add(it)
+            units.forEach { worldGrid[it.cell].add(it) }
+            units.forEach { myUnit ->
+                for (otherUnit in worldGrid[myUnit.cell])
+                    if (otherUnit.parent != entity) sendCollidedWith(myUnit, otherUnit)
             }
+            // TODO: fix FightEngine possible exception: one tries to attack collided but he is not there
             return@withLockedArea true
         }
     }
