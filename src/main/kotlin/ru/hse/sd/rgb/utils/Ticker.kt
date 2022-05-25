@@ -45,7 +45,7 @@ class Ticker(
         }
 
         fun stopTickers(m: Messagable) {
-            val ts = tickers.remove(m)!!
+            val ts = tickers.remove(m)!! // TODO: NullPointerException :(
             for (t in ts) t.stop()
         }
 

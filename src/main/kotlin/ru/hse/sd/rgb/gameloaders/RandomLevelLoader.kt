@@ -55,10 +55,10 @@ class RandomLevelLoader private constructor(
         )
         entities.add(hero)
 
-        val currentEmptyCells = getEmptyCells(w, h, entities)
         maze.withCoords().forEach { (x, y, _) ->
             if (random.nextChance(levelFactory.glitchSpawnRate)) {
                 val cell = Cell(x, y)
+                val currentEmptyCells = getEmptyCells(w, h, entities)
                 if (cell in currentEmptyCells) {
                     val glitch = levelFactory.createGlitch(cell)
                     entities.add(glitch)
