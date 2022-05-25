@@ -47,7 +47,6 @@ class FightEngine(
     interface UnsafeMethods {
         fun unsafeChangeRGB(unit: GameUnit, newRgb: RGB)
         fun unsafeAttack(from: GameUnit, to: GameUnit)
-        // TODO: unsafeHeal
     }
 
     // TODO: is it a good idea?
@@ -60,14 +59,15 @@ class FightEngine(
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
             val isFatal = if (to is HpGameUnit) {
                 val atk = computeAttack(from, to)
-                if (atk > 0 && from.parent.fightEntity.teamId == to.parent.fightEntity.teamId) return
+                val sameTeam = from.parent.fightEntity.teamId == to.parent.fightEntity.teamId
+                if (atk > 0 && sameTeam) return // don't attack teammates
+                if (atk < 0 && !sameTeam) return // don't heal enemies
                 to.hp -= atk
                 if (to.hp > to.maxHp) to.hp = to.maxHp
                 to.hp <= 0
             } else false
             to.parent.receive(ReceivedAttack(to, from, isFatal))
         }
-
     }
 
     private suspend inline fun <R> withLockedUnits(units: Set<GameUnit>, crossinline block: suspend () -> R): R? {
