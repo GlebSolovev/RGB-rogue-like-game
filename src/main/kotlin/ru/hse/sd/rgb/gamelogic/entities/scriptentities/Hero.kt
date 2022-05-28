@@ -1,7 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
-import ru.hse.sd.rgb.gamelogic.FinishControllerMessage
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
@@ -9,7 +8,8 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
-import ru.hse.sd.rgb.utils.Message
+import ru.hse.sd.rgb.utils.messaging.*
+import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.sameAs
 import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.*
@@ -58,13 +58,13 @@ class Hero(
     }
 
     override fun onLifeStart() {
-        controller.view.receive(View.SubscribeToMovement(this))
-        controller.view.receive(View.SubscribeToInventory(this))
+        controller.view.receive(SubscribeToMovement(this))
+        controller.view.receive(SubscribeToInventory(this))
     }
 
     override fun onLifeEnd() {
-        controller.view.receive(View.UnsubscribeFromInventory(this))
-        controller.view.receive(View.UnsubscribeFromMovement(this))
+        controller.view.receive(UnsubscribeFromInventory(this))
+        controller.view.receive(UnsubscribeFromMovement(this))
     }
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)

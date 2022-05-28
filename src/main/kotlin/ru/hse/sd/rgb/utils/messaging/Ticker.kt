@@ -1,6 +1,8 @@
 package ru.hse.sd.rgb.utils
 
 import kotlinx.coroutines.*
+import ru.hse.sd.rgb.utils.messaging.Messagable
+import ru.hse.sd.rgb.utils.messaging.Message
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 

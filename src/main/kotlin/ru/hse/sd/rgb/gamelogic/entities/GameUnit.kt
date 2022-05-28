@@ -2,6 +2,8 @@ package ru.hse.sd.rgb.gamelogic.entities
 
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
+import ru.hse.sd.rgb.utils.structures.RGB
 import java.util.concurrent.atomic.AtomicLong
 
 typealias GameUnitId = Long
@@ -71,5 +73,3 @@ data class ColorCellNoHp(override val color: RGB, override val cell: Cell) : Col
 
 class ColorCellHp(override val color: RGB, override val cell: Cell, val maxHp: Int) :
     ColorCell(color, cell)
-
-data class ColorTick(val unit: GameUnit) : Tick()

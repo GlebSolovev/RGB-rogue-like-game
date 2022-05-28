@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.gameloaders.generators
 
 import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.Grid2D
+import ru.hse.sd.rgb.utils.structures.Grid2D
 import kotlin.random.Random
 import kotlin.random.nextInt
 

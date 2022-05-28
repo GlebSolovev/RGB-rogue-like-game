@@ -3,11 +3,12 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.views.EntityUpdated
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
+import ru.hse.sd.rgb.utils.messaging.*
+import ru.hse.sd.rgb.utils.messaging.messages.*
 
 class WavePart(
     cell: ColorCellNoHp,

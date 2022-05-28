@@ -1,4 +1,4 @@
-package ru.hse.sd.rgb.utils
+package ru.hse.sd.rgb.utils.structures
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

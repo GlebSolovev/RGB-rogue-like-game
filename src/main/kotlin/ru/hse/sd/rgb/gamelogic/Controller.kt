@@ -7,8 +7,9 @@ import ru.hse.sd.rgb.gameloaders.RandomLevelLoader
 import ru.hse.sd.rgb.gameloaders.factories.*
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.views.GameViewStarted
-import ru.hse.sd.rgb.views.UserQuit
+import ru.hse.sd.rgb.utils.messaging.*
+import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.View
 import ru.hse.sd.rgb.views.swing.SwingView
 import java.util.concurrent.Executors
@@ -88,7 +89,7 @@ class Controller(val view: View) : Messagable() {
                 view.initialize()
                 view.messagingRoutine()
             }
-            view.receive(View.SubscribeToQuit(this@Controller))
+            view.receive(SubscribeToQuit(this@Controller))
             // delay(700) // helps to see loading screen
 
             // load engines before loading entities
@@ -136,9 +137,6 @@ class Controller(val view: View) : Messagable() {
 }
 
 var controller = Controller(SwingView()) // TODO: DI
-
-class StartControllerMessage : Message()
-data class FinishControllerMessage(val isWin: Boolean) : Message()
 
 fun main() = runBlocking {
     controller.receive(StartControllerMessage())

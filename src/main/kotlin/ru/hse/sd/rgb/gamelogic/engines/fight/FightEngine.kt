@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
-import ru.hse.sd.rgb.gamelogic.entities.ReceivedAttack
-import ru.hse.sd.rgb.utils.Grid2D
-import ru.hse.sd.rgb.utils.RGB
+import ru.hse.sd.rgb.utils.messaging.messages.ReceivedAttack
+import ru.hse.sd.rgb.utils.structures.Grid2D
+import ru.hse.sd.rgb.utils.structures.RGB
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs

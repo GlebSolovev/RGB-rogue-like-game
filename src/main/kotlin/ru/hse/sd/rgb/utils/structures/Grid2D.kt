@@ -1,4 +1,6 @@
-package ru.hse.sd.rgb.utils
+package ru.hse.sd.rgb.utils.structures
+
+import ru.hse.sd.rgb.utils.Cell
 
 class Grid2D<T>(val w: Int, val h: Int, init: (Int, Int) -> T) : AbstractCollection<T>() {
 

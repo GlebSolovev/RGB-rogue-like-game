@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.gameloaders.factories
 
-import ru.hse.sd.rgb.utils.RGB
+import ru.hse.sd.rgb.utils.structures.RGB
 
 class ColdFactory: LevelContentFactory() {
     override val bgColor = RGB(0, 10, 50)

@@ -1,5 +1,8 @@
-package ru.hse.sd.rgb.utils
+package ru.hse.sd.rgb.utils.structures
 
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.plus
 import kotlin.math.abs
 import kotlin.random.Random
 

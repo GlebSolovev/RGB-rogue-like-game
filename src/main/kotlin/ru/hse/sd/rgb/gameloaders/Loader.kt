@@ -6,8 +6,8 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.utils.Grid2D
-import ru.hse.sd.rgb.utils.RGB
+import ru.hse.sd.rgb.utils.structures.Grid2D
+import ru.hse.sd.rgb.utils.structures.RGB
 
 data class GameWorldDescription(
     val gameGridW: Int,

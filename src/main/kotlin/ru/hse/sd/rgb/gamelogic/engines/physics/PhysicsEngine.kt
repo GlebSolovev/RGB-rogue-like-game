@@ -1,10 +1,11 @@
 package ru.hse.sd.rgb.gamelogic.engines.physics
 
 import kotlinx.coroutines.sync.Mutex
-import ru.hse.sd.rgb.gamelogic.entities.CollidedWith
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.messaging.messages.CollidedWith
+import ru.hse.sd.rgb.utils.structures.Grid2D
 import kotlin.random.Random
 
 class PhysicsEngine(private val w: Int, private val h: Int) {

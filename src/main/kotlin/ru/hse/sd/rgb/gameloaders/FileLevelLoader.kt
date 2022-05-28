@@ -4,7 +4,7 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.RGB
+import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.WrongConfigError
 import java.io.File
 import java.util.*

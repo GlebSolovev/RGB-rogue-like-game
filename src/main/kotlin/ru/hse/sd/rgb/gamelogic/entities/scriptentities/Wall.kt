@@ -3,6 +3,8 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.*
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape

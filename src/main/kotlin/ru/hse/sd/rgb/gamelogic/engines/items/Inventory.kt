@@ -1,8 +1,9 @@
 package ru.hse.sd.rgb.gamelogic.engines.items
 
 import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.Message
+import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.structures.Grid2D
 import java.awt.Color
 
 data class InventorySwingAppearance(
@@ -36,7 +37,7 @@ class Inventory(
             swingAppearance
         )
 
-        fun applyMessageToAppearance(m: Message) {} // todo?
+        fun applyMessageToAppearance(m: Message) {} // TODO?
     }
 
     val viewInventory = ViewInventory()

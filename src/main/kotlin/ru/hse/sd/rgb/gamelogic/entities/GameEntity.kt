@@ -2,8 +2,11 @@ package ru.hse.sd.rgb.gamelogic.entities
 
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.views.EntityRemoved
-import ru.hse.sd.rgb.views.EntityUpdated
+import ru.hse.sd.rgb.utils.messaging.*
+import ru.hse.sd.rgb.utils.messaging.messages.EntityRemoved
+import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
+import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
+import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
 import java.util.Collections
@@ -103,13 +106,5 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
     abstract suspend fun handleGameMessage(m: Message)
 }
-
-class LifeStarted : Message()
-data class LifeEnded(val dieRoutine: suspend () -> Unit) : Message()
-
-data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : Message()
-data class ReceivedAttack(val myUnit: GameUnit, val fromUnit: GameUnit, val isFatal: Boolean) : Message()
-
-class MoveTick : Tick()
 
 enum class EntityLifeCycleState { NOT_STARTED, ONGOING, DEAD }

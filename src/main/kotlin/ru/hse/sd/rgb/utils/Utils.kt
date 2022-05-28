@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.utils
 
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.utils.structures.RGB
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference

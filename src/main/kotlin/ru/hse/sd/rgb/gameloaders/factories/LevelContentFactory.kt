@@ -4,7 +4,7 @@ import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Glitch
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
 import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.RGB
+import ru.hse.sd.rgb.utils.structures.RGB
 
 abstract class LevelContentFactory {
 

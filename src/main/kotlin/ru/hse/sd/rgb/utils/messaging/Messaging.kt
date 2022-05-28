@@ -1,4 +1,4 @@
-package ru.hse.sd.rgb.utils
+package ru.hse.sd.rgb.utils.messaging
 
 import kotlinx.coroutines.channels.Channel
 

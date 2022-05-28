@@ -6,6 +6,8 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.structures.Grid2D
+import ru.hse.sd.rgb.utils.structures.RGB
 import kotlin.random.Random
 
 class RandomLevelLoader private constructor(

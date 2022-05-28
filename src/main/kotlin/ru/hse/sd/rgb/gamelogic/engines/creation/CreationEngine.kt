@@ -5,10 +5,10 @@ import kotlinx.coroutines.launch
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.gamelogic.entities.LifeEnded
-import ru.hse.sd.rgb.gamelogic.entities.LifeStarted
 import ru.hse.sd.rgb.gamelogic.gameCoroutineScope
 import ru.hse.sd.rgb.utils.Ticker
+import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
+import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
 import java.util.concurrent.ConcurrentHashMap
 
 class CreationEngine(private val physics: PhysicsEngine, private val fightEngine: FightEngine) {
