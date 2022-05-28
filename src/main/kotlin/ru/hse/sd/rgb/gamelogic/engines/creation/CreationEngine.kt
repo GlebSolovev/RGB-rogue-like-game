@@ -45,7 +45,7 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
             entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
             physics.remove(entity)
             entityCoroutines.remove(entity)!!.cancel()
-            Ticker.stopTickers(entity)
+            Ticker.tryStopTickers(entity)
         }
         entity.receive(LifeEnded(dieRoutine))
     }

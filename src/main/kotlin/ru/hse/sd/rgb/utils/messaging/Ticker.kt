@@ -46,9 +46,8 @@ class Ticker(
             return t
         }
 
-        fun stopTickers(m: Messagable) {
-            val ts = tickers.remove(m)!! // TODO: NullPointerException :(
-            for (t in ts) t.stop()
+        fun tryStopTickers(m: Messagable) {
+            tickers.remove(m)?.let { for (t in it) t.stop() }
         }
 
         private var tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
