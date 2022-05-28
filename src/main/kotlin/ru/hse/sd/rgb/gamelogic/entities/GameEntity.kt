@@ -1,5 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
+import ru.hse.sd.rgb.gamelogic.behaviours.Behaviour
+import ru.hse.sd.rgb.gamelogic.behaviours.simple.PassiveBehaviour
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*
@@ -46,9 +48,18 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         abstract val teamId: Int
     }
 
+    open inner class BehaviourEntity {
+        open fun createPassiveBehaviour(): Behaviour = PassiveBehaviour(this@GameEntity)
+    }
+
+    open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
+        override fun createPassiveBehaviour(): Behaviour = singleBehaviour
+    }
+
     abstract val viewEntity: ViewEntity
     abstract val physicalEntity: PhysicalEntity
     abstract val fightEntity: FightEntity
+    abstract val behaviourEntity: BehaviourEntity
 
     val units: MutableSet<GameUnit> = Collections.newSetFromMap(ConcurrentHashMap())
     // TODO: maybe make private and not concurrent
@@ -87,7 +98,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
                         onLifeEnd()
                     }
                     else -> {
-                        handleGameMessage(m)
+                        behaviour.handleMessage(m)
                         viewEntity.applyMessageToAppearance(m)
                     }
                 }
@@ -104,7 +115,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     open fun onLifeStart() {}
     open fun onLifeEnd() {}
 
-    abstract suspend fun handleGameMessage(m: Message)
+    protected abstract var behaviour: Behaviour
 }
 
 enum class EntityLifeCycleState { NOT_STARTED, ONGOING, DEAD }

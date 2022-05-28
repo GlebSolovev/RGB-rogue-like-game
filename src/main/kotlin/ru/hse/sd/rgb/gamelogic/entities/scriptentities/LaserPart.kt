@@ -1,9 +1,11 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
+import ru.hse.sd.rgb.gamelogic.behaviours.Behaviour
+import ru.hse.sd.rgb.gamelogic.behaviours.SimpleBehaviour
+import ru.hse.sd.rgb.gamelogic.behaviours.State
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
-import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.views.ViewUnit
@@ -33,15 +35,46 @@ class LaserPart(
         override val teamId = this@LaserPart.teamId
     }
 
-    val continueTicker = createTicker(6, ContinueTick()).also { it.start() }
-    val dieTicker = createTicker(persistMillis, DieTick()).also { it.start() }
-    private var didContinue = false
-    private var didDie = false
+    override var behaviour: Behaviour = LaserPartDefaultBehaviour()
+    override val behaviourEntity = SingleBehaviourEntity(behaviour)
 
-    override suspend fun handleGameMessage(m: Message) {
-        when (m) {
-            is ContinueTick -> {
-                if (didContinue) return
+    private inner class LaserPartDefaultBehaviour : SimpleBehaviour() {
+
+        val continueTicker = createTicker(6, ContinueTick()).also { it.start() }
+        val dieTicker = createTicker(persistMillis, DieTick()).also { it.start() }
+        private var didContinue = false
+        private var didDie = false
+
+        override var state = object : State() {
+
+            override suspend fun handleReceivedAttack(message: ReceivedAttack): State = this
+
+            override suspend fun handleCollidedWith(message: CollidedWith): State {
+                controller.fighting.attack(message.myUnit, message.otherUnit)
+                return this
+            }
+
+            override suspend fun handleColorTick(tick: ColorTick): State = this
+
+            override suspend fun handleMoveTick(): State {
+                if (controller.physics.tryMove(this@LaserPart, dir))
+                    controller.view.receive(EntityUpdated(this@LaserPart))
+                else
+                    didContinue = true // prevent stuck parts from cloning
+                return this
+            }
+
+            override suspend fun handleDieTick(): State {
+                if (didDie) return this
+                continueTicker.stop()
+                dieTicker.stop()
+                controller.creation.die(this@LaserPart)
+                didDie = true
+                return this
+            }
+
+            override suspend fun handleContinueTick(): State {
+                if (didContinue) return this
                 val clone = clone()
                 if (controller.creation.tryAddToWorld(clone)) {
                     controller.view.receive(EntityUpdated(clone))
@@ -49,22 +82,7 @@ class LaserPart(
                 }
                 didContinue = true
                 continueTicker.stop()
-            }
-            is MoveTick -> {
-                if (controller.physics.tryMove(this, dir))
-                    controller.view.receive(EntityUpdated(this))
-                else
-                    didContinue = true // prevent stuck parts from cloning
-            }
-            is CollidedWith -> {
-                controller.fighting.attack(m.myUnit, m.otherUnit)
-            }
-            is DieTick -> {
-                if (didDie) return
-                continueTicker.stop()
-                dieTicker.stop()
-                controller.creation.die(this)
-                didDie = true
+                return this
             }
         }
     }

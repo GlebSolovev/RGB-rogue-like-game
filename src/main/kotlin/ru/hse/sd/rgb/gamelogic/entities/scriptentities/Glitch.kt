@@ -1,5 +1,8 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
+import ru.hse.sd.rgb.gamelogic.behaviours.Behaviour
+import ru.hse.sd.rgb.gamelogic.behaviours.SimpleBehaviour
+import ru.hse.sd.rgb.gamelogic.behaviours.State
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
@@ -7,7 +10,6 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
-import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.ViewUnit
@@ -40,18 +42,35 @@ class Glitch(
         override val teamId = this@Glitch.teamId
     }
 
-    private val repaintTicker = createTicker(30, RepaintTick()).also { it.start() }
-    private val moveTicker = createTicker(5000, MoveTick()).also { it.start() }
-
     private val random = Random
 
-    override suspend fun handleGameMessage(m: Message) {
-        when (m) {
-            is RepaintTick -> {
-                units.forEach { unit -> controller.fighting.changeRGB(unit, generateRandomColor(random)) }
-                controller.view.receive(EntityUpdated(this))
+    override var behaviour: Behaviour = GlitchDefaultBehaviour()
+    override val behaviourEntity = SingleBehaviourEntity(behaviour) // TODO: normal behaviourEntity
+
+    private inner class GlitchDefaultBehaviour : SimpleBehaviour() {
+
+        private val repaintTicker = createTicker(30, RepaintTick()).also { it.start() }
+        private val moveTicker = createTicker(5000, MoveTick()).also { it.start() }
+        // TODO: move constants to parameters
+
+        override var state = object : State() {
+
+            override suspend fun handleReceivedAttack(message: ReceivedAttack): State {
+                if (message.isFatal) controller.creation.die(this@Glitch)
+                return this
             }
-            is MoveTick -> {
+
+            override suspend fun handleCollidedWith(message: CollidedWith): State {
+                controller.fighting.attack(message.myUnit, message.otherUnit)
+                return this
+            }
+
+            override suspend fun handleColorTick(tick: ColorTick): State {
+                controller.fighting.update(tick.unit, ControlParams(AttackType.HERO_TARGET, HealType.RANDOM_TARGET))
+                return this
+            }
+
+            override suspend fun handleMoveTick(): State {
                 val cells = units.map { it.cell }.toSet()
                 val adjacentCells =
                     cells.flatMap { cell -> Direction.values().map { cell + it.toShift() } }.toSet() subtract cells
@@ -60,13 +79,14 @@ class Glitch(
                 val clone = clone(targetCell)
                 val cloneIsPopulated = controller.creation.tryAddToWorld(clone)
                 if (cloneIsPopulated) controller.view.receive(EntityUpdated(clone))
+                return this
             }
-            is CollidedWith -> controller.fighting.attack(m.myUnit, m.otherUnit)
-            is ReceivedAttack -> if (m.isFatal) controller.creation.die(this)
-            is ColorTick -> {
-                controller.fighting.update(m.unit, ControlParams(AttackType.HERO_TARGET, HealType.NO_HEAL))
+
+            override suspend fun handleRepaintTick(): State {
+                units.forEach { unit -> controller.fighting.changeRGB(unit, generateRandomColor(random)) }
+                controller.view.receive(EntityUpdated(this@Glitch))
+                return this
             }
-            else -> unreachable(m)
         }
     }
 

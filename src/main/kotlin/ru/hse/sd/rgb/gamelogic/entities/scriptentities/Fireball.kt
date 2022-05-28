@@ -1,10 +1,12 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
+import ru.hse.sd.rgb.gamelogic.behaviours.Behaviour
+import ru.hse.sd.rgb.gamelogic.behaviours.SimpleBehaviour
+import ru.hse.sd.rgb.gamelogic.behaviours.State
 import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.Paths2D
 import ru.hse.sd.rgb.views.ViewUnit
@@ -17,9 +19,6 @@ class Fireball(
     targetCell: Cell,
     teamId: Int,
 ) : GameEntity(setOf(colorCell)) {
-
-    val ticker = createTicker(movePeriodMillis, MoveTick()).also { it.start() }
-    // TODO: possible update ticker via effects
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
@@ -37,23 +36,42 @@ class Fireball(
         override val teamId = teamId
     }
 
-    private val pathStrategy = Paths2D.straightLine(colorCell.cell, targetCell)
+    override var behaviour: Behaviour = FireballDefaultBehaviour(colorCell, movePeriodMillis, targetCell)
+    override val behaviourEntity = SingleBehaviourEntity(behaviour)
 
-    override suspend fun handleGameMessage(m: Message) {
-        when (m) {
-            is MoveTick -> {
+    private inner class FireballDefaultBehaviour(
+        colorCell: ColorCellNoHp,
+        movePeriodMillis: Long,
+        targetCell: Cell
+    ) : SimpleBehaviour() {
+
+        private val pathStrategy = Paths2D.straightLine(colorCell.cell, targetCell)
+
+        private val moveTicker = createTicker(movePeriodMillis, MoveTick()).also { it.start() }
+        // TODO: possible update ticker via effects
+
+        override var state = object : State() {
+
+            override suspend fun handleReceivedAttack(message: ReceivedAttack): State {
+                if (message.isFatal) controller.creation.die(this@Fireball)
+                return this
+            }
+
+            override suspend fun handleCollidedWith(message: CollidedWith): State {
+                if (message.otherUnit.parent.fightEntity.teamId == fightEntity.teamId) return this
+                controller.fighting.attack(message.myUnit, message.otherUnit)
+                controller.creation.die(this@Fireball)
+                return this
+            }
+
+            override suspend fun handleColorTick(tick: ColorTick): State = this
+
+            override suspend fun handleMoveTick(): State {
                 val cell = units.first().cell
-                val moved = controller.physics.tryMove(this, pathStrategy.next(cell))
-                if (moved) controller.view.receive(EntityUpdated(this))
+                val moved = controller.physics.tryMove(this@Fireball, pathStrategy.next(cell))
+                if (moved) controller.view.receive(EntityUpdated(this@Fireball))
+                return this
             }
-            is CollidedWith -> {
-                if (m.otherUnit.parent.fightEntity.teamId == this.fightEntity.teamId) return
-                controller.fighting.attack(m.myUnit, m.otherUnit)
-                controller.creation.die(this)
-            }
-            is ReceivedAttack -> if (m.isFatal) controller.creation.die(this)
-            is ColorTick -> ignore
-            else -> unreachable
         }
     }
 }

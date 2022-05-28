@@ -13,6 +13,5 @@ data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : Message
 // messages from View
 data class UserMoved(val dir: Direction) : Message()
 class UserToggledInventory : Message()
-class UserQuit : Message()
 class UserSelect : Message()
 class UserDrop : Message()
