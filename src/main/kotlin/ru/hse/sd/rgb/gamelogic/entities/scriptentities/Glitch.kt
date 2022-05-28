@@ -1,9 +1,9 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.SimpleBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple.MoveSimpleBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
@@ -46,10 +46,9 @@ class Glitch(
     override var behaviour: Behaviour = GlitchDefaultBehaviour()
     override val behaviourEntity = SingleBehaviourEntity(behaviour) // TODO: normal behaviourEntity
 
-    private inner class GlitchDefaultBehaviour : SimpleBehaviour(this) {
+    private inner class GlitchDefaultBehaviour : MoveSimpleBehaviour(this, 5000) {
 
         private val repaintTicker = Ticker(30, this@Glitch, RepaintTick()).also { it.start() }
-        private val moveTicker = Ticker(5000, this@Glitch, MoveTick()).also { it.start() }
         // TODO: move constants to parameters
 
         override var state = object : State() {
@@ -89,8 +88,8 @@ class Glitch(
         }
 
         override fun stopTickers() {
+            super.stopTickers()
             repaintTicker.stop()
-            moveTicker.stop()
         }
     }
 

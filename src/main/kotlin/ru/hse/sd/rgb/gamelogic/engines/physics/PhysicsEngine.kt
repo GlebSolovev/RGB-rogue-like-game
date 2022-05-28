@@ -6,6 +6,7 @@ import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.messages.CollidedWith
 import ru.hse.sd.rgb.utils.structures.Grid2D
+import ru.hse.sd.rgb.utils.structures.Paths2D
 import kotlin.random.Random
 
 class PhysicsEngine(private val w: Int, private val h: Int) {
@@ -132,6 +133,29 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
             if (!entityCells.contains(cell)) return cell
         }
         throw IllegalStateException("$RANDOM_TARGET_ATTEMPTS attempts exceeded")
+    }
+
+    suspend fun checkPathAvailability(
+        path: Paths2D.PathStrategy,
+        startCell: Cell,
+        depth: Int,
+        unitIsOk: (GameUnit) -> Boolean
+    ): Boolean {
+        val pathCells = generatePathCells(path, startCell, depth)
+        return withLockedArea(pathCells) {
+            pathCells.all { worldGrid[it].all(unitIsOk) }
+        }
+    }
+
+    private fun generatePathCells(path: Paths2D.PathStrategy, startCell: Cell, depth: Int): Set<Cell> {
+        val pathCells = mutableSetOf<Cell>()
+        var currentCell = startCell
+        repeat(depth) {
+            if (!isInBounds(currentCell)) return pathCells
+            pathCells.add(currentCell)
+            currentCell += path.next(currentCell).toShift()
+        }
+        return pathCells
     }
 
 }

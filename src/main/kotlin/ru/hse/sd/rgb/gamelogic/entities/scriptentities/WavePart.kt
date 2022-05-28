@@ -1,9 +1,9 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.SimpleBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple.MoveSimpleBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.ViewUnit
@@ -38,10 +38,10 @@ class WavePart(
     override var behaviour: Behaviour = WavePartDefaultBehaviour(movePeriodMillis, dir)
     override val behaviourEntity = SingleBehaviourEntity(behaviour)
 
-    private inner class WavePartDefaultBehaviour(movePeriodMillis: Long, dir: Direction) :
-        SimpleBehaviour(this) {
-
-        private val moveTicker = Ticker(movePeriodMillis, this@WavePart, MoveTick()).also { it.start() }
+    private inner class WavePartDefaultBehaviour(
+        movePeriodMillis: Long,
+        dir: Direction
+    ) : MoveSimpleBehaviour(this, movePeriodMillis) {
 
         override var state = object : State() {
 
@@ -64,10 +64,6 @@ class WavePart(
                 if (moved) controller.view.receive(EntityUpdated(this@WavePart))
                 return this
             }
-        }
-
-        override fun stopTickers() {
-            moveTicker.stop()
         }
     }
 }
