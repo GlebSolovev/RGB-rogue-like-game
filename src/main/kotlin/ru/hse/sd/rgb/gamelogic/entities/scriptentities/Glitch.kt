@@ -9,7 +9,6 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.ViewUnit
@@ -47,10 +46,10 @@ class Glitch(
     override var behaviour: Behaviour = GlitchDefaultBehaviour()
     override val behaviourEntity = SingleBehaviourEntity(behaviour) // TODO: normal behaviourEntity
 
-    private inner class GlitchDefaultBehaviour : SimpleBehaviour() {
+    private inner class GlitchDefaultBehaviour : SimpleBehaviour(this) {
 
-        private val repaintTicker = createTicker(30, RepaintTick()).also { it.start() }
-        private val moveTicker = createTicker(5000, MoveTick()).also { it.start() }
+        private val repaintTicker = Ticker(30, this@Glitch, RepaintTick()).also { it.start() }
+        private val moveTicker = Ticker(5000, this@Glitch, MoveTick()).also { it.start() }
         // TODO: move constants to parameters
 
         override var state = object : State() {
@@ -87,6 +86,11 @@ class Glitch(
                 controller.view.receive(EntityUpdated(this@Glitch))
                 return this
             }
+        }
+
+        override fun stopTickers() {
+            repaintTicker.stop()
+            moveTicker.stop()
         }
     }
 

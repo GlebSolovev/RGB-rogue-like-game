@@ -9,7 +9,6 @@ import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
-import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 
 class WavePart(
@@ -39,9 +38,10 @@ class WavePart(
     override var behaviour: Behaviour = WavePartDefaultBehaviour(movePeriodMillis, dir)
     override val behaviourEntity = SingleBehaviourEntity(behaviour)
 
-    private inner class WavePartDefaultBehaviour(movePeriodMillis: Long, dir: Direction) : SimpleBehaviour() {
+    private inner class WavePartDefaultBehaviour(movePeriodMillis: Long, dir: Direction) :
+        SimpleBehaviour(this) {
 
-        val moveTicker = createTicker(movePeriodMillis, MoveTick()).also { it.start() }
+        private val moveTicker = Ticker(movePeriodMillis, this@WavePart, MoveTick()).also { it.start() }
 
         override var state = object : State() {
 
@@ -64,6 +64,10 @@ class WavePart(
                 if (moved) controller.view.receive(EntityUpdated(this@WavePart))
                 return this
             }
+        }
+
+        override fun stopTickers() {
+            moveTicker.stop()
         }
     }
 }

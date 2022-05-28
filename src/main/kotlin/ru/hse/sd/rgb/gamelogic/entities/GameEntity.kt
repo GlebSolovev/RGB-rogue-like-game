@@ -46,11 +46,12 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     }
 
     open inner class BehaviourEntity {
-        open fun createPassiveBehaviour(): Behaviour = PassiveBehaviour(this@GameEntity)
+        open fun createPassiveBehaviour(movePeriodMillis: Long): Behaviour =
+            PassiveBehaviour(this@GameEntity, movePeriodMillis)
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
-        override fun createPassiveBehaviour(): Behaviour = singleBehaviour
+        override fun createPassiveBehaviour(movePeriodMillis: Long): Behaviour = singleBehaviour
     }
 
     abstract val viewEntity: ViewEntity
@@ -95,6 +96,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
                         onLifeEnd()
                     }
                     is SetBehaviour -> {
+                        behaviour.stopTickers()
                         behaviour = m.createNewBehaviour(behaviour)
                     }
                     else -> {

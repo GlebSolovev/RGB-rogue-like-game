@@ -7,10 +7,13 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.utils.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.Paths2D
 
-class PassiveBehaviour(entity: GameEntity) : SimpleBehaviour() {
+class PassiveBehaviour(entity: GameEntity, movePeriodMillis: Long) : SimpleBehaviour(entity) {
+
+    private val moveTicker = Ticker(movePeriodMillis, entity, MoveTick()).also { it.start() }
 
     override var state: State = object : State() {
 
@@ -38,6 +41,10 @@ class PassiveBehaviour(entity: GameEntity) : SimpleBehaviour() {
             return this
         }
 
+    }
+
+    override fun stopTickers() {
+        moveTicker.stop()
     }
 
 }

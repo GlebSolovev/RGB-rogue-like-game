@@ -1,9 +1,12 @@
 package ru.hse.sd.rgb.gamelogic.engines.behaviour
 
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.messaging.Message
 
-sealed interface Behaviour {
+sealed class Behaviour(protected val entity: GameEntity) {
 
-    suspend fun handleMessage(message: Message)
+    abstract suspend fun handleMessage(message: Message)
+
+    abstract fun stopTickers()
 
 }

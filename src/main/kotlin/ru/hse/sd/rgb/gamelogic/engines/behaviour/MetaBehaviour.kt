@@ -1,3 +1,5 @@
 package ru.hse.sd.rgb.gamelogic.engines.behaviour
 
-abstract class MetaBehaviour(protected var behaviour: Behaviour) : Behaviour
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+
+abstract class MetaBehaviour(protected var behaviour: Behaviour, entity: GameEntity) : Behaviour(entity)

@@ -11,6 +11,7 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.sameAs
@@ -74,9 +75,11 @@ class Hero(
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
 
-    inner class HeroBehaviour : SimpleBehaviour() {
+    private inner class HeroBehaviour : SimpleBehaviour(this) {
 
         override var state: State = PlayingState()
+
+        override fun stopTickers() = ignore
 
         private open inner class PlayingState : State() {
             private var lastMoveTime = System.currentTimeMillis()

@@ -40,12 +40,14 @@ class Wall(colorCells: Set<ColorCellNoHp>) : GameEntity(colorCells) {
     override var behaviour: Behaviour = WallDefaultBehaviour()
     override val behaviourEntity = SingleBehaviourEntity(behaviour)
 
-    private inner class WallDefaultBehaviour : SimpleBehaviour() {
+    private inner class WallDefaultBehaviour : SimpleBehaviour(this) {
         override var state = object : State() {
             override suspend fun handleReceivedAttack(message: ReceivedAttack): State = this
             override suspend fun handleCollidedWith(message: CollidedWith): State = this
             override suspend fun handleColorTick(tick: ColorTick): State = this
             override suspend fun handleMoveTick(): State = this
         }
+
+        override fun stopTickers() = ignore
     }
 }

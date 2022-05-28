@@ -3,7 +3,6 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.SimpleBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
-import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
@@ -43,12 +42,11 @@ class Fireball(
         colorCell: ColorCellNoHp,
         movePeriodMillis: Long,
         targetCell: Cell
-    ) : SimpleBehaviour() {
+    ) : SimpleBehaviour(this) {
 
         private val pathStrategy = Paths2D.straightLine(colorCell.cell, targetCell)
 
-        private val moveTicker = createTicker(movePeriodMillis, MoveTick()).also { it.start() }
-        // TODO: possible update ticker via effects
+        private val moveTicker = Ticker(movePeriodMillis, this@Fireball, MoveTick()).also { it.start() }
 
         override var state = object : State() {
 
@@ -72,6 +70,10 @@ class Fireball(
                 if (moved) controller.view.receive(EntityUpdated(this@Fireball))
                 return this
             }
+        }
+
+        override fun stopTickers() {
+            moveTicker.stop()
         }
     }
 }
