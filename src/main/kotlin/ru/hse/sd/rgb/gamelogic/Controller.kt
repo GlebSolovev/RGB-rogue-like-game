@@ -131,6 +131,8 @@ class Controller(val view: View) : Messagable() {
         get() = stateRef.get().engines.fighting
     val creation
         get() = stateRef.get().engines.creation
+    val behaviour
+        get() = stateRef.get().engines.behaviour
 
     val hero: Hero
         get() = stateRef.get().hero

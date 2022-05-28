@@ -1,7 +1,7 @@
-package ru.hse.sd.rgb.gamelogic.behaviours.simple
+package ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple
 
-import ru.hse.sd.rgb.gamelogic.behaviours.SimpleBehaviour
-import ru.hse.sd.rgb.gamelogic.behaviours.State
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.SimpleBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams

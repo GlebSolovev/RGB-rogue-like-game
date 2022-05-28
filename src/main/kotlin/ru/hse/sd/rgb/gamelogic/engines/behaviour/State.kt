@@ -1,4 +1,4 @@
-package ru.hse.sd.rgb.gamelogic.behaviours
+package ru.hse.sd.rgb.gamelogic.engines.behaviour
 
 import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*

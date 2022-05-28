@@ -1,11 +1,13 @@
 package ru.hse.sd.rgb.gameloaders
 
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourEngine
 import ru.hse.sd.rgb.gamelogic.engines.creation.CreationEngine
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
+import ru.hse.sd.rgb.utils.messaging.messages.SetBehaviour
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
 
@@ -31,6 +33,7 @@ data class Engines(
     val physics: PhysicsEngine,
     val fighting: FightEngine,
     val creation: CreationEngine,
+    val behaviour: BehaviourEngine
 )
 
 data class LevelBasicParams(
@@ -64,8 +67,9 @@ class Loader(
         val physics = PhysicsEngine(w, h)
         val fighting = FightEngine(baseColorList, interactionMatrix)
         val creation = CreationEngine(physics, fighting)
+        val behaviour = BehaviourEngine()
 
-        return Engines(physics, fighting, creation)
+        return Engines(physics, fighting, creation, behaviour)
     }
 
     fun loadLevel(): LevelDescription = levelLoader.loadLevelDescription()

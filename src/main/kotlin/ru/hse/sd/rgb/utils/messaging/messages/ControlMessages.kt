@@ -1,5 +1,6 @@
 package ru.hse.sd.rgb.utils.messaging.messages
 
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.utils.messaging.Message
 
 // global control messages
@@ -12,3 +13,4 @@ class UserQuit : Message()
 // for Entity
 class LifeStarted : Message()
 data class LifeEnded(val dieRoutine: suspend () -> Unit) : Message()
+data class SetBehaviour(val createNewBehaviour: (Behaviour) -> Behaviour) : Message()

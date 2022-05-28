@@ -1,14 +1,11 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
-import ru.hse.sd.rgb.gamelogic.behaviours.Behaviour
-import ru.hse.sd.rgb.gamelogic.behaviours.simple.PassiveBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple.PassiveBehaviour
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*
-import ru.hse.sd.rgb.utils.messaging.messages.EntityRemoved
-import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
-import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
-import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
+import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
 import java.util.Collections
@@ -96,6 +93,9 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
                         m.dieRoutine()
                         controller.view.receive(EntityRemoved(this))
                         onLifeEnd()
+                    }
+                    is SetBehaviour -> {
+                        behaviour = m.createNewBehaviour(behaviour)
                     }
                     else -> {
                         behaviour.handleMessage(m)

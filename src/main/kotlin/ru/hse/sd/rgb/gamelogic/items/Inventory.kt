@@ -1,4 +1,4 @@
-package ru.hse.sd.rgb.gamelogic.engines.items
+package ru.hse.sd.rgb.gamelogic.items
 
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.messaging.Message

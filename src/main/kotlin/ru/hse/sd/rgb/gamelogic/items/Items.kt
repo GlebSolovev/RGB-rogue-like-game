@@ -1,4 +1,4 @@
-package ru.hse.sd.rgb.gamelogic.engines.items
+package ru.hse.sd.rgb.gamelogic.items
 
 import java.awt.image.BufferedImage
 

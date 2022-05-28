@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.views.swing
 
-import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
+import ru.hse.sd.rgb.gamelogic.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*

@@ -1,14 +1,14 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
-import ru.hse.sd.rgb.gamelogic.behaviours.Behaviour
-import ru.hse.sd.rgb.gamelogic.behaviours.SimpleBehaviour
-import ru.hse.sd.rgb.gamelogic.behaviours.State
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.SimpleBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
-import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
+import ru.hse.sd.rgb.gamelogic.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.messaging.*
