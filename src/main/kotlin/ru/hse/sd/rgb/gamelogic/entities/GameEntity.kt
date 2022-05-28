@@ -3,6 +3,8 @@ package ru.hse.sd.rgb.gamelogic.entities
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple.PassiveBehaviour
 import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.AttackUponSeeingMetaBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.FleeUponSeeingMetaBehaviour
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*
@@ -48,10 +50,58 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     open inner class BehaviourEntity {
         open fun createPassiveBehaviour(movePeriodMillis: Long): Behaviour =
             PassiveBehaviour(this@GameEntity, movePeriodMillis)
+
+        open fun createAttackUponSeeingMetaBehaviour(
+            initialBehaviour: Behaviour,
+            targetEntity: GameEntity,
+            seeingDepth: Int,
+            directAttackMovePeriodMillis: Long,
+            watchPeriodMillis: Long
+        ): Behaviour =
+            AttackUponSeeingMetaBehaviour(
+                initialBehaviour,
+                this@GameEntity,
+                targetEntity,
+                seeingDepth,
+                directAttackMovePeriodMillis,
+                watchPeriodMillis
+            )
+
+        open fun createFleeUponSeeingMetaBehaviour(
+            initialBehaviour: Behaviour,
+            targetEntity: GameEntity,
+            seeingDepth: Int,
+            directFleeMovePeriodMillis: Long,
+            watchPeriodMillis: Long
+        ): Behaviour =
+            FleeUponSeeingMetaBehaviour(
+                initialBehaviour,
+                this@GameEntity,
+                targetEntity,
+                seeingDepth,
+                directFleeMovePeriodMillis,
+                watchPeriodMillis
+            )
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
         override fun createPassiveBehaviour(movePeriodMillis: Long): Behaviour = singleBehaviour
+
+        override fun createAttackUponSeeingMetaBehaviour(
+            initialBehaviour: Behaviour,
+            targetEntity: GameEntity,
+            seeingDepth: Int,
+            directAttackMovePeriodMillis: Long,
+            watchPeriodMillis: Long
+        ): Behaviour = singleBehaviour
+
+        override fun createFleeUponSeeingMetaBehaviour(
+            initialBehaviour: Behaviour,
+            targetEntity: GameEntity,
+            seeingDepth: Int,
+            directFleeMovePeriodMillis: Long,
+            watchPeriodMillis: Long
+        ): Behaviour = singleBehaviour
     }
 
     abstract val viewEntity: ViewEntity

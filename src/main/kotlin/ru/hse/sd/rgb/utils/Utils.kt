@@ -26,6 +26,14 @@ enum class Direction {
         NOPE -> GridShift(0, 0)
     }
 
+    fun opposite(): Direction = when (this) {
+        UP -> DOWN
+        LEFT -> RIGHT
+        DOWN -> UP
+        RIGHT -> LEFT
+        NOPE -> NOPE
+    }
+
     val isVertical
         get() = this == UP || this == DOWN
     val isHorizontal
