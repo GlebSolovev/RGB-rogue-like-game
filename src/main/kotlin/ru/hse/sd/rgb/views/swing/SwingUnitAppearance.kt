@@ -20,6 +20,7 @@ enum class SwingUnitShape {
     CIRCLE_HALF_RIGHT,
     RECTANGLE_HORIZONTAL,
     RECTANGLE_VERTICAL,
+    STAR_8
     ;
 
     companion object {

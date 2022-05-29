@@ -9,13 +9,14 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
-import kotlin.random.Random
 
+// TODO: FIX - NO ATTACK
 class Glitch(
     cell: Cell,
     hp: Int,
@@ -41,14 +42,12 @@ class Glitch(
         override val teamId = this@Glitch.teamId
     }
 
-    private val random = Random
-
     override var behaviour: Behaviour = GlitchDefaultBehaviour()
     override val behaviourEntity = SingleBehaviourEntity(behaviour) // TODO: normal behaviourEntity
 
     private inner class GlitchDefaultBehaviour : MoveSimpleBehaviour(this, 5000) {
 
-        private val repaintTicker = Ticker(30, this@Glitch, RepaintTick()).also { it.start() }
+        private val repaintTicker = Ticker(100, this@Glitch, RepaintTick())
         // TODO: move constants to parameters
 
         override var state = object : State() {
@@ -72,7 +71,7 @@ class Glitch(
                 val cells = units.map { it.cell }.toSet()
                 val adjacentCells =
                     cells.flatMap { cell -> Direction.values().map { cell + it.toShift() } }.toSet() subtract cells
-                val targetCell = adjacentCells.randomElement(random)
+                val targetCell = adjacentCells.randomElement()
 
                 val clone = clone(targetCell)
                 val cloneIsPopulated = controller.creation.tryAddToWorld(clone)
@@ -81,10 +80,15 @@ class Glitch(
             }
 
             override suspend fun handleRepaintTick(): State {
-                units.forEach { unit -> controller.fighting.changeRGB(unit, generateRandomColor(random)) }
+                units.forEach { unit -> controller.fighting.changeRGB(unit, generateRandomColor()) }
                 controller.view.receive(EntityUpdated(this@Glitch))
                 return this
             }
+        }
+
+        override fun startTickers() {
+            super.startTickers()
+            repaintTicker.start()
         }
 
         override fun stopTickers() {
@@ -94,5 +98,4 @@ class Glitch(
     }
 
     private fun clone(targetCell: Cell): Glitch = Glitch(targetCell, (units.first() as HpGameUnit).hp, teamId)
-
 }

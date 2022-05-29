@@ -6,7 +6,7 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
-import ru.hse.sd.rgb.utils.Ticker
+import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -41,8 +41,8 @@ class LaserPart(
     private inner class LaserPartDefaultBehaviour : SimpleBehaviour(this) {
 
         // TODO: magic number 5
-        private val continueTicker = Ticker(6, this@LaserPart, ContinueTick()).also { it.start() }
-        private val dieTicker = Ticker(persistMillis, this@LaserPart, DieTick()).also { it.start() }
+        private val continueTicker = Ticker(6, this@LaserPart, ContinueTick())
+        private val dieTicker = Ticker(persistMillis, this@LaserPart, DieTick())
         private var didContinue = false
         private var didDie = false
 
@@ -85,6 +85,11 @@ class LaserPart(
                 continueTicker.stop()
                 return this
             }
+        }
+
+        override fun startTickers() {
+            continueTicker.start()
+            dieTicker.start()
         }
 
         override fun stopTickers() {

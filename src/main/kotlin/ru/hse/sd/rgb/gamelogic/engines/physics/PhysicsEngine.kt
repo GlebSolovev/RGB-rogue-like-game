@@ -139,11 +139,17 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         path: Paths2D.PathStrategy,
         startCell: Cell,
         depth: Int,
-        unitIsOk: (GameUnit) -> Boolean
+        unitIsOk: (GameUnit) -> Boolean,
+        unitIsTarget: (GameUnit) -> Boolean
     ): Boolean {
         val pathCells = generatePathCells(path, startCell, depth)
         return withLockedArea(pathCells) {
             pathCells.all { worldGrid[it].all(unitIsOk) }
+            for (cell in pathCells) {
+                if (!worldGrid[cell].all(unitIsOk)) return@withLockedArea false
+                if (worldGrid[cell].any(unitIsTarget)) return@withLockedArea true
+            }
+            false
         }
     }
 

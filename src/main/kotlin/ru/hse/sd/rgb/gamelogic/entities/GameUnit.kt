@@ -2,6 +2,7 @@ package ru.hse.sd.rgb.gamelogic.entities
 
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
 import ru.hse.sd.rgb.utils.structures.RGB
 import java.util.concurrent.atomic.AtomicLong

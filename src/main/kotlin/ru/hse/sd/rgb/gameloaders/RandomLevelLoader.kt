@@ -57,6 +57,12 @@ class RandomLevelLoader private constructor(
         )
         entities.add(hero)
 
+        repeat(levelFactory.sharpySpawnCount) {
+            val emptyCells = getEmptyCells(w, h, entities)
+            val sharpy = levelFactory.createSharpy(emptyCells.random())
+            entities.add(sharpy)
+        }
+
         maze.withCoords().forEach { (x, y, _) ->
             if (random.nextChance(levelFactory.glitchSpawnRate)) {
                 val cell = Cell(x, y)
@@ -132,8 +138,16 @@ class RandomLevelLoader private constructor(
             val LEVEL_FACTORY = object : LevelContentFactory() {
                 override val bgColor: RGB = RGB(0, 0, 0)
                 override val wallColor: RGB = RGB(100, 100, 100)
-                override val glitchHp = 1
+
                 override val glitchSpawnRate = 0.0
+                override val glitchHp = 1
+
+                override val sharpySpawnCount: Int = 1
+                override val sharpyColor: RGB = RGB(50, 50, 50)
+                override val sharpyHp: Int = 5
+                override val sharpyMovePeriodMillis: Long = 2000
+                override val sharpySeeingDepth: Int = 5
+                override val sharpyWatchPeriodMillis: Long = 500
             }
         }
     }

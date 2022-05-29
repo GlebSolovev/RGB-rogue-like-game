@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.views.swing
 
 import ru.hse.sd.rgb.gamelogic.items.InventoryViewSnapshot
-import ru.hse.sd.rgb.utils.Ticker.Companion.createTicker
+import ru.hse.sd.rgb.utils.messaging.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*
@@ -218,7 +218,7 @@ class SwingView : View() {
 
     override var state: AtomicReference<ViewState> = AtomicReference(SwingLoadingState())
 
-    private val ticker: Ticker = createTicker(10) // TODO: magic constant
+    private val ticker: Ticker = createTicker(10, ViewTick()) // TODO: magic constant
 
     override fun initialize() {
         window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE // TODO: maybe save something on exit?

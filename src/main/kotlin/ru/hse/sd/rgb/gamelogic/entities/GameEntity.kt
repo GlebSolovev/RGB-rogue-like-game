@@ -110,7 +110,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     abstract val behaviourEntity: BehaviourEntity
 
     val units: MutableSet<GameUnit> = Collections.newSetFromMap(ConcurrentHashMap())
-    // TODO: maybe make private and not concurrent
+//     TODO: maybe make private and not concurrent
 
     init {
         units.addAll(colorCells.map { cell ->
@@ -131,6 +131,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
                         lifeCycleState = EntityLifeCycleState.ONGOING
                         controller.view.receive(EntityUpdated(this))
                         onLifeStart()
+                        behaviour.startTickers()
                     }
                     is LifeEnded -> lifeCycleState = EntityLifeCycleState.DEAD
                     else -> ignore
@@ -144,10 +145,12 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
                         m.dieRoutine()
                         controller.view.receive(EntityRemoved(this))
                         onLifeEnd()
+                        behaviour.stopTickers()
                     }
                     is SetBehaviour -> {
                         behaviour.stopTickers()
                         behaviour = m.createNewBehaviour(behaviour)
+                        behaviour.startTickers()
                     }
                     else -> {
                         behaviour.handleMessage(m)

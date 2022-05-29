@@ -133,6 +133,7 @@ class FightEngine(
     }
 
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
+        if (!unit.parent.fightEntity.isUnitActive(unit)) return
         withLockedUnits(setOf(unit)) {
             val initialBaseColorId = unit.cachedBaseColorId
             for (updateEffect in initialBaseColorId.stats.updateEffects) {

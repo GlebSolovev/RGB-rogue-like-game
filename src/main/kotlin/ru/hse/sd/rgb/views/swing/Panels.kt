@@ -7,9 +7,12 @@ import ru.hse.sd.rgb.views.DrawablesMap
 import java.awt.*
 import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
+import java.awt.geom.Path2D
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 private fun Graphics2D.enableFancyRendering() {
     this.setRenderingHints(
@@ -94,6 +97,29 @@ open class GamePanel(
                 tileSize.scaled(),
                 tileSize.scaled() / 3
             )
+            SwingUnitShape.STAR_8 -> {
+                val centerX = spX + tileSize.scaled() / 2
+                val centerY = spY + tileSize.scaled() / 2
+                val innerRadius = tileSize.scaled() / 3.5
+                val outerRadius = tileSize.scaled() / 2.0
+                val numRays = 8
+                val startAngleRad = 0
+
+                val path = Path2D.Double()
+                val deltaAngleRad = Math.PI / numRays
+                for (i in 0 until (numRays * 2)) {
+                    val angleRad = startAngleRad + i * deltaAngleRad
+                    val ca = cos(angleRad)
+                    val sa = sin(angleRad)
+                    val relX = ca * (if (i % 2 == 0) outerRadius else innerRadius)
+                    val relY = sa * (if (i % 2 == 0) outerRadius else innerRadius)
+
+                    if (i == 0) path.moveTo(centerX + relX, centerY + relY)
+                    else path.lineTo(centerX + relX, centerY + relY)
+                }
+                path.closePath()
+                path
+            }
         }
     }
 

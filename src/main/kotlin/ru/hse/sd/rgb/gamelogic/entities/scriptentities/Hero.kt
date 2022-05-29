@@ -79,6 +79,7 @@ class Hero(
 
         override var state: State = PlayingState()
 
+        override fun startTickers() = ignore
         override fun stopTickers() = ignore
 
         private open inner class PlayingState : State() {

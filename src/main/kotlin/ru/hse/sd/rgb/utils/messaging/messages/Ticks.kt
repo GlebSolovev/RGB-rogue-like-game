@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.utils.messaging.messages
 
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.Tick
+import ru.hse.sd.rgb.utils.messaging.Tick
 
 // ticks required to be handled in Behaviour-s
 

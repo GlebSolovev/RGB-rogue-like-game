@@ -1,8 +1,7 @@
-package ru.hse.sd.rgb.utils
+package ru.hse.sd.rgb.utils.messaging
 
 import kotlinx.coroutines.*
-import ru.hse.sd.rgb.utils.messaging.Messagable
-import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.ConcurrentHashSet
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
@@ -16,18 +15,24 @@ class Ticker(
     private val periodHolder = AtomicLong(periodMillis)
     private lateinit var coroutineJob: Job
 
+    private var isTicking: Boolean = false
+
     private var periodMillis: Long
         get() = periodHolder.get()
         set(value) = periodHolder.set(value)
 
     fun start() {
+        if (isTicking) return
         coroutineJob = tickerCoroutineScope.launch {
             tickingRoutine()
         }
+        isTicking = true
     }
 
     fun stop() {
+        if (!isTicking) return
         coroutineJob.cancel()
+        isTicking = false
     }
 
     private suspend fun CoroutineScope.tickingRoutine() {

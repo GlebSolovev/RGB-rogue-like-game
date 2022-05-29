@@ -48,6 +48,7 @@ class Wall(colorCells: Set<ColorCellNoHp>) : GameEntity(colorCells) {
             override suspend fun handleMoveTick(): State = this
         }
 
+        override fun startTickers() = ignore
         override fun stopTickers() = ignore
     }
 }
