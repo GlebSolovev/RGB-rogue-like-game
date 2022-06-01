@@ -1,9 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
-import ru.hse.sd.rgb.gamelogic.controller
-import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.utils.messaging.Ticker
-import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
 import java.util.concurrent.atomic.AtomicLong
 
@@ -15,21 +13,11 @@ sealed class GameUnit(
     var cell: Cell,
     var lastMoveDir: Direction = Direction.random()
 ) {
-    // WARNING!!! Do not shuffle initialization order!
-
     companion object {
         private val globalId = AtomicLong(0)
     }
 
     val id: GameUnitId = globalId.incrementAndGet()
-
-    private val colorTicker = Ticker(
-        controller.fighting.getBaseColorStats(this).updatePeriodMillis,
-        parent,
-        ColorTick(this) // is ok
-    ).also {
-        it.start()
-    } // TODO: update when base color changes
 
     override fun equals(other: Any?) = this === other || id == (other as? GameUnit)?.id
 

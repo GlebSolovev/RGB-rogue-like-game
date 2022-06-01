@@ -1,12 +1,12 @@
 baseColors:
   - name: "SHARP STONE"
     rgb: 50 50 50
-    updatePeriodMillis: 1000000
+    updatePeriodMillis: ~
     updateEffects: [ ]
 
   - name: "NEWBIE GRAY"
     rgb: 100 100 100
-    updatePeriodMillis: 1000000
+    updatePeriodMillis: ~
     updateEffects: [ ]
 
   - name: "FIRE RED"

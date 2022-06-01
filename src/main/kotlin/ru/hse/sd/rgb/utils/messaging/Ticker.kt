@@ -17,7 +17,7 @@ class Ticker(
 
     private var isTicking: Boolean = false
 
-    private var periodMillis: Long
+    var periodMillis: Long
         get() = periodHolder.get()
         set(value) = periodHolder.set(value)
 
@@ -37,6 +37,7 @@ class Ticker(
 
     private suspend fun CoroutineScope.tickingRoutine() {
         while (isActive) {
+            // TODO: recalculate delay on periodMillis update
             delay(periodMillis)
             target.receive(tick)
         }

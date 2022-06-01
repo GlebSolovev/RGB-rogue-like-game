@@ -6,9 +6,12 @@ import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
+import ru.hse.sd.rgb.utils.messaging.Ticker
+import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
 import ru.hse.sd.rgb.utils.messaging.messages.ReceivedAttack
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.unreachable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
@@ -24,7 +27,7 @@ private typealias BaseColorInteractionMatrix = ConcurrentHashMap<Pair<BaseColorI
 data class BaseColorStats(
     val name: String,
     val rgb: RGB,
-    val updatePeriodMillis: Long,
+    val updatePeriodMillis: Long?,
     val updateEffects: List<BaseColorUpdateEffect>
 )
 
@@ -42,7 +45,8 @@ class FightEngine(
 
     private val unitMutexes = ConcurrentHashMap<GameUnitId, Mutex>()
     private val unitCachedBaseColorIds = ConcurrentHashMap<GameUnitId, BaseColorId>() // TODO: AtomicRef ?
-    private val unsafeMethods: UnsafeMethods = UnsafeMethodsImpl()
+    private val unitColorTickers = ConcurrentHashMap<GameUnitId, Ticker>() // TODO: not concurrent ?
+    private val unsafeMethods: UnsafeMethodsImpl = UnsafeMethodsImpl()
 
     interface UnsafeMethods {
         fun unsafeChangeRGB(unit: GameUnit, newRgb: RGB)
@@ -53,7 +57,9 @@ class FightEngine(
     private inner class UnsafeMethodsImpl : UnsafeMethods {
         override fun unsafeChangeRGB(unit: GameUnit, newRgb: RGB) {
             unit.gameColor = newRgb
-            unitCachedBaseColorIds[unit.id] = resolveBaseColor(unit.gameColor)
+            val newBaseColorId = resolveBaseColor(unit.gameColor)
+            unitCachedBaseColorIds[unit.id] = newBaseColorId
+            unsafeMethods.updateUnitTicker(unit, newBaseColorId.stats.updatePeriodMillis)
         }
 
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
@@ -67,6 +73,21 @@ class FightEngine(
                 to.hp <= 0
             } else false
             to.parent.receive(ReceivedAttack(to, from, isFatal))
+        }
+
+        fun updateUnitTicker(unit: GameUnit, updatePeriodMillis: Long?) {
+            if (updatePeriodMillis == null) {
+                unitColorTickers.remove(unit.id)?.stop()
+            } else {
+                val currentTicker = unitColorTickers[unit.id]
+                if (currentTicker == null) {
+                    val newTicker = Ticker(updatePeriodMillis, unit.parent, ColorTick(unit))
+                    unitColorTickers.put(unit.id, newTicker)?.let { unreachable }
+                    newTicker.start()
+                } else {
+                    currentTicker.periodMillis = updatePeriodMillis
+                }
+            }
         }
     }
 
@@ -105,15 +126,17 @@ class FightEngine(
     suspend fun registerUnit(unit: GameUnit) {
         val mutex = Mutex()
         mutex.withLock {
-            unitMutexes.put(unit.id, mutex)?.let { throw IllegalStateException("double unit register") }
+            unitMutexes.put(unit.id, mutex)?.let { error("double unit register") }
+            unsafeMethods.updateUnitTicker(unit, getBaseColorStats(unit).updatePeriodMillis)
         }
     }
 
     suspend fun unregisterUnit(unit: GameUnit) {
         val mutex = unitMutexes[unit.id]!!
         mutex.withLock {
-            unitCachedBaseColorIds.remove(unit.id)
-            unitMutexes.remove(unit.id) ?: throw IllegalStateException("attempt to unregister not registered unit")
+            unsafeMethods.updateUnitTicker(unit, null)
+            unitCachedBaseColorIds.remove(unit.id) ?: unreachable
+            unitMutexes.remove(unit.id) ?: error("attempt to unregister not registered unit")
         }
     }
 
