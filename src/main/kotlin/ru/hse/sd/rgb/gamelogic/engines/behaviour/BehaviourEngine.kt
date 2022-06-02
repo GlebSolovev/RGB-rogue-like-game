@@ -1,48 +1,41 @@
 package ru.hse.sd.rgb.gamelogic.engines.behaviour
 
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.utils.messaging.messages.SetBehaviour
+import ru.hse.sd.rgb.utils.messaging.messages.ApplyBehaviourMessage
 
 class BehaviourEngine {
 
-    fun setPassiveBehaviour(entity: GameEntity, movePeriodMillis: Long) {
-        entity.receive(SetBehaviour { entity.behaviourEntity.createPassiveBehaviour(movePeriodMillis) })
-    }
-
-    fun setAttackUponSeeingMetaBehaviour(
+    fun applyDirectAttackHeroBehaviour(
         entity: GameEntity,
-        initialBehaviour: Behaviour,
-        targetEntity: GameEntity,
-        seeingDepth: Int,
-        directAttackMovePeriodMillis: Long,
-        watchPeriodMillis: Long
+        movePeriodMillis: Long,
     ) {
-        entity.receive(SetBehaviour {
-            entity.behaviourEntity.createAttackUponSeeingMetaBehaviour(
-                initialBehaviour,
-                targetEntity,
-                seeingDepth,
-                directAttackMovePeriodMillis,
-                watchPeriodMillis
-            )
+        entity.receive(ApplyBehaviourMessage {
+            entity.behaviourEntity.createDirectAttackHeroBehaviour(it, movePeriodMillis)
         })
     }
 
-    fun setFleeUponSeeingMetaBehaviour(
+    fun applyDirectFleeFromHeroBehaviour(
         entity: GameEntity,
-        initialBehaviour: Behaviour,
+        movePeriodMillis: Long,
+    ) {
+        entity.receive(ApplyBehaviourMessage {
+            entity.behaviourEntity.createDirectFleeFromHeroBehaviour(it, movePeriodMillis)
+        })
+    }
+
+    fun applyUponSeeingBehaviour(
+        entity: GameEntity,
         targetEntity: GameEntity,
         seeingDepth: Int,
-        directFleeMovePeriodMillis: Long,
-        watchPeriodMillis: Long
+        createSeeingBehaviour: (Behaviour) -> Behaviour
     ) {
-        entity.receive(SetBehaviour {
-            entity.behaviourEntity.createFleeUponSeeingMetaBehaviour(
-                initialBehaviour,
+        entity.receive(ApplyBehaviourMessage {
+            entity.behaviourEntity.createUponSeeingBehaviour(
+                entity,
+                it,
                 targetEntity,
                 seeingDepth,
-                directFleeMovePeriodMillis,
-                watchPeriodMillis
+                createSeeingBehaviour
             )
         })
     }

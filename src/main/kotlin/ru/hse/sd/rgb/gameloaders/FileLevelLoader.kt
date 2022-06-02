@@ -21,6 +21,10 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
         return basicParams!!
     }
 
+    override fun loadHero(): Hero {
+        TODO("Not yet implemented")
+    }
+
     override fun loadLevelDescription(): LevelDescription {
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
         val entities = mutableSetOf<GameEntity>()
@@ -39,9 +43,9 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
             if (builder.isMulti) entities.add(builder.creator(builder.colorCells))
         }
         val bgColor = readRGB(scanner)
-        val hero = entities.find { it is Hero }!! as Hero
+//        val hero = entities.find { it is Hero }!! as Hero
         return LevelDescription(
-            GameWorldDescription(w, h, entities, hero, bgColor),
+            GameWorldDescription(w, h, entities, bgColor),
             INV_DESC,
         )
     }

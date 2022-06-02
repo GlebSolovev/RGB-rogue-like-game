@@ -1,17 +1,16 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.SimpleBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.controller
-import ru.hse.sd.rgb.gamelogic.entities.*
-import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
-import ru.hse.sd.rgb.utils.messaging.messages.CollidedWith
-import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
-import ru.hse.sd.rgb.utils.messaging.messages.ReceivedAttack
 import ru.hse.sd.rgb.utils.structures.RGB
-import ru.hse.sd.rgb.views.*
+import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
@@ -37,18 +36,6 @@ class Wall(colorCells: Set<ColorCellNoHp>) : GameEntity(colorCells) {
         override val teamId = controller.fighting.newTeamId()
     }
 
-    override var behaviour: Behaviour = WallDefaultBehaviour()
+    override val behaviour = BehaviourBuilder.lifecycle(this).build()
     override val behaviourEntity = SingleBehaviourEntity(behaviour)
-
-    private inner class WallDefaultBehaviour : SimpleBehaviour(this) {
-        override var state = object : State() {
-            override suspend fun handleReceivedAttack(message: ReceivedAttack): State = this
-            override suspend fun handleCollidedWith(message: CollidedWith): State = this
-            override suspend fun handleColorTick(tick: ColorTick): State = this
-            override suspend fun handleMoveTick(): State = this
-        }
-
-        override fun startTickers() = ignore
-        override fun stopTickers() = ignore
-    }
 }

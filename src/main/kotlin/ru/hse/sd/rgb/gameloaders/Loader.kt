@@ -7,7 +7,6 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.utils.messaging.messages.SetBehaviour
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
 
@@ -15,7 +14,6 @@ data class GameWorldDescription(
     val gameGridW: Int,
     val gameGridH: Int,
     val allEntities: Set<GameEntity>, // include hero
-    val hero: Hero,
     val gameBgColor: RGB, // can be ViewBackground
 )
 
@@ -48,6 +46,7 @@ data class BaseColorParams(
 
 interface LevelLoader {
     fun loadBasicParams(): LevelBasicParams
+    fun loadHero(): Hero
     fun loadLevelDescription(): LevelDescription
 }
 
@@ -71,6 +70,8 @@ class Loader(
 
         return Engines(physics, fighting, creation, behaviour)
     }
+
+    fun loadHero(): Hero = levelLoader.loadHero()
 
     fun loadLevel(): LevelDescription = levelLoader.loadLevelDescription()
 

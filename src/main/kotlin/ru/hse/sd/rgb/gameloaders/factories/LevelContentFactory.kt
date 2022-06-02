@@ -18,18 +18,18 @@ abstract class LevelContentFactory {
     open fun createWall(cell: Cell): Wall = Wall(wallColor, cell)
 
     protected abstract val glitchHp: Int
-    open fun createGlitch(cell: Cell): Glitch = Glitch(cell, glitchHp, controller.fighting.newTeamId())
+    protected abstract val glitchClonePeriod: Long
+    open fun createGlitch(cell: Cell): Glitch =
+        Glitch(cell, glitchHp, glitchClonePeriod, controller.fighting.newTeamId())
 
     protected abstract val sharpyColor: RGB
     protected abstract val sharpyHp: Int
     protected abstract val sharpyMovePeriodMillis: Long
     protected abstract val sharpySeeingDepth: Int
-    protected abstract val sharpyWatchPeriodMillis: Long
     open fun createSharpy(cell: Cell): Sharpy = Sharpy(
         ColorCellHp(sharpyColor, cell, sharpyHp),
         sharpyMovePeriodMillis,
         sharpySeeingDepth,
-        sharpyWatchPeriodMillis,
         controller.fighting.newTeamId()
     )
 }

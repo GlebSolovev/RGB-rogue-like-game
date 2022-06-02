@@ -9,6 +9,7 @@ import ru.hse.sd.rgb.utils.messaging.Message
 // game logic messages
 data class ReceivedAttack(val myUnit: GameUnit, val fromUnit: GameUnit, val isFatal: Boolean) : Message()
 data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : Message()
+class DoMove : Message()
 
 // messages from View
 data class UserMoved(val dir: Direction) : Message()

@@ -24,17 +24,33 @@ class RandomLevelLoader private constructor(
 ) : LevelLoader {
 
     private var basicParams: LevelBasicParams? = null
+    private var maze: Grid2D<Boolean>? = null
+    private val entities = mutableSetOf<GameEntity>()
 
     override fun loadBasicParams(): LevelBasicParams {
         basicParams = LevelBasicParams(width, height)
         return basicParams!!
     }
 
+    override fun loadHero(): Hero {
+        val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
+        maze = generateMaze(w, h, chamberMinSize, passageSize)
+
+        val heroCell: Cell = getEmptyCells(w, h, entities).randomElementOrNull(random)
+            ?: throw IllegalStateException("no empty cells to spawn hero")
+        val hero = Hero(
+            setOf(ColorCellHp(heroColor, heroCell, heroHp)),
+            heroInventory,
+            heroMovePeriodLimit
+        )
+        entities.add(hero)
+        return hero
+    }
+
     override fun loadLevelDescription(): LevelDescription {
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
-        val maze = generateMaze(w, h, chamberMinSize, passageSize)
+        val maze = maze ?: throw IllegalStateException("loadLevelHero() has not been called yet")
 
-        val entities = mutableSetOf<GameEntity>()
         for (x in 1 until w - 1) for (y in 1 until h - 1) if (maze[x, y]) entities.add(
             levelFactory.createWall(Cell(x, y))
         )
@@ -48,14 +64,7 @@ class RandomLevelLoader private constructor(
             entities.add(levelFactory.createWall(Cell(w - 1, y)))
         }
 
-        val heroCell: Cell = getEmptyCells(w, h, entities).randomElementOrNull(random)
-            ?: throw IllegalStateException("no empty cells to spawn hero")
-        val hero = Hero(
-            setOf(ColorCellHp(heroColor, heroCell, heroHp)),
-            heroInventory,
-            heroMovePeriodLimit
-        )
-        entities.add(hero)
+
 
         repeat(levelFactory.sharpySpawnCount) {
             val emptyCells = getEmptyCells(w, h, entities)
@@ -75,7 +84,7 @@ class RandomLevelLoader private constructor(
         }
 
         return LevelDescription(
-            GameWorldDescription(w, h, entities, hero, levelFactory.bgColor),
+            GameWorldDescription(w, h, entities, levelFactory.bgColor),
             heroInventory
         )
     }
@@ -141,13 +150,13 @@ class RandomLevelLoader private constructor(
 
                 override val glitchSpawnRate = 0.0
                 override val glitchHp = 1
+                override val glitchClonePeriod = 5000L
 
                 override val sharpySpawnCount: Int = 1
                 override val sharpyColor: RGB = RGB(50, 50, 50)
                 override val sharpyHp: Int = 5
                 override val sharpyMovePeriodMillis: Long = 2000
                 override val sharpySeeingDepth: Int = 5
-                override val sharpyWatchPeriodMillis: Long = 500
             }
         }
     }

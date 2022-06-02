@@ -1,18 +1,17 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple.PassiveBehaviour
-import ru.hse.sd.rgb.gamelogic.controller
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.AttackUponSeeingMetaBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.FleeUponSeeingMetaBehaviour
-import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.utils.messaging.*
-import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.LifecycleBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.DirectAttackHeroBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.DirectFleeFromHeroBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.UponSeeingBehaviour
+import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.messaging.Messagable
+import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
-import java.util.Collections
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
 
 abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
@@ -48,59 +47,38 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     }
 
     open inner class BehaviourEntity {
-        open fun createPassiveBehaviour(movePeriodMillis: Long): Behaviour =
-            PassiveBehaviour(this@GameEntity, movePeriodMillis)
+        open fun createDirectAttackHeroBehaviour(
+            baseBehaviour: Behaviour,
+            movePeriodMillis: Long,
+        ): Behaviour = DirectAttackHeroBehaviour(baseBehaviour, movePeriodMillis)
 
-        open fun createAttackUponSeeingMetaBehaviour(
-            initialBehaviour: Behaviour,
+        open fun createDirectFleeFromHeroBehaviour(
+            baseBehaviour: Behaviour,
+            movePeriodMillis: Long,
+        ): Behaviour = DirectFleeFromHeroBehaviour(baseBehaviour, movePeriodMillis)
+
+        open fun createUponSeeingBehaviour(
+            entity: GameEntity,
+            childBehaviour: Behaviour,
             targetEntity: GameEntity,
             seeingDepth: Int,
-            directAttackMovePeriodMillis: Long,
-            watchPeriodMillis: Long
-        ): Behaviour =
-            AttackUponSeeingMetaBehaviour(
-                initialBehaviour,
-                this@GameEntity,
-                targetEntity,
-                seeingDepth,
-                directAttackMovePeriodMillis,
-                watchPeriodMillis
-            )
-
-        open fun createFleeUponSeeingMetaBehaviour(
-            initialBehaviour: Behaviour,
-            targetEntity: GameEntity,
-            seeingDepth: Int,
-            directFleeMovePeriodMillis: Long,
-            watchPeriodMillis: Long
-        ): Behaviour =
-            FleeUponSeeingMetaBehaviour(
-                initialBehaviour,
-                this@GameEntity,
-                targetEntity,
-                seeingDepth,
-                directFleeMovePeriodMillis,
-                watchPeriodMillis
-            )
+            createSeeingBehaviour: (Behaviour) -> Behaviour
+        ): Behaviour = UponSeeingBehaviour(entity, childBehaviour, targetEntity, seeingDepth, createSeeingBehaviour)
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
-        override fun createPassiveBehaviour(movePeriodMillis: Long): Behaviour = singleBehaviour
+        override fun createDirectAttackHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long) =
+            singleBehaviour
 
-        override fun createAttackUponSeeingMetaBehaviour(
-            initialBehaviour: Behaviour,
+        override fun createDirectFleeFromHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long) =
+            singleBehaviour
+
+        override fun createUponSeeingBehaviour(
+            entity: GameEntity,
+            childBehaviour: Behaviour,
             targetEntity: GameEntity,
             seeingDepth: Int,
-            directAttackMovePeriodMillis: Long,
-            watchPeriodMillis: Long
-        ): Behaviour = singleBehaviour
-
-        override fun createFleeUponSeeingMetaBehaviour(
-            initialBehaviour: Behaviour,
-            targetEntity: GameEntity,
-            seeingDepth: Int,
-            directFleeMovePeriodMillis: Long,
-            watchPeriodMillis: Long
+            createSeeingBehaviour: (Behaviour) -> Behaviour
         ): Behaviour = singleBehaviour
     }
 
@@ -121,56 +99,10 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         })
     }
 
-    var lifeCycleState: EntityLifeCycleState by AtomicReference(EntityLifeCycleState.NOT_STARTED)
-
-    final override suspend fun handleMessage(m: Message) {
-        when (lifeCycleState) {
-            EntityLifeCycleState.NOT_STARTED -> {
-                when (m) {
-                    is LifeStarted -> {
-                        lifeCycleState = EntityLifeCycleState.ONGOING
-                        controller.view.receive(EntityUpdated(this))
-                        onLifeStart()
-                        behaviour.startTickers()
-                    }
-                    is LifeEnded -> lifeCycleState = EntityLifeCycleState.DEAD
-                    else -> ignore
-                }
-            }
-            EntityLifeCycleState.ONGOING -> {
-                when (m) {
-                    is LifeStarted -> unreachable
-                    is LifeEnded -> {
-                        lifeCycleState = EntityLifeCycleState.DEAD
-                        m.dieRoutine()
-                        controller.view.receive(EntityRemoved(this))
-                        onLifeEnd()
-                        behaviour.stopTickers()
-                    }
-                    is SetBehaviour -> {
-                        behaviour.stopTickers()
-                        behaviour = m.createNewBehaviour(behaviour)
-                        behaviour.startTickers()
-                    }
-                    else -> {
-                        behaviour.handleMessage(m)
-                        viewEntity.applyMessageToAppearance(m)
-                    }
-                }
-            }
-            EntityLifeCycleState.DEAD -> {
-                when (m) {
-                    is LifeStarted -> unreachable
-                    else -> ignore
-                }
-            }
-        }
-    }
-
     open fun onLifeStart() {}
     open fun onLifeEnd() {}
 
-    protected abstract var behaviour: Behaviour
-}
+    abstract val behaviour: LifecycleBehaviour
 
-enum class EntityLifeCycleState { NOT_STARTED, ONGOING, DEAD }
+    override suspend fun handleMessage(m: Message) = behaviour.handleMessage(m)
+}

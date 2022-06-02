@@ -1,15 +1,17 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
-import ru.hse.sd.rgb.gamelogic.controller
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple.MoveSimpleBehaviour
-import ru.hse.sd.rgb.gamelogic.entities.*
-import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnCollision
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.MoveTowardsDirection
+import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
+import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
-import ru.hse.sd.rgb.utils.messaging.messages.*
 
 class WavePart(
     cell: ColorCellNoHp,
@@ -35,35 +37,13 @@ class WavePart(
         override val teamId = teamId
     }
 
-    override var behaviour: Behaviour = WavePartDefaultBehaviour(movePeriodMillis, dir)
+    override val behaviour = BehaviourBuilder.lifecycle(this)
+        .addBlocks {
+            add { DieOnFatalAttack(entity, childBlock) }
+            add { AttackOnCollision(entity, childBlock) }
+            add { DieOnCollision(entity, childBlock) }
+            add { MoveTowardsDirection(entity, childBlock, movePeriodMillis, dir) }
+        }.build()
+
     override val behaviourEntity = SingleBehaviourEntity(behaviour)
-
-    private inner class WavePartDefaultBehaviour(
-        movePeriodMillis: Long,
-        dir: Direction
-    ) : MoveSimpleBehaviour(this, movePeriodMillis) {
-
-        override var state = object : State() {
-
-            override suspend fun handleReceivedAttack(message: ReceivedAttack): State {
-                if (message.isFatal) controller.creation.die(this@WavePart)
-                return this
-            }
-
-            override suspend fun handleCollidedWith(message: CollidedWith): State {
-                if (message.otherUnit.parent.fightEntity.teamId == fightEntity.teamId) return this
-                controller.fighting.attack(message.myUnit, message.otherUnit)
-                controller.creation.die(this@WavePart)
-                return this
-            }
-
-            override suspend fun handleColorTick(tick: ColorTick): State = this
-
-            override suspend fun handleMoveTick(): State {
-                val moved = controller.physics.tryMove(this@WavePart, dir)
-                if (moved) controller.view.receive(EntityUpdated(this@WavePart))
-                return this
-            }
-        }
-    }
 }

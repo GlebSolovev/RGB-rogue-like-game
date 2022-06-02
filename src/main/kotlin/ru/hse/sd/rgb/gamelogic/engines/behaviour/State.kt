@@ -10,6 +10,7 @@ abstract class State {
     open suspend fun next(message: Message): State = when (message) {
         is ReceivedAttack -> handleReceivedAttack(message)
         is CollidedWith -> handleCollidedWith(message)
+        is DoMove -> handleDoMove()
         is UserMoved -> handleUserMoved(message)
         is UserToggledInventory -> handleUserToggledInventory()
         is UserSelect -> handleUserSelect()
@@ -20,11 +21,13 @@ abstract class State {
         is DieTick -> handleDieTick()
         is ContinueTick -> handleContinueTick()
         is WatcherTick -> handleWatcherTick()
+        is CloneTick -> handleCloneTick()
         else -> unreachable("State doesn't have method for this message")
     }
 
     open suspend fun handleReceivedAttack(message: ReceivedAttack): State = messageNotSupported
     open suspend fun handleCollidedWith(message: CollidedWith): State = messageNotSupported
+    open suspend fun handleDoMove(): State = messageNotSupported
 
     open suspend fun handleUserMoved(message: UserMoved): State = messageNotSupported
     open suspend fun handleUserToggledInventory(): State = messageNotSupported
@@ -38,6 +41,7 @@ abstract class State {
     open suspend fun handleDieTick(): State = messageNotSupported
     open suspend fun handleContinueTick(): State = messageNotSupported
     open suspend fun handleWatcherTick(): State = messageNotSupported
+    open suspend fun handleCloneTick(): State = messageNotSupported
 
     // TODO: message to change Behaviour, service, stop ticker
 

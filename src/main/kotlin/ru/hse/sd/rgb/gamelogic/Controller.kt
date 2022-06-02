@@ -2,14 +2,14 @@ package ru.hse.sd.rgb.gamelogic
 
 import kotlinx.coroutines.*
 import ru.hse.sd.rgb.gameloaders.*
-import ru.hse.sd.rgb.gameloaders.FileColorLoader
-import ru.hse.sd.rgb.gameloaders.RandomLevelLoader
-import ru.hse.sd.rgb.gameloaders.factories.*
+import ru.hse.sd.rgb.gameloaders.factories.FieryFactory
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.utils.messaging.*
+import ru.hse.sd.rgb.utils.messaging.Messagable
+import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.View
 import ru.hse.sd.rgb.views.swing.SwingView
 import java.util.concurrent.Executors
@@ -65,7 +65,7 @@ class Controller(val view: View) : Messagable() {
             chamberMinSize = 10
             heroInventory = InventoryDescription(8, 4)
             factory = FieryFactory()
-            heroColor = RGB(0, 0, 150)
+            heroColor = RGB(100, 0, 200)
         }
         val colorLoader = FileColorLoader(colorsFilename)
 
@@ -95,9 +95,10 @@ class Controller(val view: View) : Messagable() {
             // load engines before loading entities
             engines = loader.loadEngines()
 
+            hero = loader.loadHero() // invariant: hero always exists
+
             val level = loader.loadLevel()
             val (gameDesc, _) = level
-            hero = gameDesc.hero
 
             creation.addAllToWorld(gameDesc.allEntities) {
                 view.receive(GameViewStarted(level))

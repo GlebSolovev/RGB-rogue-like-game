@@ -45,13 +45,14 @@ enum class Direction {
 }
 
 val ignore = Unit
-val unreachable: Nothing
-    get() = throw RuntimeException("reached unreachable")
+val unreachable: Nothing get() = throw RuntimeException("reached unreachable")
 
 fun unreachable(info: Any): Nothing {
     System.err.println("unreachable! info: $info")
     unreachable
 }
+
+val notAllowed: Nothing get() = error("method not allowed")
 
 operator fun <T, U, V> Map<Pair<T, U>, V>.get(t: T, u: U) = this[t to u]
 

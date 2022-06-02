@@ -1,13 +1,21 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gamelogic.controller
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.AttackUponSeeingMetaBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.simple.PassiveBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.MoveUsingUpdatingPath
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.DirectAttackHeroBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.UponSeeingBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
+import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
+import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.structures.Paths2D
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
@@ -16,12 +24,11 @@ class Sharpy(
     colorCellHp: ColorCellHp,
     private val movePeriodMillis: Long,
     private val seeingDepth: Int,
-    private val watchPeriodMillis: Long,
     teamId: Int
 ) : GameEntity(setOf(colorCellHp)) {
 
     companion object {
-        const val DIRECT_ATTACK_MOVE_PERIOD_COEFFICIENT: Double = 4.0
+        const val DIRECT_ATTACK_MOVE_PERIOD_COEFFICIENT: Double = 0.25
     }
 
     override val viewEntity = object : ViewEntity() {
@@ -40,16 +47,24 @@ class Sharpy(
         override val teamId: Int = teamId
     }
 
-    override fun onLifeStart() {
-        behaviour = AttackUponSeeingMetaBehaviour(
-            PassiveBehaviour(this, movePeriodMillis), this,
-            controller.hero,
-            seeingDepth,
-            (movePeriodMillis / DIRECT_ATTACK_MOVE_PERIOD_COEFFICIENT).toLong(),
-            watchPeriodMillis
-        )
-    }
-
-    override lateinit var behaviour: Behaviour
+    override val behaviour = BehaviourBuilder.lifecycle(this)
+        .addBlocks {
+            add { MoveUsingUpdatingPath(entity, childBlock, movePeriodMillis) { Paths2D.randomWalk() } }
+            add {
+                EnableColorUpdate(
+                    entity,
+                    childBlock,
+                    ControlParams(AttackType.RANDOM_TARGET, HealType.RANDOM_TARGET)
+                )
+            }
+            add { AttackOnCollision(entity, childBlock) }
+            add { DieOnFatalAttack(entity, childBlock) }
+        }
+        .add {
+            UponSeeingBehaviour(entity, childBehaviour, controller.hero, seeingDepth) {
+                DirectAttackHeroBehaviour(it, (movePeriodMillis * DIRECT_ATTACK_MOVE_PERIOD_COEFFICIENT).toLong())
+            }
+        }
+        .build()
     override val behaviourEntity = BehaviourEntity()
 }

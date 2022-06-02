@@ -1,21 +1,23 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.SimpleBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
+import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
+import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.items.Inventory
-import ru.hse.sd.rgb.gamelogic.entities.*
 import ru.hse.sd.rgb.utils.Direction
-import ru.hse.sd.rgb.utils.ignore
-import ru.hse.sd.rgb.utils.messaging.*
+import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.sameAs
-import ru.hse.sd.rgb.views.*
+import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
@@ -70,17 +72,18 @@ class Hero(
         controller.view.receive(UnsubscribeFromMovement(this))
     }
 
-    override var behaviour: Behaviour = HeroBehaviour()
+    override val behaviour = BehaviourBuilder.lifecycle(this, HeroBehaviour()).build()
     override val behaviourEntity = SingleBehaviourEntity(behaviour)
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
 
-    private inner class HeroBehaviour : SimpleBehaviour(this) {
+    private inner class HeroBehaviour : NoneBehaviour(this) {
 
-        override var state: State = PlayingState()
+        private var state: State = PlayingState()
 
-        override fun startTickers() = ignore
-        override fun stopTickers() = ignore
+        override suspend fun handleMessage(message: Message) {
+            state = state.next(message)
+        }
 
         private open inner class PlayingState : State() {
             private var lastMoveTime = System.currentTimeMillis()
