@@ -45,7 +45,7 @@ class ColorModificationItem(
     override fun getNewItemEntity(cell: Cell): ItemEntity = ColorModificationEntity(cell, rgbDelta)
 }
 
-class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) : ItemEntity(cell, rgbDelta.saturate()) {
+class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) : ItemEntity(cell, rgbDelta.exaggerate()) {
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
             override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SPINNING_SQUARE)

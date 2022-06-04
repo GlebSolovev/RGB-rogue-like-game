@@ -180,7 +180,8 @@ class SwingView : View() {
                 drawables.remove(m.gameEntity)!!
             }
             is UserQuit -> this.also {
-                quitListeners.forEach { it.receive(m) }
+//                quitListeners.forEach { it.receive(m) } // this is unintuitive
+                inventoryListeners.forEach { it.receive(UserToggledInventory()) }
             }
             else -> unreachable(m)
         }

@@ -38,12 +38,11 @@ data class RGBDelta(val dr: Int, val dg: Int, val db: Int) {
         require(dr in -255..255 && dg in -255..255 && db in -255..255)
     }
 
-    fun saturate(): RGB {
-        // TODO: not representative
-        val max = maxOf(dr, dg, db, 1).toDouble()
-        val min = minOf(dr, dg, db, 0).toDouble()
-        fun scale(dc: Int) = (255 * (dc - min) / (max - min)).toInt()
-        return RGB(scale(dr), scale(dg), scale(db))
+    fun exaggerate(): RGB {
+        // TODO: still not that representative
+        fun limit(c: Int) = min(255, max(0, c))
+        fun exaggerate(dc: Int) = limit(128 * dc * 4)
+        return RGB(exaggerate(dr), exaggerate(dg), exaggerate(db))
     }
 }
 

@@ -267,8 +267,7 @@ class GameInventoryPanel(
             val itemsMaxX = invOffsetX + invGridW * itemSize
             val descMargin = ((width - itemsMaxX) * textMarginCoef).toInt()
 
-            // TODO: fix NPE (???)
-//            g.drawString(selItem.description, itemsMaxX + descMargin, invOffsetY)
+            g.drawString(selItem.description, itemsMaxX + descMargin, invOffsetY)
         }
 
         val statsMargin = (invOffsetX * textMarginCoef).toInt()

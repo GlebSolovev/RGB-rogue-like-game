@@ -10,8 +10,8 @@ abstract class Item(protected val color: RGB, protected val holder: GameEntity) 
     abstract class ViewItem(parent: Item) {
         abstract fun getSwingAppearance(): SwingUnitAppearance
 
-        val color = parent.color
-        val description = parent.description
+        val color by parent::color
+        val description by parent::description // delegate to avoid NPE due to init order in Item
     }
 
     abstract val viewItem: ViewItem
