@@ -1,13 +1,18 @@
 package ru.hse.sd.rgb.gameloaders
 
+import ru.hse.sd.rgb.gameloaders.factories.GenerationTable
 import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.gamelogic.items.scriptitems.ColorModificationEntity
+import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.nextChance
+import ru.hse.sd.rgb.utils.randomElementOrNull
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.structures.RGBDelta
 import kotlin.random.Random
 
 class RandomLevelLoader private constructor(
@@ -64,8 +69,6 @@ class RandomLevelLoader private constructor(
             entities.add(levelFactory.createWall(Cell(w - 1, y)))
         }
 
-
-
         repeat(levelFactory.sharpySpawnCount) {
             val emptyCells = getEmptyCells(w, h, entities)
             val sharpy = levelFactory.createSharpy(emptyCells.random())
@@ -73,13 +76,21 @@ class RandomLevelLoader private constructor(
         }
 
         maze.withCoords().forEach { (x, y, _) ->
-            if (random.nextChance(levelFactory.glitchSpawnRate)) {
-                val cell = Cell(x, y)
-                val currentEmptyCells = getEmptyCells(w, h, entities)
-                if (cell in currentEmptyCells) {
-                    val glitch = levelFactory.createGlitch(cell)
-                    entities.add(glitch)
+            fun trySpawnRandomGeneratedEntity(chance: Double, createEntity: (Cell) -> GameEntity) {
+                if (random.nextChance(chance)) {
+                    val cell = Cell(x, y)
+                    val currentEmptyCells = getEmptyCells(w, h, entities)
+                    if (cell in currentEmptyCells) {
+                        entities.add(createEntity(cell))
+                    }
                 }
+            }
+            trySpawnRandomGeneratedEntity(levelFactory.glitchSpawnRate) { cell ->
+                levelFactory.createGlitch(cell)
+            }
+            trySpawnRandomGeneratedEntity(levelFactory.colorModificationSpawnRate) {cell ->
+                val rgbDelta = levelFactory.colorModificationRGBDeltaGenerationTable.roll()
+                ColorModificationEntity(cell, rgbDelta)
             }
         }
 
@@ -157,6 +168,14 @@ class RandomLevelLoader private constructor(
                 override val sharpyHp: Int = 5
                 override val sharpyMovePeriodMillis: Long = 2000
                 override val sharpySeeingDepth: Int = 5
+
+                override val colorModificationSpawnRate = 1.0 / (30 * 30)
+                override val colorModificationRGBDeltaGenerationTable = GenerationTable.builder<RGBDelta>()
+                    .outcome(1) { RGBDelta(10, 0, 0) }
+                    .outcome(1) { RGBDelta(0, 10, 0) }
+                    .outcome(1) { RGBDelta(0, 0, 10) }
+                    .outcome(1) { RGBDelta(-10, -10, -10) }
+                    .build()
             }
         }
     }

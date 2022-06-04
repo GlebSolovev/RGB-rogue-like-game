@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.gameloaders.factories
 
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.structures.RGBDelta
 
 class ColdFactory : LevelContentFactory() {
 
@@ -17,4 +18,13 @@ class ColdFactory : LevelContentFactory() {
     override val sharpyHp: Int = 6
     override val sharpyMovePeriodMillis: Long = 1100
     override val sharpySeeingDepth: Int = 10
+
+    override val colorModificationSpawnRate = 1.0 / (20 * 20)
+    override val colorModificationRGBDeltaGenerationTable = GenerationTable.builder<RGBDelta>()
+        .outcome(7) { RGBDelta(0, 0, 15) }
+        .outcome(7) { RGBDelta(0, 10, 10) }
+        .outcome(7) { RGBDelta(10, -10, 30) }
+        .outcome(3) { RGBDelta(-20, 20, 40) }
+        .outcome(1) { RGBDelta(-50, 30, 50) }
+        .build()
 }

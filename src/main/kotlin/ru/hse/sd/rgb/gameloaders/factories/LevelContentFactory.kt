@@ -7,12 +7,15 @@ import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Sharpy
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.structures.RGBDelta
 
 abstract class LevelContentFactory {
 
     abstract val bgColor: RGB
     abstract val glitchSpawnRate: Double
     abstract val sharpySpawnCount: Int
+    abstract val colorModificationSpawnRate: Double
+    abstract val colorModificationRGBDeltaGenerationTable: GenerationTable<RGBDelta>
 
     protected abstract val wallColor: RGB
     open fun createWall(cell: Cell): Wall = Wall(wallColor, cell)
@@ -32,4 +35,5 @@ abstract class LevelContentFactory {
         sharpySeeingDepth,
         controller.fighting.newTeamId()
     )
+
 }

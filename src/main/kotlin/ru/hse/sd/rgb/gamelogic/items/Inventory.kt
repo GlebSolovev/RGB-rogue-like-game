@@ -65,7 +65,7 @@ class Inventory(
             selectedCell = nextCell
     }
 
-    fun useCurrent(): Boolean {
+    suspend fun useCurrent(): Boolean {
         val item = items[selectedCell] ?: return false
         item.use()
         if (!item.isReusable) items[selectedCell] = null

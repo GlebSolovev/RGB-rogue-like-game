@@ -7,6 +7,8 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.math.max
+import kotlin.math.min
 
 @Serializable(with = RGBSerializer::class)
 data class RGB(val r: Int, val g: Int, val b: Int) {
@@ -29,4 +31,25 @@ object RGBSerializer : KSerializer<RGB> {
         return RGB(r, g, b)
     }
 
+}
+
+data class RGBDelta(val dr: Int, val dg: Int, val db: Int) {
+    init {
+        require(dr in -255..255 && dg in -255..255 && db in -255..255)
+    }
+
+    fun saturate(): RGB {
+        // TODO: not representative
+        val max = maxOf(dr, dg, db, 1).toDouble()
+        val min = minOf(dr, dg, db, 0).toDouble()
+        fun scale(dc: Int) = (255 * (dc - min) / (max - min)).toInt()
+        return RGB(scale(dr), scale(dg), scale(db))
+    }
+}
+
+operator fun RGB.plus(delta: RGBDelta): RGB {
+    val (r, g, b) = this
+    val (dr, dg, db) = delta
+    fun limit(value: Int) = max(0, min(value, 255))
+    return RGB(limit(r + dr), limit(g + dg), limit(b + db))
 }

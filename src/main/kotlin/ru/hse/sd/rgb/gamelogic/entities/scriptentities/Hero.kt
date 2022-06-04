@@ -13,9 +13,11 @@ import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.items.Inventory
+import ru.hse.sd.rgb.gamelogic.items.ItemEntity
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.randomCell
 import ru.hse.sd.rgb.utils.sameAs
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
@@ -98,8 +100,17 @@ class Hero(
             }
 
             override suspend fun handleCollidedWith(message: CollidedWith): State {
-                controller.fighting.attack(message.myUnit, message.otherUnit)
-                // TODO: pick item instead of attacking
+                when (val itemEntity = message.otherUnit.parent) {
+                    is ItemEntity -> {
+                        val item = itemEntity.getNewItem(this@Hero)
+                        if (inventory.addItem(item)) {
+                            controller.creation.die(itemEntity)
+                        }
+                    }
+                    else -> {
+                        controller.fighting.attack(message.myUnit, message.otherUnit)
+                    }
+                }
                 return this
             }
 
@@ -157,8 +168,14 @@ class Hero(
             }
 
             override suspend fun handleUserDrop(): State {
-                inventory.dropCurrent()
-                // TODO: place item in world
+                val item = inventory.dropCurrent()
+                if (item != null) {
+                    // TODO: fix: one unit drops, on next move another picks
+                    val itemEntity = item.getNewItemEntity(randomCell())
+                    if (controller.creation.tryAddToWorld(itemEntity))
+                        controller.view.receive(EntityUpdated(itemEntity))
+                    // TODO: fix: when dropped on incompatible, entity doesn't spawn but the item is gone
+                }
                 sendInvUpdate()
                 return this
             }

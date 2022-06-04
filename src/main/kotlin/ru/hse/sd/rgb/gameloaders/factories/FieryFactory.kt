@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.gameloaders.factories
 
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.structures.RGBDelta
 
 class FieryFactory : LevelContentFactory() {
 
@@ -17,4 +18,12 @@ class FieryFactory : LevelContentFactory() {
     override val sharpyHp: Int = 4
     override val sharpyMovePeriodMillis: Long = 900
     override val sharpySeeingDepth: Int = 20
+
+    override val colorModificationSpawnRate = 1.0 / (20 * 20)
+    override val colorModificationRGBDeltaGenerationTable = GenerationTable.builder<RGBDelta>()
+        .outcome(5) { RGBDelta(20, 0, 0) }
+        .outcome(5) { RGBDelta(10, 5, 5) }
+        .outcome(1) { RGBDelta(50, 0, 0) }
+        .outcome(4) { RGBDelta(30, -10, -10) }
+        .build()
 }
