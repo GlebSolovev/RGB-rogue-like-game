@@ -12,6 +12,7 @@ import java.awt.geom.Ellipse2D
 import java.awt.geom.Path2D
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
+import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -131,6 +132,19 @@ private fun convertToSwingShape(
             )
             return Polygon(xs, ys, 12)
         }
+        SwingUnitShape.SPINNING_SQUARE -> {
+            val angleRad = ((System.currentTimeMillis() / 10) % 360 * 2 * PI / 360)
+            val cos = cos(angleRad)
+            val sin = sin(angleRad)
+            val cX = spX + tileSize.scaled() / 2
+            val cY = spY + tileSize.scaled() / 2
+            val unit = tileSize.scaled() / 2
+            return Polygon(
+                intArrayOf(cX + (cos imul unit), cX - (sin imul unit), cX - (cos imul unit), cX + (sin imul unit)),
+                intArrayOf(cY + (sin imul unit), cY + (cos imul unit), cY - (sin imul unit), cY - (cos imul unit)),
+                4
+            )
+        }
     }
 }
 
@@ -233,7 +247,8 @@ class GameInventoryPanel(
                 g.drawRect(pxX, pxY, itemSize, itemSize)
 
                 val item = invSnapshot.itemsGrid[Cell(gx, gy)]
-                if(item != null) {
+                if (item != null) {
+                    g.color = item.color.toSwingColor()
                     g.fill(convertToSwingShape(item.getSwingAppearance(), pxX, pxY, itemSize))
                 }
             }
@@ -248,11 +263,12 @@ class GameInventoryPanel(
         val textMarginCoef = 0.05 // TODO: constant (or parameter)
 
         val selItem = invSnapshot.itemsGrid[selCell]
-        if(selItem != null) {
+        if (selItem != null) {
             val itemsMaxX = invOffsetX + invGridW * itemSize
             val descMargin = ((width - itemsMaxX) * textMarginCoef).toInt()
 
-            g.drawString(selItem.getDescription(), itemsMaxX + descMargin, invOffsetY)
+            // TODO: fix NPE (???)
+//            g.drawString(selItem.description, itemsMaxX + descMargin, invOffsetY)
         }
 
         val statsMargin = (invOffsetX * textMarginCoef).toInt()
@@ -275,3 +291,5 @@ class LoadingPanel : JPanel() {
         g.drawArc(width / 2, height / 2, 50, 50, ((System.currentTimeMillis() / 10) % 360).toInt(), 300)
     }
 }
+
+private infix fun Double.imul(v: Int) = (this * v).toInt()

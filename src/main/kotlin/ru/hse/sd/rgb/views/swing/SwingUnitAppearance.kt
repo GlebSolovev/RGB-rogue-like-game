@@ -21,7 +21,8 @@ enum class SwingUnitShape {
     RECTANGLE_HORIZONTAL,
     RECTANGLE_VERTICAL,
     STAR_8,
-    PLUS
+    PLUS,
+    SPINNING_SQUARE,
     ;
 
     companion object {

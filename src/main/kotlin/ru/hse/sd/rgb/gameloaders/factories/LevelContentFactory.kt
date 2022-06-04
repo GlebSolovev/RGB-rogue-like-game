@@ -14,26 +14,29 @@ abstract class LevelContentFactory {
     abstract val bgColor: RGB
     abstract val glitchSpawnRate: Double
     abstract val sharpySpawnCount: Int
+
     abstract val colorModificationSpawnRate: Double
     abstract val colorModificationRGBDeltaGenerationTable: GenerationTable<RGBDelta>
 
-    protected abstract val wallColor: RGB
+    abstract val instantHealSpawnRate: Double
+    abstract val instantHealGenerationTable: GenerationTable<Int>
+
+    abstract val wallColor: RGB
     open fun createWall(cell: Cell): Wall = Wall(wallColor, cell)
 
-    protected abstract val glitchHp: Int
-    protected abstract val glitchClonePeriod: Long
+    abstract val glitchHp: Int
+    abstract val glitchClonePeriod: Long
     open fun createGlitch(cell: Cell): Glitch =
         Glitch(cell, glitchHp, glitchClonePeriod, controller.fighting.newTeamId())
 
-    protected abstract val sharpyColor: RGB
-    protected abstract val sharpyHp: Int
-    protected abstract val sharpyMovePeriodMillis: Long
-    protected abstract val sharpySeeingDepth: Int
+    abstract val sharpyColor: RGB
+    abstract val sharpyHp: Int
+    abstract val sharpyMovePeriodMillis: Long
+    abstract val sharpySeeingDepth: Int
     open fun createSharpy(cell: Cell): Sharpy = Sharpy(
         ColorCellHp(sharpyColor, cell, sharpyHp),
         sharpyMovePeriodMillis,
         sharpySeeingDepth,
         controller.fighting.newTeamId()
     )
-
 }

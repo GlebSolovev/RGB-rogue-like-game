@@ -63,7 +63,7 @@ class Controller(val view: View) : Messagable() {
             width = 70
             height = random(50..60)
             chamberMinSize = 10
-            heroInventory = InventoryDescription(8, 4)
+            heroInventory = InventoryDescription(3, 4)
             factory = FieryFactory()
             heroColor = RGB(100, 100, 100)
         }

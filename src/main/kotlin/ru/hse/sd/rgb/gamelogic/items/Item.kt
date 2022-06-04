@@ -1,14 +1,17 @@
 package ru.hse.sd.rgb.gamelogic.items
 
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 
-abstract class Item  {
+abstract class Item(protected val color: RGB, protected val holder: GameEntity) {
 
-    interface ViewItem {
-        fun getSwingAppearance(): SwingUnitAppearance
+    abstract class ViewItem(parent: Item) {
+        abstract fun getSwingAppearance(): SwingUnitAppearance
 
-        fun getDescription(): String
+        val color = parent.color
+        val description = parent.description
     }
 
     abstract val viewItem: ViewItem
@@ -17,4 +20,3 @@ abstract class Item  {
     abstract val isReusable: Boolean
     abstract val description: String
 }
-

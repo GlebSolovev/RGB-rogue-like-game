@@ -7,6 +7,7 @@ import ru.hse.sd.rgb.gamelogic.items.Item
 import ru.hse.sd.rgb.gamelogic.items.ItemEntity
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
+import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
 import ru.hse.sd.rgb.utils.structures.plus
 import ru.hse.sd.rgb.views.ViewUnit
@@ -14,13 +15,13 @@ import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
 class ColorModificationItem(
+    color: RGB,
+    holder: GameEntity,
     private val rgbDelta: RGBDelta, // TODO: isAbsolute
-    private val holder: GameEntity
-) : Item() {
+) : Item(color, holder) {
 
-    override val viewItem = object : ViewItem {
-        override fun getSwingAppearance() = SwingUnitAppearance(SwingUnitShape.PLUS)
-        override fun getDescription() = description
+    override val viewItem = object : ViewItem(this) {
+        override fun getSwingAppearance() = SwingUnitAppearance(SwingUnitShape.SPINNING_SQUARE, 0.9)
     }
 
     override val isReusable = false
@@ -33,7 +34,7 @@ class ColorModificationItem(
     }
 
     override val description = run {
-        fun colorToText(dc: Int) = if(dc > 0) "+$dc" else "$dc"
+        fun colorToText(dc: Int) = if (dc > 0) "+$dc" else "$dc"
         val (dr, dg, db) = rgbDelta
         val rt = colorToText(dr)
         val gt = colorToText(dg)
@@ -47,8 +48,10 @@ class ColorModificationItem(
 class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) : ItemEntity(cell, rgbDelta.saturate()) {
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.PLUS, 0.9)
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SPINNING_SQUARE)
         }
     }
-    override fun getNewItem(picker: GameEntity) = ColorModificationItem(rgbDelta, picker)
+
+    override fun getNewItem(picker: GameEntity) =
+        ColorModificationItem(this.units.first().gameColor, picker, rgbDelta)
 }

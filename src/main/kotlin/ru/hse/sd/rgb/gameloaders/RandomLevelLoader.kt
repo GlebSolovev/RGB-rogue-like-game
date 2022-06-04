@@ -7,6 +7,7 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.gamelogic.items.scriptitems.ColorModificationEntity
+import ru.hse.sd.rgb.gamelogic.items.scriptitems.InstantHealEntity
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.nextChance
 import ru.hse.sd.rgb.utils.randomElementOrNull
@@ -88,9 +89,13 @@ class RandomLevelLoader private constructor(
             trySpawnRandomGeneratedEntity(levelFactory.glitchSpawnRate) { cell ->
                 levelFactory.createGlitch(cell)
             }
-            trySpawnRandomGeneratedEntity(levelFactory.colorModificationSpawnRate) {cell ->
+            // TODO: fix occasional 'invalid entities' exception
+            trySpawnRandomGeneratedEntity(levelFactory.colorModificationSpawnRate) { cell ->
                 val rgbDelta = levelFactory.colorModificationRGBDeltaGenerationTable.roll()
                 ColorModificationEntity(cell, rgbDelta)
+            }
+            trySpawnRandomGeneratedEntity(levelFactory.instantHealSpawnRate) { cell ->
+                InstantHealEntity(cell, levelFactory.instantHealGenerationTable.roll())
             }
         }
 
@@ -175,6 +180,11 @@ class RandomLevelLoader private constructor(
                     .outcome(1) { RGBDelta(0, 10, 0) }
                     .outcome(1) { RGBDelta(0, 0, 10) }
                     .outcome(1) { RGBDelta(-10, -10, -10) }
+                    .build()
+
+                override val instantHealSpawnRate = 1.0 / (40 * 40)
+                override val instantHealGenerationTable = GenerationTable.builder<Int>()
+                    .outcome(1) { 1 }
                     .build()
             }
         }

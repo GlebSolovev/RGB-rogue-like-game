@@ -155,6 +155,14 @@ class FightEngine(
         }
     }
 
+    suspend fun heal(unit: GameUnit, amount: Int) {
+        withLockedUnits(setOf(unit)) {
+            if (unit is HpGameUnit) {
+                unit.hp += amount
+            }
+        }
+    }
+
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
         if (!unit.parent.fightEntity.isUnitActive(unit)) return
         withLockedUnits(setOf(unit)) {

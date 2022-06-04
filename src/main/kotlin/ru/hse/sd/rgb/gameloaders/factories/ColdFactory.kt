@@ -27,4 +27,10 @@ class ColdFactory : LevelContentFactory() {
         .outcome(3) { RGBDelta(-20, 20, 40) }
         .outcome(1) { RGBDelta(-50, 30, 50) }
         .build()
+
+    override val instantHealSpawnRate = 1.0 / (40 * 40)
+    override val instantHealGenerationTable = GenerationTable.builder<Int>()
+        .outcome(2) { 3 }
+        .outcome(1) { 5 }
+        .build()
 }
