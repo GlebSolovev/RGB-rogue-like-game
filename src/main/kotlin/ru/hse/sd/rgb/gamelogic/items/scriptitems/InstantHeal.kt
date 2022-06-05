@@ -39,5 +39,5 @@ class InstantHealEntity(cell: Cell, private val healAmount: Int) : ItemEntity(ce
         }
     }
 
-    override fun getNewItem(picker: GameEntity) = InstantHealItem(units.first().gameColor, picker, healAmount)
+    override fun getNewItemInternal(picker: GameEntity) = InstantHealItem(units.first().gameColor, picker, healAmount)
 }

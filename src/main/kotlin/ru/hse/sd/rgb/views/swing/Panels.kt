@@ -13,10 +13,7 @@ import java.awt.geom.Ellipse2D
 import java.awt.geom.Path2D
 import java.util.concurrent.atomic.AtomicReference
 import javax.swing.JPanel
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.roundToInt
-import kotlin.math.sin
+import kotlin.math.*
 
 private fun Graphics2D.enableFancyRendering() {
     this.setRenderingHints(
@@ -147,23 +144,23 @@ private fun convertToSwingShape(
             )
         }
         SwingUnitShape.SPIRAL -> {
-            val scaleCoef = 0.6
+            val scaleCoef = 0.8
             val unit = tileSize.scaled() / 2.0
 
             var curW = 2 * unit
-            var curH = 2 * unit
+            var curH = 2 * unit * scaleCoef
             fun offsetX() = (2 * unit - curW) / 2.0
             fun offsetY() = (2 * unit - curH) / 2.0
 
             fun arc(start: Double) =
-                Arc2D.Double(spX + offsetX(), spY + offsetY(), curW, curH, start, 100.0, Arc2D.CHORD)
+                Arc2D.Double(spX + offsetX(), spY + offsetY(), curW, curH, start, 110.0, Arc2D.CHORD)
 
-            var flag = false
+            var flag = true
             val arcs = (0..450 step 90).map {
-                if (flag) curW *= scaleCoef else curH *= scaleCoef
+                val result = arc((it % 360).toDouble())
+                if (flag) curW *= scaleCoef.pow(2) else curH *= scaleCoef.pow(2)
                 flag = !flag
-
-                arc((it % 360).toDouble())
+                result
             }
 
             val path = Path2D.Double()

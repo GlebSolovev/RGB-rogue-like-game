@@ -105,7 +105,7 @@ class Hero(
                 when (val itemEntity = message.otherUnit.parent) {
                     is ItemEntity -> {
                         val item = itemEntity.getNewItem(this@Hero)
-                        if (inventory.addItem(item)) {
+                        if (item != null && inventory.addItem(item)) {
                             controller.creation.die(itemEntity)
                         }
                     }
@@ -172,7 +172,6 @@ class Hero(
             override suspend fun handleUserDrop(): State {
                 val item = inventory.dropCurrent()
                 if (item != null) {
-                    // TODO: fix: one unit drops, on next move another picks
                     val itemEntity = item.getNewItemEntity(randomCell())
                     if (controller.creation.tryAddToWorld(itemEntity))
                         controller.view.receive(EntityUpdated(itemEntity))

@@ -52,6 +52,6 @@ class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) : Item
         }
     }
 
-    override fun getNewItem(picker: GameEntity) =
+    override fun getNewItemInternal(picker: GameEntity) =
         ColorModificationItem(this.units.first().gameColor, picker, rgbDelta)
 }

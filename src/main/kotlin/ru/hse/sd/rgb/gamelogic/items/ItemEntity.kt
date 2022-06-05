@@ -14,7 +14,13 @@ abstract class ItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNo
 
     abstract override val viewEntity: ViewEntity
 
-    abstract fun getNewItem(picker: GameEntity): Item
+    protected abstract fun getNewItemInternal(picker: GameEntity): Item
+
+    // null if not ready to be picked up
+    fun getNewItem(picker: GameEntity): Item? {
+        if (lifeStartTimeMillis == -1L || System.currentTimeMillis() - lifeStartTimeMillis < 3000) return null
+        return getNewItemInternal(picker)
+    }
 
     final override val physicalEntity = object : PhysicalEntity() {
         override val isSolid = false
@@ -30,4 +36,10 @@ abstract class ItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNo
     final override val lifecycle = BehaviourBuilder.lifecycle(this, itemBaseBehaviour).build()
 
     final override val behaviourEntity = SingleBehaviourEntity(itemBaseBehaviour)
+
+    private var lifeStartTimeMillis: Long = -1L
+
+    override fun onLifeStart() {
+        lifeStartTimeMillis = System.currentTimeMillis()
+    }
 }

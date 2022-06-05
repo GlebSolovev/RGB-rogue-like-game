@@ -53,7 +53,6 @@ class Lifecycle(
                             childBehaviour.traverseSubtree {
                                 val itChild = (it as? MetaBehaviour)?.childBehaviour
                                 if (itChild === message.target) {
-                                    println("actually removed!")
                                     it.childBehaviour = itChild.childBehaviour
                                     itChild.stopTickers()
                                 }

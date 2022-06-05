@@ -47,7 +47,6 @@ class RandomLevelLoader private constructor(
             .map { (x, y, _) -> Cell(x, y) }
             .shuffled()
             .first()
-        println(heroCell)
         val hero = Hero(
             setOf(ColorCellHp(heroColor, heroCell, heroHp)),
             heroInventory,
