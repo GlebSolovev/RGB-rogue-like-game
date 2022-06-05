@@ -10,7 +10,6 @@ import ru.hse.sd.rgb.gamelogic.items.scriptitems.ColorModificationEntity
 import ru.hse.sd.rgb.gamelogic.items.scriptitems.InstantHealEntity
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.nextChance
-import ru.hse.sd.rgb.utils.randomElementOrNull
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
@@ -42,8 +41,7 @@ class RandomLevelLoader private constructor(
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
         maze = generateMaze(w, h, chamberMinSize, passageSize)
 
-        val heroCell: Cell = getEmptyCells(w, h, entities).randomElementOrNull(random)
-            ?: throw IllegalStateException("no empty cells to spawn hero")
+        val heroCell = maze!!.withCoords().filterNot { it.value }.map { (x, y, _) -> Cell(x, y) }.random()
         val hero = Hero(
             setOf(ColorCellHp(heroColor, heroCell, heroHp)),
             heroInventory,
