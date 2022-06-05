@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.items.scriptitems
 
-import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.items.Item

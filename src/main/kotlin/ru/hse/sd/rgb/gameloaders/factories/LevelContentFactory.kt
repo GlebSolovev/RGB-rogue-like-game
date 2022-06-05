@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.gameloaders.factories
 
-import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Glitch
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Sharpy

@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.items
 
-import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp

@@ -2,7 +2,7 @@ package ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.*
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit

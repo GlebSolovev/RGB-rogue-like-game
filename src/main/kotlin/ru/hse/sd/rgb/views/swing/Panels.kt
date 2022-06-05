@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.views.swing
 
-import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.utils.Cell

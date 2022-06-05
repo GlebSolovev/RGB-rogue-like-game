@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks
 
-import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuildingBlock
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.Cell

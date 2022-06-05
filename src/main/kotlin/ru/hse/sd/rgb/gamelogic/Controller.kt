@@ -1,17 +1,17 @@
 package ru.hse.sd.rgb.gamelogic
 
 import kotlinx.coroutines.*
-import ru.hse.sd.rgb.gameloaders.*
-import ru.hse.sd.rgb.gameloaders.factories.FieryFactory
+import ru.hse.sd.rgb.gameloaders.ColorLoader
+import ru.hse.sd.rgb.gameloaders.Engines
+import ru.hse.sd.rgb.gameloaders.LevelLoader
+import ru.hse.sd.rgb.gameloaders.Loader
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
-import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.View
-import ru.hse.sd.rgb.views.swing.SwingView
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
@@ -36,10 +36,12 @@ fun onException() {
     exitProcess(5)
 }
 
-val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
-const val colorsFilename: String = "src/main/resources/gameColors.yaml"
 
-class Controller(val view: View) : Messagable() {
+class Controller(
+    val levelLoader: LevelLoader,
+    val colorLoader: ColorLoader,
+    val view: View
+    ) : Messagable() {
 
     private var stateRef: AtomicReference<ControllerState> = AtomicReference(GameInitState())
 
@@ -58,17 +60,6 @@ class Controller(val view: View) : Messagable() {
     }
 
     private inner class GameInitState : ControllerState() {
-
-        val levelLoader = RandomLevelLoader.builder {
-            width = 70
-            height = random(50..60)
-            chamberMinSize = 10
-            heroInventory = InventoryDescription(3, 4)
-            factory = FieryFactory()
-            heroColor = RGB(200, 60, 200)
-        }
-        val colorLoader = FileColorLoader(colorsFilename)
-
         val loader = Loader(levelLoader, colorLoader)
 
         override lateinit var engines: Engines
@@ -90,7 +81,6 @@ class Controller(val view: View) : Messagable() {
                 view.messagingRoutine()
             }
             view.receive(SubscribeToQuit(this@Controller))
-            // delay(700) // helps to see loading screen
 
             // load engines before loading entities
             engines = loader.loadEngines()
@@ -137,16 +127,4 @@ class Controller(val view: View) : Messagable() {
 
     val hero: Hero
         get() = stateRef.get().hero
-}
-
-var controller = Controller(SwingView()) // TODO: DI
-
-fun main() = runBlocking {
-    controller.receive(StartControllerMessage())
-    try {
-        controller.messagingRoutine()
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        onException()
-    }
 }

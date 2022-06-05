@@ -1,6 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.engines.fight
 
-import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.plus
 import ru.hse.sd.rgb.utils.randomCell
