@@ -1,10 +1,5 @@
 package ru.hse.sd.rgb.utils.structures
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import ru.hse.sd.rgb.utils.Cell
 
 class Grid2D<T>(val w: Int, val h: Int, init: (Int, Int) -> T) : AbstractCollection<T>() {
@@ -20,8 +15,6 @@ class Grid2D<T>(val w: Int, val h: Int, init: (Int, Int) -> T) : AbstractCollect
     override val size = w * h
 
     override fun iterator() = data.flatten().iterator()
-
-    fun getRawView(): List<List<T>> = data
 
     // ------------- operators and extensions -------------
 
@@ -48,27 +41,4 @@ class Grid2D<T>(val w: Int, val h: Int, init: (Int, Int) -> T) : AbstractCollect
         data.withIndex().map { (y, l) -> l.withIndex().map { (x, v) -> CoordinatedValue(x, y, v) } }.flatten()
 
     fun withIndex(): Nothing = throw UnsupportedOperationException()
-}
-
-object IntGrid2DSerializer : KSerializer<Grid2D<Int>> {
-    override val descriptor = PrimitiveSerialDescriptor("Grid2D", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: Grid2D<Int>) {
-        val v = value.getRawView()
-        val resultBuilder = StringBuilder("\n")
-        for (list in v) {
-            resultBuilder.append(list.joinToString(separator = " ")).append('\n')
-        }
-        encoder.encodeString(resultBuilder.toString())
-    }
-
-    override fun deserialize(decoder: Decoder): Grid2D<Int> {
-        val s = decoder.decodeString()
-        val lists = s.lineSequence()
-            .filterNot { it == "" }
-            .map { line ->
-                line.split("\\s+".toRegex()).map { it.toInt() }
-            }
-            .toList()
-        return Grid2D(lists)
-    }
 }

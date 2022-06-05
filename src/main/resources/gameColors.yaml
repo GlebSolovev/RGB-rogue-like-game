@@ -78,18 +78,28 @@ baseColors:
       - !<heal>
         isControllable: true
 
+  - name: "WONDER PURPLE"
+    rgb: 200 60 200
+    updatePeriodMillis: 4000
+    updateEffects:
+      - !<confuse>
+        movePeriodMillis: 150
+        confuseDurationMillis: 3000
+
 # matrix layout:
 #   from
 # t  . .
 # o  . .
-interactionMatrix: |
-  5   1   2   2   6   3   4   5   7   -1
-  5   1   2   2   6   3   4   5   7   -1
-  1   1   1   1   6   8   9   15  1   -1
-  1   1   1   1   6   8   9   15  1   -1
-  6   6   6   6   6   6   6   6   6   6
-  1   1   11  11  6   1   1   1   2   -1
-  1   1   10  10  6   1   1   1   2   -1
-  1   1   5   6   6   1   1   1   2   -3
-  1   1   1   1   6   2   3   5   0   -1
-  4   1   5   5   6   1   1   1   4   -1
+interactionMatrixRepresentation: [
+ # 0   1   2   3   4   5   6   7   8   9   10 FROM / TO:
+  "5   1   2   2   6   3   4   5   7   -1  1",   # 0 = SHARP STONE
+  "5   1   2   2   6   3   4   5   7   -1  1",   # 1 = NEWBIE GRAY
+  "1   1   1   1   6   8   9   15  1   -1  1",   # 2 = FIRE RED
+  "1   1   1   1   6   8   9   15  1   -1  1",   # 3 = FLAME RED
+  "6   6   6   6   6   6   6   6   6   6   6",   # 4 = HELL RED
+  "1   1   11  11  6   1   1   1   2   -1  1",   # 5 = SEA BLUE
+  "1   1   10  10  6   1   1   1   2   -1  1",   # 6 = OCEAN BLUE
+  "1   1   5   6   6   1   1   1   2   -3  1",   # 7 = CARIBBEAN BLUE
+  "1   1   1   1   6   2   3   5   0   -1  1",   # 8 = PLASMA VIOLET
+  "4   1   5   5   6   1   1   1   4   -1  1",   # 9 = FOREST GREEN
+  "2   1   2   2   6   2   2   2   2   -1  1"]   # 10 = WONDER PURPLE
