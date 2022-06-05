@@ -2,6 +2,7 @@ package ru.hse.sd.rgb.gamelogic.items
 
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
@@ -25,7 +26,8 @@ abstract class ItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNo
         override fun isUnitActive(unit: GameUnit) = false
     }
 
-    final override val behaviour = BehaviourBuilder.lifecycle(this).build()
+    private val itemBaseBehaviour = NoneBehaviour(this)
+    final override val lifecycle = BehaviourBuilder.lifecycle(this, itemBaseBehaviour).build()
 
-    final override val behaviourEntity = SingleBehaviourEntity(behaviour)
+    final override val behaviourEntity = SingleBehaviourEntity(itemBaseBehaviour)
 }

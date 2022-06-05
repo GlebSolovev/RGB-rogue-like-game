@@ -2,6 +2,7 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
@@ -36,6 +37,7 @@ class Wall(colorCells: Set<ColorCellNoHp>) : GameEntity(colorCells) {
         override val teamId = controller.fighting.newTeamId()
     }
 
-    override val behaviour = BehaviourBuilder.lifecycle(this).build()
-    override val behaviourEntity = SingleBehaviourEntity(behaviour)
+    private val wallBaseBehaviour = NoneBehaviour(this)
+    override val lifecycle = BehaviourBuilder.lifecycle(this, wallBaseBehaviour).build()
+    override val behaviourEntity = SingleBehaviourEntity(wallBaseBehaviour)
 }

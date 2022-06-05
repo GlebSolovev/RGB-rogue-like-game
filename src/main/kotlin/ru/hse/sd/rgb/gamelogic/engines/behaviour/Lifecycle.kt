@@ -4,23 +4,18 @@ import ru.hse.sd.rgb.gamelogic.controller
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
-import ru.hse.sd.rgb.utils.messaging.Tick
-import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
-import ru.hse.sd.rgb.utils.notAllowed
 import ru.hse.sd.rgb.utils.unreachable
-import kotlin.reflect.KClass
 
-class LifecycleBehaviour(
-    entity: GameEntity,
+class Lifecycle(
+    private val entity: GameEntity,
     private var childBehaviour: Behaviour
-) : Behaviour(entity) {
-
+) {
     private enum class LifecycleState { NOT_STARTED, ONGOING, DEAD }
 
     private var lifeCycleState: LifecycleState = LifecycleState.NOT_STARTED
 
-    override suspend fun handleMessage(message: Message) {
+    suspend fun handleMessage(message: Message) {
         when (lifeCycleState) {
             LifecycleState.NOT_STARTED -> {
                 when (message) {
@@ -46,14 +41,22 @@ class LifecycleBehaviour(
                     }
                     is ApplyBehaviourMessage -> {
                         childBehaviour = message.createNewBehaviour(childBehaviour)
+                        childBehaviour.startTickers()
                         entity.viewEntity.applyMessageToAppearance(message)
                     }
                     is RemoveBehaviourMessage -> {
-                        childBehaviour.traverseSubtree {
-                            val itChild = (it as? MetaBehaviour)?.childBehaviour
-                            if (itChild === message.target) {
-                                it.childBehaviour = itChild.childBehaviour
-                                itChild.stopTickers()
+                        val child = childBehaviour
+                        if (child === message.target) {
+                            childBehaviour = child.childBehaviour
+                            child.stopTickers()
+                        } else {
+                            childBehaviour.traverseSubtree {
+                                val itChild = (it as? MetaBehaviour)?.childBehaviour
+                                if (itChild === message.target) {
+                                    println("actually removed!")
+                                    it.childBehaviour = itChild.childBehaviour
+                                    itChild.stopTickers()
+                                }
                             }
                         }
                         entity.viewEntity.applyMessageToAppearance(message)
@@ -73,7 +76,7 @@ class LifecycleBehaviour(
         }
     }
 
-    override fun tickersGroup(tickClass: KClass<out Tick>) = notAllowed
-    override fun traverseTickers(onEach: (Ticker) -> Unit) = notAllowed
-    override fun traverseSubtree(onEach: (Behaviour) -> Unit) = notAllowed
+//    override fun tickersGroup(tickClass: KClass<out Tick>) = notAllowed
+//    override fun traverseTickers(onEach: (Ticker) -> Unit) = notAllowed
+//    override fun traverseSubtree(onEach: (Behaviour) -> Unit) = notAllowed
 }

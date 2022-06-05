@@ -62,7 +62,7 @@ object BehaviourBuilder {
     interface LifecycleBuilder {
         fun add(block: BehaviourBuilderContext.() -> Behaviour): LifecycleBuilder
         fun addBlocks(b: InlineBehaviourFromBlocksBuilder.() -> Unit): LifecycleBuilder
-        fun build(): LifecycleBehaviour
+        fun build(): Lifecycle
     }
 
     fun lifecycle(
@@ -113,8 +113,8 @@ object BehaviourBuilder {
             return this
         }
 
-        override fun build(): LifecycleBehaviour {
-            return LifecycleBehaviour(entity, topBehaviour)
+        override fun build(): Lifecycle {
+            return Lifecycle(entity, topBehaviour)
         }
     }
 

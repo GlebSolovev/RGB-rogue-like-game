@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnCollision
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
@@ -37,7 +38,8 @@ class WavePart(
         override val teamId = teamId
     }
 
-    override val behaviour = BehaviourBuilder.lifecycle(this)
+    private val wavePartBaseBehaviour = NoneBehaviour(this)
+    override val lifecycle = BehaviourBuilder.lifecycle(this, wavePartBaseBehaviour)
         .addBlocks {
             add { DieOnFatalAttack(entity, childBlock) }
             add { AttackOnCollision(entity, childBlock) }
@@ -45,5 +47,5 @@ class WavePart(
             add { MoveTowardsDirection(entity, childBlock, movePeriodMillis, dir) }
         }.build()
 
-    override val behaviourEntity = SingleBehaviourEntity(behaviour)
+    override val behaviourEntity = SingleBehaviourEntity(wavePartBaseBehaviour)
 }

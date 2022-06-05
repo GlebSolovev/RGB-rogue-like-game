@@ -105,11 +105,7 @@ class FileLevelLoader(levelFilename: String) : LevelLoader {
             for (x in 0 until w) {
                 val word = scanner.next()
                 if (word == ".") continue
-                if (word.length != 2) throw WrongConfigError("entity unit description length must be 2").also {
-                    println(
-                        word
-                    )
-                }
+                if (word.length != 2) throw WrongConfigError("entity unit description length must be 2")
                 val entityShortName = word[0].toString()
                 val colorName = word[1].toString()
                 val entityBuilder = shortNameBuilders[entityShortName] ?: throw WrongConfigError("entity not found")

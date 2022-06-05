@@ -54,7 +54,16 @@ class Glitch(
         override val teamId = this@Glitch.teamId
     }
 
-    override val behaviour = BehaviourBuilder.lifecycle(this, object : NoneBehaviour(this) {
+    private val glitchBaseBehaviour = GlitchBaseBehaviour()
+    override val lifecycle = BehaviourBuilder.lifecycle(this, glitchBaseBehaviour).addBlocks {
+        add { AttackOnCollision(entity, childBlock) }
+        add { DieOnFatalAttack(entity, childBlock) }
+        add { EnableColorUpdate(entity, childBlock, ControlParams(AttackType.HERO_TARGET, HealType.RANDOM_TARGET)) }
+    }.build()
+
+    override val behaviourEntity = SingleBehaviourEntity(glitchBaseBehaviour) // TODO: normal behaviourEntity
+
+    private inner class GlitchBaseBehaviour : NoneBehaviour(this) {
         private val repaintTicker = Ticker(REPAINT_PERIOD_MILLIS, this@Glitch, RepaintTick())
         private val cloneTicker = Ticker(clonePeriodMillis, this@Glitch, CloneTick())
 
@@ -81,13 +90,7 @@ class Glitch(
                 }
             }
         }
-    }).addBlocks {
-        add { AttackOnCollision(entity, childBlock) }
-        add { DieOnFatalAttack(entity, childBlock) }
-        add { EnableColorUpdate(entity, childBlock, ControlParams(AttackType.HERO_TARGET, HealType.RANDOM_TARGET)) }
-    }.build()
-
-    override val behaviourEntity = SingleBehaviourEntity(behaviour) // TODO: normal behaviourEntity
+    }
 
     private fun clone(targetCell: Cell): Glitch =
         Glitch(targetCell, (units.first() as HpGameUnit).hp, clonePeriodMillis, teamId)

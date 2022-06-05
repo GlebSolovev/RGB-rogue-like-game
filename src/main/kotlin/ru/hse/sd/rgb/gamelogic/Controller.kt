@@ -65,7 +65,7 @@ class Controller(val view: View) : Messagable() {
             chamberMinSize = 10
             heroInventory = InventoryDescription(3, 4)
             factory = FieryFactory()
-            heroColor = RGB(100, 100, 100)
+            heroColor = RGB(200, 60, 200)
         }
         val colorLoader = FileColorLoader(colorsFilename)
 

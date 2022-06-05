@@ -146,6 +146,32 @@ private fun convertToSwingShape(
                 4
             )
         }
+        SwingUnitShape.SPIRAL -> {
+            val scaleCoef = 0.6
+            val unit = tileSize.scaled() / 2.0
+
+            var curW = 2 * unit
+            var curH = 2 * unit
+            fun offsetX() = (2 * unit - curW) / 2.0
+            fun offsetY() = (2 * unit - curH) / 2.0
+
+            fun arc(start: Double) =
+                Arc2D.Double(spX + offsetX(), spY + offsetY(), curW, curH, start, 100.0, Arc2D.CHORD)
+
+            var flag = false
+            val arcs = (0..450 step 90).map {
+                if (flag) curW *= scaleCoef else curH *= scaleCoef
+                flag = !flag
+
+                arc((it % 360).toDouble())
+            }
+
+            val path = Path2D.Double()
+            for (arc in arcs) {
+                path.append(arc, false)
+            }
+            return path
+        }
     }
 }
 

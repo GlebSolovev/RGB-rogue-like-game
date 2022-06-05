@@ -2,15 +2,11 @@ package ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
-import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
-import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.controller
+import ru.hse.sd.rgb.gamelogic.engines.fight.*
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Fireball
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
-import ru.hse.sd.rgb.utils.*
 
 @Serializable
 @SerialName("fireball")
@@ -29,14 +25,7 @@ class FireballEffect(
         if (attackType == AttackType.NO_ATTACK) return
 
         repeat(count) {
-            val targetCell = when (attackType) {
-                AttackType.HERO_TARGET -> controller.hero.randomCell()
-                AttackType.RANDOM_TARGET -> controller.physics.generateRandomTarget(unit.parent)
-                AttackType.LAST_MOVE_DIR ->
-                    if (it == 0) unit.cell + unit.lastMoveDir.toShift()
-                    else controller.physics.generateRandomTarget(unit.parent)
-                else -> unreachable
-            }
+            val targetCell = attackTargetCell(attackType, unit, it)!!
 
             val fireball = Fireball(
                 ColorCellNoHp(unit.gameColor, unit.cell),

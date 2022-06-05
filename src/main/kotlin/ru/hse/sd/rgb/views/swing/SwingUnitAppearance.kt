@@ -23,6 +23,7 @@ enum class SwingUnitShape {
     STAR_8,
     PLUS,
     SPINNING_SQUARE,
+    SPIRAL,
     ;
 
     companion object {

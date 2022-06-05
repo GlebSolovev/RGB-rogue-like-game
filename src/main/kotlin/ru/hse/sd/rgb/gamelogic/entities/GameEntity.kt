@@ -1,10 +1,8 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.LifecycleBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.DirectAttackHeroBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.DirectFleeFromHeroBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.UponSeeingBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.Lifecycle
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.*
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
@@ -58,12 +56,22 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         ): Behaviour = DirectFleeFromHeroBehaviour(baseBehaviour, movePeriodMillis)
 
         open fun createUponSeeingBehaviour(
-            entity: GameEntity,
             childBehaviour: Behaviour,
             targetEntity: GameEntity,
             seeingDepth: Int,
             createSeeingBehaviour: (Behaviour) -> Behaviour
-        ): Behaviour = UponSeeingBehaviour(entity, childBehaviour, targetEntity, seeingDepth, createSeeingBehaviour)
+        ): Behaviour =
+            UponSeeingBehaviour(this@GameEntity, childBehaviour, targetEntity, seeingDepth, createSeeingBehaviour)
+
+        open fun createConfusedBehaviour(
+            childBehaviour: Behaviour,
+        ): Behaviour = ConfusedBehaviour(this@GameEntity, childBehaviour)
+
+        open fun createExpiringBehaviour(
+            childBehaviour: Behaviour,
+            lastingPeriodMillis: Long,
+            createTemporaryBehaviour: (Behaviour) -> Behaviour,
+        ): Behaviour = ExpiringBehaviour(this@GameEntity, childBehaviour, lastingPeriodMillis, createTemporaryBehaviour)
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
@@ -74,11 +82,18 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
             singleBehaviour
 
         override fun createUponSeeingBehaviour(
-            entity: GameEntity,
             childBehaviour: Behaviour,
             targetEntity: GameEntity,
             seeingDepth: Int,
             createSeeingBehaviour: (Behaviour) -> Behaviour
+        ): Behaviour = singleBehaviour
+
+        override fun createConfusedBehaviour(childBehaviour: Behaviour): Behaviour = singleBehaviour
+
+        override fun createExpiringBehaviour(
+            childBehaviour: Behaviour,
+            lastingPeriodMillis: Long,
+            createTemporaryBehaviour: (Behaviour) -> Behaviour
         ): Behaviour = singleBehaviour
     }
 
@@ -102,7 +117,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     open fun onLifeStart() {}
     open fun onLifeEnd() {}
 
-    abstract val behaviour: LifecycleBehaviour
+    abstract val lifecycle: Lifecycle
 
-    override suspend fun handleMessage(m: Message) = behaviour.handleMessage(m)
+    override suspend fun handleMessage(m: Message) = lifecycle.handleMessage(m)
 }

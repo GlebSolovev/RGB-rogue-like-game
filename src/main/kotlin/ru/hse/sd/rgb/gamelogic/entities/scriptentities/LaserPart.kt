@@ -42,11 +42,12 @@ class LaserPart(
         override val teamId = this@LaserPart.teamId
     }
 
-    override val behaviour = BehaviourBuilder.lifecycle(this, LaserPartDefaultBehaviour())
+    private val laserPartDefaultBehaviour = LaserPartDefaultBehaviour()
+    override val lifecycle = BehaviourBuilder.lifecycle(this, laserPartDefaultBehaviour)
         .addBlocks {
             add { AttackOnCollision(entity, childBlock) }
         }.build()
-    override val behaviourEntity = SingleBehaviourEntity(behaviour)
+    override val behaviourEntity = SingleBehaviourEntity(laserPartDefaultBehaviour)
 
     private inner class LaserPartDefaultBehaviour : NoneBehaviour(this) {
 

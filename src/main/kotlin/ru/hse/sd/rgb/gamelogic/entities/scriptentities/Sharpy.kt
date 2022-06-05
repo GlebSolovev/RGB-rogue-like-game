@@ -47,7 +47,7 @@ class Sharpy(
         override val teamId: Int = teamId
     }
 
-    override val behaviour = BehaviourBuilder.lifecycle(this)
+    override val lifecycle = BehaviourBuilder.lifecycle(this)
         .addBlocks {
             add { MoveUsingUpdatingPath(entity, childBlock, movePeriodMillis) { Paths2D.randomWalk() } }
             add {

@@ -31,7 +31,6 @@ class BehaviourEngine {
     ) {
         entity.receive(ApplyBehaviourMessage {
             entity.behaviourEntity.createUponSeeingBehaviour(
-                entity,
                 it,
                 targetEntity,
                 seeingDepth,
@@ -40,4 +39,29 @@ class BehaviourEngine {
         })
     }
 
+    // note: is permanent
+    fun applyConfusedBehaviour(
+        entity: GameEntity,
+    ) {
+        entity.receive(ApplyBehaviourMessage {
+            entity.behaviourEntity.createConfusedBehaviour(it)
+        })
+    }
+
+    // TODO: currently caller must use entity.behaviourEntity to create appropriate temporary behaviour
+    // but the whole purpose of this class is to avoid that
+
+    fun applyExpiringBehaviour(
+        entity: GameEntity,
+        durationPeriodMillis: Long,
+        createTemporaryBehaviour: (Behaviour) -> Behaviour,
+    ) {
+        entity.receive(ApplyBehaviourMessage {
+            entity.behaviourEntity.createExpiringBehaviour(
+                it,
+                durationPeriodMillis,
+                createTemporaryBehaviour
+            )
+        })
+    }
 }

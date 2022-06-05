@@ -18,7 +18,6 @@ import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.randomCell
-import ru.hse.sd.rgb.utils.sameAs
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
@@ -40,16 +39,18 @@ class Hero(
         }
 
         override fun applyMessageToAppearance(m: Message) {
-            // TODO: allow to easily reuse this code in other GameEntities (maybe use mixins?)
-            if (m is ReceivedAttack) {
-                val unit = m.myUnit as HpGameUnit
-                val scale = unit.hp.toDouble() / unit.maxHp
-                if (scale sameAs 1.0) {
-                    scaleFactors.remove(unit)
-                } else {
-                    scaleFactors[unit] = scale
+            // TODO: allow to easily reuse this code in other GameEntities
+            when (m) {
+                is HpChanged -> {
+                    val unit = m.myUnit as HpGameUnit
+                    val scale = unit.hp.toDouble() / unit.maxHp
+                    if (scale >= 0.999) {
+                        scaleFactors.remove(unit)
+                    } else {
+                        scaleFactors[unit] = scale
+                    }
+                    controller.view.receive(EntityUpdated(this@Hero))
                 }
-                controller.view.receive(EntityUpdated(this@Hero))
             }
         }
     }
@@ -74,8 +75,9 @@ class Hero(
         controller.view.receive(UnsubscribeFromMovement(this))
     }
 
-    override val behaviour = BehaviourBuilder.lifecycle(this, HeroBehaviour()).build()
-    override val behaviourEntity = SingleBehaviourEntity(behaviour)
+    private val heroBehaviour = HeroBehaviour()
+    override val lifecycle = BehaviourBuilder.lifecycle(this, heroBehaviour).build()
+    override val behaviourEntity = SingleBehaviourEntity(heroBehaviour)
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
 
@@ -91,7 +93,7 @@ class Hero(
             private var lastMoveTime = System.currentTimeMillis()
             private lateinit var lastMoveDir: Direction
 
-            override suspend fun handleReceivedAttack(message: ReceivedAttack): State {
+            override suspend fun handleHpChanged(message: HpChanged): State {
                 if (message.isFatal) {
                     controller.creation.die(this@Hero)
                     controller.receive(FinishControllerMessage(false))

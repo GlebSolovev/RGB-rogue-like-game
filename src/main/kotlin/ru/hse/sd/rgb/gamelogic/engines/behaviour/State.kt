@@ -8,7 +8,7 @@ import ru.hse.sd.rgb.utils.unreachable
 abstract class State {
 
     open suspend fun next(message: Message): State = when (message) {
-        is ReceivedAttack -> handleReceivedAttack(message)
+        is HpChanged -> handleHpChanged(message)
         is CollidedWith -> handleCollidedWith(message)
         is DoMove -> handleDoMove()
         is UserMoved -> handleUserMoved(message)
@@ -25,7 +25,7 @@ abstract class State {
         else -> unreachable("State doesn't have method for this message")
     }
 
-    open suspend fun handleReceivedAttack(message: ReceivedAttack): State = messageNotSupported
+    open suspend fun handleHpChanged(message: HpChanged): State = messageNotSupported
     open suspend fun handleCollidedWith(message: CollidedWith): State = messageNotSupported
     open suspend fun handleDoMove(): State = messageNotSupported
 

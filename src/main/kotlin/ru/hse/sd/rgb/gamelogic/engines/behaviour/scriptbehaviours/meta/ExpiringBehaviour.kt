@@ -12,13 +12,13 @@ class ExpiringBehaviour(
     entity: GameEntity,
     childBehaviour: Behaviour,
     lastingPeriodMillis: Long,
-    temporaryBehaviourFromChild: (Behaviour) -> Behaviour,
+    createTemporaryBehaviour: (Behaviour) -> Behaviour,
 ) : MetaBehaviour(entity, childBehaviour) {
 
     private val expireTick = ExpireTick()
     private val expiryTicker = Ticker(lastingPeriodMillis, entity, expireTick)
 
-    private val temporaryBehaviour = temporaryBehaviourFromChild(childBehaviour)
+    private val temporaryBehaviour = createTemporaryBehaviour(childBehaviour)
 
     override fun traverseTickers(onEach: (Ticker) -> Unit) {
         onEach(expiryTicker)

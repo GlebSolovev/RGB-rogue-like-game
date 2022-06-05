@@ -8,7 +8,7 @@ import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
-import ru.hse.sd.rgb.utils.messaging.messages.ReceivedAttack
+import ru.hse.sd.rgb.utils.messaging.messages.HpChanged
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.unreachable
@@ -72,7 +72,7 @@ class FightEngine(
                 if (to.hp > to.maxHp) to.hp = to.maxHp
                 to.hp <= 0
             } else false
-            to.parent.receive(ReceivedAttack(to, from, isFatal))
+            to.parent.receive(HpChanged(to, isFatal))
         }
 
         fun updateUnitTicker(unit: GameUnit, updatePeriodMillis: Long?) {
@@ -160,6 +160,7 @@ class FightEngine(
             if (unit is HpGameUnit) {
                 unit.hp += amount
             }
+            unit.parent.receive(HpChanged(unit, false))
         }
     }
 

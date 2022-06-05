@@ -7,7 +7,7 @@ import ru.hse.sd.rgb.utils.messaging.Message
 // messages required to be handled in Behaviour-s
 
 // game logic messages
-data class ReceivedAttack(val myUnit: GameUnit, val fromUnit: GameUnit, val isFatal: Boolean) : Message()
+data class HpChanged(val myUnit: GameUnit, val isFatal: Boolean) : Message()
 data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : Message()
 class DoMove : Message()
 
