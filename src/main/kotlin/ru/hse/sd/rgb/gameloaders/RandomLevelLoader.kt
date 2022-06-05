@@ -41,7 +41,13 @@ class RandomLevelLoader private constructor(
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
         maze = generateMaze(w, h, chamberMinSize, passageSize)
 
-        val heroCell = maze!!.withCoords().filterNot { it.value }.map { (x, y, _) -> Cell(x, y) }.random()
+        val heroCell = maze!!.withCoords().asSequence()
+            .filterNot { it.value }
+            .filterNot { it.x == 0 || it.x == w - 1 || it.y == 0 || it.y == h - 1 }
+            .map { (x, y, _) -> Cell(x, y) }
+            .shuffled()
+            .first()
+        println(heroCell)
         val hero = Hero(
             setOf(ColorCellHp(heroColor, heroCell, heroHp)),
             heroInventory,
@@ -53,7 +59,7 @@ class RandomLevelLoader private constructor(
 
     override fun loadLevelDescription(): LevelDescription {
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
-        val maze = maze ?: throw IllegalStateException("loadLevelHero() has not been called yet")
+        val maze = maze ?: throw IllegalStateException("loadHero() has not been called yet")
 
         for (x in 1 until w - 1) for (y in 1 until h - 1) if (maze[x, y]) entities.add(
             levelFactory.createWall(Cell(x, y))
