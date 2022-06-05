@@ -7,6 +7,7 @@ import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.views.DrawablesMap
 import java.awt.*
+import java.awt.font.TextLayout
 import java.awt.geom.Arc2D
 import java.awt.geom.Ellipse2D
 import java.awt.geom.Path2D
@@ -267,14 +268,14 @@ class GameInventoryPanel(
             val itemsMaxX = invOffsetX + invGridW * itemSize
             val descMargin = ((width - itemsMaxX) * textMarginCoef).toInt()
 
-            g.drawString(selItem.description, itemsMaxX + descMargin, invOffsetY)
+            g.drawTextCustom(selItem.description, itemsMaxX + descMargin, invOffsetY)
         }
 
         val statsMargin = (invOffsetX * textMarginCoef).toInt()
         val hero = controller.hero
         val hps = hero.units.map { (it as HpGameUnit).hp }
         val rgbs = hero.units.map { it.gameColor }
-        g.drawString("Stats:   HP=$hps   RGB=$rgbs", statsMargin, invOffsetY)
+        g.drawTextCustom("Stats:   HP=$hps   RGB=$rgbs", statsMargin, invOffsetY)
         // TODO: display info per each unit properly
     }
 
@@ -292,3 +293,10 @@ class LoadingPanel : JPanel() {
 }
 
 private infix fun Double.imul(v: Int) = (this * v).toInt()
+
+private val customFont = Font(Font.SANS_SERIF, Font.BOLD, 20)
+
+fun Graphics2D.drawTextCustom(text: String, atX: Int, atY: Int) {
+    val textLayout = TextLayout(text, customFont, fontRenderContext)
+    textLayout.draw(this, atX.toFloat(), atY.toFloat())
+}

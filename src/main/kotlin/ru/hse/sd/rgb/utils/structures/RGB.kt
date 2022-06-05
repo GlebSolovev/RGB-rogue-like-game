@@ -39,9 +39,8 @@ data class RGBDelta(val dr: Int, val dg: Int, val db: Int) {
     }
 
     fun exaggerate(): RGB {
-        // TODO: still not that representative
         fun limit(c: Int) = min(255, max(0, c))
-        fun exaggerate(dc: Int) = limit(128 * dc * 4)
+        fun exaggerate(dc: Int) = limit(128 + dc * 4)
         return RGB(exaggerate(dr), exaggerate(dg), exaggerate(db))
     }
 }
