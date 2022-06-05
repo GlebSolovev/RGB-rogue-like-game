@@ -46,8 +46,9 @@ class LifecycleBehaviour(
                     }
                     is ApplyBehaviourMessage -> {
                         childBehaviour = message.createNewBehaviour(childBehaviour)
+                        entity.viewEntity.applyMessageToAppearance(message)
                     }
-                    is RemoveBehaviour -> {
+                    is RemoveBehaviourMessage -> {
                         childBehaviour.traverseSubtree {
                             val itChild = (it as? MetaBehaviour)?.childBehaviour
                             if (itChild === message.target) {
@@ -55,6 +56,7 @@ class LifecycleBehaviour(
                                 itChild.stopTickers()
                             }
                         }
+                        entity.viewEntity.applyMessageToAppearance(message)
                     }
                     else -> {
                         childBehaviour.handleMessage(message)
