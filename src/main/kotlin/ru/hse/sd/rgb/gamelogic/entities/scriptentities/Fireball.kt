@@ -9,8 +9,8 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.structures.Cell
+import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
@@ -49,5 +49,4 @@ class Fireball(
     override val lifecycle = BehaviourBuilder.lifecycle(this)
         .add { behaviour }
         .build()
-
 }

@@ -4,7 +4,7 @@ import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.unreachable
 
-// TODO: put Entity here and create defaults
+@Suppress("TooManyFunctions")
 abstract class State {
 
     open suspend fun next(message: Message): State = when (message) {
@@ -22,6 +22,7 @@ abstract class State {
         is ContinueTick -> handleContinueTick()
         is WatcherTick -> handleWatcherTick()
         is CloneTick -> handleCloneTick()
+        is ExpireTick -> handleExpireTick()
         else -> unreachable("State doesn't have method for this message")
     }
 
@@ -42,6 +43,7 @@ abstract class State {
     open suspend fun handleContinueTick(): State = messageNotSupported
     open suspend fun handleWatcherTick(): State = messageNotSupported
     open suspend fun handleCloneTick(): State = messageNotSupported
+    open suspend fun handleExpireTick(): State = messageNotSupported
 
     // TODO: message to change Behaviour, service, stop ticker
 

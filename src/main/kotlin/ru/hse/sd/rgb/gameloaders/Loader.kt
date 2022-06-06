@@ -74,5 +74,4 @@ class Loader(
     fun loadHero(): Hero = levelLoader.loadHero()
 
     fun loadLevel(): LevelDescription = levelLoader.loadLevelDescription()
-
 }

@@ -11,7 +11,6 @@ abstract class ViewUnit(parentUnit: GameUnit) { // TODO: add layers?
     val rgb = parentUnit.gameColor
 
     abstract val swingAppearance: SwingUnitAppearance
-
 }
 
 typealias GameEntityViewSnapshot = Set<ViewUnit>

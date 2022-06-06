@@ -76,7 +76,7 @@ class UponSeeingBehaviour(
             startCell,
             seeingDepth,
             { !it.parent.physicalEntity.isSolid },
-            { it.parent == targetEntity })
+            { it.parent == targetEntity }
+        )
     }
-
 }

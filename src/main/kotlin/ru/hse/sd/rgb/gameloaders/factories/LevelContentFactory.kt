@@ -5,7 +5,7 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Glitch
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Sharpy
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
-import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
 
@@ -41,6 +41,7 @@ abstract class LevelContentFactory {
     abstract val instantHealGenerationTable: GenerationTable<Int>
 }
 
+@Suppress("MagicNumber")
 fun GenerationTableBuilder<RGBDelta>.addDefaults(eachWeight: Int = 1) = apply {
     outcome(eachWeight) { RGBDelta(20, 0, 0) }
     outcome(eachWeight) { RGBDelta(0, 20, 0) }

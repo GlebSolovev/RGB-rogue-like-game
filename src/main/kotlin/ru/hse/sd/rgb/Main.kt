@@ -1,6 +1,7 @@
+@file:Suppress("TooGenericExceptionCaught", "MagicNumber")
+
 package ru.hse.sd.rgb
 
-import kotlinx.coroutines.runBlocking
 import ru.hse.sd.rgb.gameloaders.FileColorLoader
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.gameloaders.RandomLevelLoader
@@ -10,9 +11,10 @@ import ru.hse.sd.rgb.gamelogic.onException
 import ru.hse.sd.rgb.utils.messaging.messages.StartControllerMessage
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.swing.SwingView
+import kotlinx.coroutines.runBlocking
 
-//private val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
-private const val colorsFilename: String = "src/main/resources/gameColors.yaml"
+// private val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
+private const val COLORS_FILENAME: String = "src/main/resources/gameColors.yaml"
 
 private val levelLoader = RandomLevelLoader.builder {
     width = 70
@@ -26,8 +28,8 @@ private val levelLoader = RandomLevelLoader.builder {
 
 val controller = Controller(
     levelLoader,
-    FileColorLoader(colorsFilename),
-    SwingView()
+    FileColorLoader(COLORS_FILENAME),
+    SwingView(10)
 ) // TODO: DI
 
 fun main() = runBlocking {

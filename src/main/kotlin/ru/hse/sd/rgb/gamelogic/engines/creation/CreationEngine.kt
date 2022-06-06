@@ -1,7 +1,5 @@
 package ru.hse.sd.rgb.gamelogic.engines.creation
 
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
@@ -9,6 +7,8 @@ import ru.hse.sd.rgb.gamelogic.gameCoroutineScope
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
 import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
 class CreationEngine(private val physics: PhysicsEngine, private val fightEngine: FightEngine) {
@@ -49,6 +49,4 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
         }
         entity.receive(LifeEnded(dieRoutine))
     }
-
 }
-

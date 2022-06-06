@@ -14,5 +14,4 @@ class ContinueTick : Tick()
 class WatcherTick : Tick()
 class CloneTick : Tick()
 
-// behaviour control ticks
 class ExpireTick : Tick()

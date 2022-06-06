@@ -2,8 +2,8 @@ package ru.hse.sd.rgb.gamelogic.engines.fight
 
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.plus
 import ru.hse.sd.rgb.utils.randomCell
+import ru.hse.sd.rgb.utils.structures.plus
 
 // Entity, where do you want to fight?
 enum class AttackType { NO_ATTACK, HERO_TARGET, RANDOM_TARGET, LAST_MOVE_DIR }

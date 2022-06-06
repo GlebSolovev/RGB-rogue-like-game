@@ -3,9 +3,9 @@ package ru.hse.sd.rgb.gamelogic.entities
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Lifecycle
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.*
-import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
 import java.util.*
@@ -94,12 +94,14 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 //     TODO: maybe make private and not concurrent
 
     init {
-        units.addAll(colorCells.map { cell ->
-            when (cell) {
-                is ColorCellHp -> HpGameUnit(this, cell)
-                is ColorCellNoHp -> NoHpGameUnit(this, cell)
+        units.addAll(
+            colorCells.map { cell ->
+                when (cell) {
+                    is ColorCellHp -> HpGameUnit(this, cell)
+                    is ColorCellNoHp -> NoHpGameUnit(this, cell)
+                }
             }
-        })
+        )
     }
 
     open fun onLifeStart() {}

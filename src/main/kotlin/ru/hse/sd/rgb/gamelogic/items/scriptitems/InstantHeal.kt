@@ -3,9 +3,9 @@ package ru.hse.sd.rgb.gamelogic.items.scriptitems
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.gamelogic.items.Item
 import ru.hse.sd.rgb.gamelogic.items.BasicItemEntity
-import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.gamelogic.items.Item
+import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance

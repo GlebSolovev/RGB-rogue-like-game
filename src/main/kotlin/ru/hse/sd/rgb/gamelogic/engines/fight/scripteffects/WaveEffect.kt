@@ -1,7 +1,5 @@
 package ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
@@ -11,6 +9,12 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.WavePart
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.structures.Cell
+import ru.hse.sd.rgb.utils.structures.Direction
+import ru.hse.sd.rgb.utils.structures.GridShift
+import ru.hse.sd.rgb.utils.structures.plus
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlin.math.abs
 
 @Serializable
@@ -31,10 +35,15 @@ class WaveEffect(
         if (width % 2 != 1) throw IllegalArgumentException("width must be odd")
 
         fun calcDirTo(targetCell: Cell): Direction {
-            val dx = unit.cell.x - targetCell.x
-            val dy = unit.cell.y - targetCell.y
-            return if (abs(dx) < abs(dy)) if(dx > 0) Direction.RIGHT else Direction.LEFT else if(dy > 0) Direction.UP else Direction.DOWN
+            val dx: Int = unit.cell.x - targetCell.x
+            val dy: Int = unit.cell.y - targetCell.y
+            return if (abs(dx) < abs(dy)) {
+                if (dx > 0) Direction.RIGHT else Direction.LEFT
+            } else {
+                if (dy > 0) Direction.UP else Direction.DOWN
+            }
         }
+
         val dir = when (attackType) {
             AttackType.HERO_TARGET -> calcDirTo(controller.hero.randomCell())
             AttackType.RANDOM_TARGET -> Direction.random()
@@ -56,7 +65,6 @@ class WaveEffect(
 
         spawnWavePart(0)
         for (t in 1..radius) if (!spawnWavePart(t)) break
-        for (t in -1 downTo-radius) if (!spawnWavePart(t)) break
+        for (t in -1 downTo -radius) if (!spawnWavePart(t)) break
     }
-
 }

@@ -19,7 +19,7 @@ import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.CloneTick
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
 import ru.hse.sd.rgb.utils.messaging.messages.RepaintTick
-import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.structures.*
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape

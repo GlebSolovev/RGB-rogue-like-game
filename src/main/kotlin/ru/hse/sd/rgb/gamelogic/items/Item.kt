@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.items
 
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.utils.Cell
+import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 

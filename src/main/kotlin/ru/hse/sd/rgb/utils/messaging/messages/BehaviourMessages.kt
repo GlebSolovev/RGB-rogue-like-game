@@ -1,8 +1,8 @@
 package ru.hse.sd.rgb.utils.messaging.messages
 
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.structures.Direction
 
 // messages required to be handled in Behaviour-s
 

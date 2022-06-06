@@ -53,7 +53,6 @@ class GenerationTable<T> private constructor(
 
         fun <U> builder(): GenerationTableBuilder<U> = BuilderSimpleImpl()
     }
-
 }
 
 interface GenerationTableBuilder<T> {

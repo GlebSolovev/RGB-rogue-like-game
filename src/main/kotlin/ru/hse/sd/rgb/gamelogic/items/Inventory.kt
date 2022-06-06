@@ -1,9 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.items
 
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.messaging.Message
-import ru.hse.sd.rgb.utils.*
-import ru.hse.sd.rgb.utils.structures.Grid2D
+import ru.hse.sd.rgb.utils.structures.*
 import java.awt.Color
 
 data class InventorySwingAppearance(
@@ -25,19 +22,22 @@ class Inventory(
     private val w: Int,
     private val h: Int,
 ) {
+
+    companion object {
+        val DEFAULT_SWING_APPEARANCE = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200)
+    }
+
     private var selectedCell: Cell = Cell(0, 0)
     private val items: Grid2D<Item?> = Grid2D(w, h) { _, _ -> null }
 
     inner class ViewInventory {
-        private val swingAppearance = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200)
+        private val swingAppearance = DEFAULT_SWING_APPEARANCE
 
         fun takeViewSnapshot() = InventoryViewSnapshot(
             items.map { it?.viewItem }, // TODO: should be concurrent?
             selectedCell,
             swingAppearance
         )
-
-        fun applyMessageToAppearance(m: Message) {} // TODO: maybe when low hp
     }
 
     val viewInventory = ViewInventory()

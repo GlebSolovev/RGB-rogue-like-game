@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.structures.Cell
+import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
 import java.util.concurrent.atomic.AtomicLong
 
@@ -35,7 +35,6 @@ class NoHpGameUnit(
         colorCellNoHp.color,
         colorCellNoHp.cell
     )
-
 }
 
 class HpGameUnit(
@@ -53,7 +52,6 @@ class HpGameUnit(
         colorCellHp.maxHp,
         colorCellHp.maxHp
     )
-
 }
 
 sealed class ColorCell(open val color: RGB, open val cell: Cell)

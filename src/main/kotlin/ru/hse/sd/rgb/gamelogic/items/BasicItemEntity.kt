@@ -6,8 +6,8 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.structures.Cell
+import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
 
 abstract class BasicItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNoHp(color, cell))) {

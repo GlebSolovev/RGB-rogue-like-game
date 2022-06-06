@@ -5,16 +5,18 @@ import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.gamelogic.items.scriptitems.ColorModificationEntity
 import ru.hse.sd.rgb.gamelogic.items.scriptitems.InstantHealEntity
-import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.nextChance
+import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
 import kotlin.random.Random
 
+@Suppress("LongParameterList")
 class RandomLevelLoader private constructor(
     private val width: Int,
     private val height: Int,
@@ -109,7 +111,8 @@ class RandomLevelLoader private constructor(
     }
 
     private fun getEmptyCells(w: Int, h: Int, entities: Set<GameEntity>): Set<Cell> {
-        val occupiedCells: Set<Cell> = entities.flatMap { it.units.map { it.cell } }.toSet()
+        val occupiedCells: Set<Cell> =
+            entities.flatMap { entity -> entity.units.map<GameUnit, Cell> { it.cell } }.toSet()
         return Grid2D(w, h) { x, y -> Cell(x, y) }.toSet() subtract occupiedCells
     }
 
@@ -152,6 +155,7 @@ class RandomLevelLoader private constructor(
             random = random
         )
 
+        @Suppress("MagicNumber")
         private object DefaultParams {
             val WIDTH_RANGE = 70..90
             val HEIGHT_RANGE = 25..40
@@ -192,5 +196,4 @@ class RandomLevelLoader private constructor(
             }
         }
     }
-
 }

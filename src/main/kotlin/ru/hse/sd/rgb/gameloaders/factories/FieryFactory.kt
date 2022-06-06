@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package ru.hse.sd.rgb.gameloaders.factories
 
 import ru.hse.sd.rgb.utils.structures.RGB

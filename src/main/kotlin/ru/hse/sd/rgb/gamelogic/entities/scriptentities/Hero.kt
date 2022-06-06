@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
-import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.controller
+import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.*
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
@@ -10,14 +10,15 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
-import ru.hse.sd.rgb.gamelogic.items.Inventory
 import ru.hse.sd.rgb.gamelogic.items.BasicItemEntity
-import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.gamelogic.items.Inventory
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.randomCell
+import ru.hse.sd.rgb.utils.sameAs
+import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
@@ -28,13 +29,17 @@ class Hero(
     private var singleDirMovePeriodLimit: Long
 ) : GameEntity(colorCells) {
 
+    companion object {
+        const val DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR = 1.0
+    }
+
     override val viewEntity = object : ViewEntity() {
-        private val scaleFactors = mutableMapOf<GameUnit, Double>()
+        private val swingScaleFactors = mutableMapOf<GameUnit, Double>()
 
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
             override val swingAppearance = SwingUnitAppearance(
                 SwingUnitShape.SQUARE,
-                scaleFactors.getOrDefault(unit, 1.0)
+                swingScaleFactors.getOrDefault(unit, DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR)
             )
         }
 
@@ -44,10 +49,12 @@ class Hero(
                 is HpChanged -> {
                     val unit = m.myUnit as HpGameUnit
                     val scale = unit.hp.toDouble() / unit.maxHp
-                    if (scale >= 0.999) {
-                        scaleFactors.remove(unit)
+                    if (scale.sameAs(DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR) ||
+                        scale > DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR
+                    ) {
+                        swingScaleFactors.remove(unit)
                     } else {
-                        scaleFactors[unit] = scale
+                        swingScaleFactors[unit] = scale
                     }
                     controller.view.receive(EntityUpdated(this@Hero))
                 }
@@ -159,7 +166,6 @@ class Hero(
                 // TODO: add default control params
                 return this
             }
-
         }
 
         private inner class InventoryState : PlayingState() {

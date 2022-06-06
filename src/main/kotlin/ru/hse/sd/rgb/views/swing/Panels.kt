@@ -1,25 +1,27 @@
+@file:Suppress("WildcardImport")
+
 package ru.hse.sd.rgb.views.swing
 
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.items.InventoryViewSnapshot
-import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.*
+import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.views.DrawablesMap
+import javax.swing.JPanel
 import java.awt.*
 import java.awt.font.TextLayout
-import java.awt.geom.Arc2D
-import java.awt.geom.Ellipse2D
-import java.awt.geom.Path2D
 import java.util.concurrent.atomic.AtomicReference
-import javax.swing.JPanel
-import kotlin.math.*
+import kotlin.math.roundToInt
 
 private fun Graphics2D.enableFancyRendering() {
     this.setRenderingHints(
         mapOf(
             RenderingHints.KEY_RENDERING to RenderingHints.VALUE_RENDER_QUALITY,
-            RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON, // only this option makes nice circles, but it also makes walls tiled
+
+            // only this option makes nice circles, but it also makes walls tiled
+            RenderingHints.KEY_ANTIALIASING to RenderingHints.VALUE_ANTIALIAS_ON,
+
             RenderingHints.KEY_DITHERING to RenderingHints.VALUE_DITHER_ENABLE,
             RenderingHints.KEY_INTERPOLATION to RenderingHints.VALUE_INTERPOLATION_BICUBIC,
         )
@@ -36,142 +38,8 @@ private fun convertToSwingShape(
         (pxX + (1.0 - s.scale) / 2 * tileSize).roundToInt(),
         (pxY + (1.0 - s.scale) / 2 * tileSize).roundToInt()
     )
-    fun Int.scaled() = (this * s.scale).roundToInt()
-    return when (s.shape) {
-        SwingUnitShape.SQUARE -> Rectangle(spX, spY, tileSize.scaled(), tileSize.scaled())
-        SwingUnitShape.CIRCLE -> Ellipse2D.Double(
-            spX.toDouble(),
-            spY.toDouble(),
-            tileSize.toDouble(),
-            tileSize.toDouble(),
-        )
-        SwingUnitShape.TRIANGLE_UP -> Polygon(
-            intArrayOf(spX, spX + tileSize.scaled() / 2, spX + tileSize.scaled()),
-            intArrayOf(spY + tileSize.scaled(), spY, spY + tileSize.scaled()),
-            3
-        )
-        SwingUnitShape.TRIANGLE_RIGHT -> Polygon(
-            intArrayOf(spX, spX + tileSize.scaled(), spX),
-            intArrayOf(spY, spY + tileSize.scaled() / 2, spY + tileSize.scaled()),
-            3
-        )
-        SwingUnitShape.TRIANGLE_DOWN -> Polygon(
-            intArrayOf(spX, spX + tileSize.scaled() / 2, spX + tileSize.scaled()),
-            intArrayOf(spY, spY + tileSize.scaled(), spY),
-            3
-        )
-        SwingUnitShape.TRIANGLE_LEFT -> Polygon(
-            intArrayOf(spX, spX + tileSize.scaled(), spX + tileSize.scaled()),
-            intArrayOf(spY + tileSize.scaled() / 2, spY + tileSize.scaled(), spY),
-            3
-        )
-        SwingUnitShape.CIRCLE_HALF_UP -> Arc2D.Double(
-            spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 0.0, 180.0, Arc2D.PIE
-        )
-        SwingUnitShape.CIRCLE_HALF_LEFT -> Arc2D.Double(
-            spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 90.0, 180.0, Arc2D.PIE
-        )
-        SwingUnitShape.CIRCLE_HALF_DOWN -> Arc2D.Double(
-            spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 180.0, 180.0, Arc2D.PIE
-        )
-        SwingUnitShape.CIRCLE_HALF_RIGHT -> Arc2D.Double(
-            spX.d, spY.d, tileSize.scaled().d, tileSize.scaled().d, 270.0, 180.0, Arc2D.PIE
-        )
-        SwingUnitShape.RECTANGLE_VERTICAL -> Rectangle(
-            spX + tileSize.scaled() / 3,
-            spY,
-            tileSize.scaled() / 3,
-            tileSize.scaled()
-        )
-        SwingUnitShape.RECTANGLE_HORIZONTAL -> Rectangle(
-            spX,
-            spY + tileSize.scaled() / 3,
-            tileSize.scaled(),
-            tileSize.scaled() / 3
-        )
-        SwingUnitShape.STAR_8 -> {
-            val centerX = spX + tileSize.scaled() / 2
-            val centerY = spY + tileSize.scaled() / 2
-            val innerRadius = tileSize.scaled() / 3.5
-            val outerRadius = tileSize.scaled() / 2.0
-            val numRays = 8
-            val startAngleRad = 0
-
-            val path = Path2D.Double()
-            val deltaAngleRad = Math.PI / numRays
-            for (i in 0 until (numRays * 2)) {
-                val angleRad = startAngleRad + i * deltaAngleRad
-                val ca = cos(angleRad)
-                val sa = sin(angleRad)
-                val relX = ca * (if (i % 2 == 0) outerRadius else innerRadius)
-                val relY = sa * (if (i % 2 == 0) outerRadius else innerRadius)
-
-                if (i == 0) path.moveTo(centerX + relX, centerY + relY)
-                else path.lineTo(centerX + relX, centerY + relY)
-            }
-            path.closePath()
-            path
-        }
-        SwingUnitShape.PLUS -> {
-            val unit = tileSize.scaled() / 3
-            //     1  2
-            // 11  12 3  4
-            // 10  9  6  5
-            //     8  7
-            val xs = intArrayOf(
-                spX + unit, spX + 2 * unit, spX + 2 * unit, spX + 3 * unit,
-                spX + 3 * unit, spX + 2 * unit, spX + 2 * unit, spX + unit,
-                spX + unit, spX, spX, spX + unit
-            )
-            val ys = intArrayOf(
-                spY, spY, spY + unit, spY + unit,
-                spY + 2 * unit, spY + 2 * unit, spY + 3 * unit, spY + 3 * unit,
-                spY + 2 * unit, spY + 2 * unit, spY + unit, spY + unit
-            )
-            return Polygon(xs, ys, 12)
-        }
-        SwingUnitShape.SPINNING_SQUARE -> {
-            val angleRad = ((System.currentTimeMillis() / 10) % 360 * 2 * PI / 360)
-            val cos = cos(angleRad)
-            val sin = sin(angleRad)
-            val cX = spX + tileSize.scaled() / 2
-            val cY = spY + tileSize.scaled() / 2
-            val unit = tileSize.scaled() / 2
-            return Polygon(
-                intArrayOf(cX + (cos imul unit), cX - (sin imul unit), cX - (cos imul unit), cX + (sin imul unit)),
-                intArrayOf(cY + (sin imul unit), cY + (cos imul unit), cY - (sin imul unit), cY - (cos imul unit)),
-                4
-            )
-        }
-        SwingUnitShape.SPIRAL -> {
-            val scaleCoefficient = 0.8
-            val unit = tileSize.scaled() / 2.0
-
-            var curW = 2 * unit
-            var curH = 2 * unit * scaleCoefficient
-            fun offsetX() = (2 * unit - curW) / 2.0
-            fun offsetY() = (2 * unit - curH) / 2.0
-
-            fun arc(start: Double) =
-                Arc2D.Double(spX + offsetX(), spY + offsetY(), curW, curH, start, 110.0, Arc2D.CHORD)
-
-            var flag = true
-            val arcs = (0..(5 * 90) step 90).map {
-                val result = arc((it % 360).toDouble())
-                if (flag) curW *= scaleCoefficient.pow(2) else curH *= scaleCoefficient.pow(2)
-                flag = !flag
-                result
-            }
-
-            val path = Path2D.Double()
-            for (arc in arcs) {
-                path.append(arc, false)
-            }
-            return path
-        }
-    }
+    return s.shape.convertToSwingShape(spX, spY, (tileSize * s.scale).roundToInt())
 }
-
 
 open class GamePanel(
     private val offsetX: Int,
@@ -199,7 +67,6 @@ open class GamePanel(
             }
         }
     }
-
 }
 
 class GameInventoryPanel(
@@ -249,6 +116,7 @@ class GameInventoryPanel(
             throw IllegalArgumentException("inventory dimensions changed")
     }
 
+    @Suppress("MagicNumber")
     override fun paintComponent(graphics: Graphics) {
         val g = graphics as Graphics2D
         g.enableFancyRendering()
@@ -284,27 +152,27 @@ class GameInventoryPanel(
         val pxY = invOffsetY + selCell.y * itemSize
         g.drawRect(pxX, pxY, itemSize, itemSize)
 
-        val textMarginCoef = 0.05 // TODO: constant (or parameter)
+        val textMarginCoefficient = 0.05 // TODO: constant (or parameter)
 
         val selItem = invSnapshot.itemsGrid[selCell]
         if (selItem != null) {
             val itemsMaxX = invOffsetX + invGridW * itemSize
-            val descMargin = ((width - itemsMaxX) * textMarginCoef).toInt()
+            val descMargin = ((width - itemsMaxX) * textMarginCoefficient).toInt()
 
             g.drawTextCustom(selItem.description, itemsMaxX + descMargin, invOffsetY)
         }
 
-        val statsMargin = (invOffsetX * textMarginCoef).toInt()
+        val statsMargin = (invOffsetX * textMarginCoefficient).toInt()
         val hero = controller.hero
         val unitsHp = hero.units.map { (it as HpGameUnit).hp }
         val unitsRgb = hero.units.map { it.gameColor }
         g.drawTextCustom("Stats:   HP=$unitsHp   RGB=$unitsRgb", statsMargin, invOffsetY)
         // TODO: display info per each unit properly
     }
-
 }
 
 class LoadingPanel : JPanel() {
+    @Suppress("MagicNumber")
     override fun paintComponent(graphics: Graphics) {
         val g = graphics as Graphics2D
         g.color = Color.BLACK
@@ -316,9 +184,8 @@ class LoadingPanel : JPanel() {
     }
 }
 
-private infix fun Double.imul(v: Int) = (this * v).toInt()
-
-private val customFont = Font(Font.SANS_SERIF, Font.BOLD, 20)
+private const val CUSTOM_FONT_SIZE = 20
+private val customFont = Font(Font.SANS_SERIF, Font.BOLD, CUSTOM_FONT_SIZE)
 
 fun Graphics2D.drawTextCustom(text: String, atX: Int, atY: Int) {
     val textLayout = TextLayout(text, customFont, fontRenderContext)

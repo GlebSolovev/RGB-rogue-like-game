@@ -10,18 +10,22 @@ class BehaviourEngine {
         entity: GameEntity,
         movePeriodMillis: Long,
     ) {
-        entity.receive(ApplyBehaviourMessage {
-            entity.behaviourEntity.createDirectAttackHeroBehaviour(it, movePeriodMillis)
-        })
+        entity.receive(
+            ApplyBehaviourMessage {
+                entity.behaviourEntity.createDirectAttackHeroBehaviour(it, movePeriodMillis)
+            }
+        )
     }
 
     fun applyDirectFleeFromHeroBehaviour(
         entity: GameEntity,
         movePeriodMillis: Long,
     ) {
-        entity.receive(ApplyBehaviourMessage {
-            entity.behaviourEntity.createDirectFleeFromHeroBehaviour(it, movePeriodMillis)
-        })
+        entity.receive(
+            ApplyBehaviourMessage {
+                entity.behaviourEntity.createDirectFleeFromHeroBehaviour(it, movePeriodMillis)
+            }
+        )
     }
 
     fun applyUponSeeingBehaviour(
@@ -30,14 +34,16 @@ class BehaviourEngine {
         seeingDepth: Int,
         createSeeingBehaviour: (Behaviour) -> Behaviour
     ) {
-        entity.receive(ApplyBehaviourMessage {
-            entity.behaviourEntity.createUponSeeingBehaviour(
-                it,
-                targetEntity,
-                seeingDepth,
-                createSeeingBehaviour
-            )
-        })
+        entity.receive(
+            ApplyBehaviourMessage {
+                entity.behaviourEntity.createUponSeeingBehaviour(
+                    it,
+                    targetEntity,
+                    seeingDepth,
+                    createSeeingBehaviour
+                )
+            }
+        )
     }
 
     fun applyConfusedBehaviour(
@@ -45,9 +51,11 @@ class BehaviourEngine {
         durationPeriodMillis: Long?
     ) {
         if (durationPeriodMillis == null) {
-            entity.receive(ApplyBehaviourMessage {
-                entity.behaviourEntity.createConfusedBehaviour(it)
-            })
+            entity.receive(
+                ApplyBehaviourMessage {
+                    entity.behaviourEntity.createConfusedBehaviour(it)
+                }
+            )
         } else {
             applyExpiringBehaviour(entity, durationPeriodMillis) {
                 entity.behaviourEntity.createConfusedBehaviour(it)
@@ -60,8 +68,10 @@ class BehaviourEngine {
         durationPeriodMillis: Long,
         createTemporaryBehaviour: (Behaviour) -> Behaviour,
     ) {
-        entity.receive(ApplyBehaviourMessage {
-            ExpiringBehaviour(entity, it, durationPeriodMillis, createTemporaryBehaviour)
-        })
+        entity.receive(
+            ApplyBehaviourMessage {
+                ExpiringBehaviour(entity, it, durationPeriodMillis, createTemporaryBehaviour)
+            }
+        )
     }
 }

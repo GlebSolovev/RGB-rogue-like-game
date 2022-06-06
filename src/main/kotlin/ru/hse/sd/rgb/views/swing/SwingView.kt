@@ -1,19 +1,22 @@
+@file:Suppress("WildcardImport")
+
 package ru.hse.sd.rgb.views.swing
 
 import ru.hse.sd.rgb.gamelogic.items.InventoryViewSnapshot
-import ru.hse.sd.rgb.utils.messaging.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*
+import ru.hse.sd.rgb.utils.messaging.Ticker.Companion.createTicker
 import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.*
+import javax.swing.JFrame
+import javax.swing.JPanel
 import java.awt.*
 import java.awt.event.*
 import java.util.concurrent.atomic.AtomicReference
-import javax.swing.JFrame
-import javax.swing.JPanel
 
-class SwingView : View() {
+class SwingView(repaintPeriodMillis: Long) : View() {
 
     private val window: JFrame = JFrame("RGB")
     private lateinit var panel: JPanel
@@ -126,7 +129,6 @@ class SwingView : View() {
             }
             else -> unreachable(m)
         }
-
     }
 
     private inner class SwingPlayingInventoryState(
@@ -219,7 +221,7 @@ class SwingView : View() {
 
     override var state: AtomicReference<ViewState> = AtomicReference(SwingLoadingState())
 
-    private val ticker: Ticker = createTicker(10, ViewTick()) // TODO: magic constant
+    private val ticker: Ticker = createTicker(repaintPeriodMillis, ViewTick())
 
     override fun initialize() {
         window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE // TODO: maybe save something on exit?
@@ -236,7 +238,6 @@ class SwingView : View() {
 
         ticker.start()
     }
-
 }
 
 fun RGB.toSwingColor() = Color(r, g, b)

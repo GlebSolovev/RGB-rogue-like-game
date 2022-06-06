@@ -1,8 +1,5 @@
 package ru.hse.sd.rgb.utils.structures
 
-import ru.hse.sd.rgb.utils.Cell
-import ru.hse.sd.rgb.utils.Direction
-import ru.hse.sd.rgb.utils.plus
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -39,7 +36,6 @@ object Paths2D {
     }
 
     fun randomWalk(random: Random = Random): PathStrategy = object : PathStrategy {
-        override fun next(from: Cell) = Direction.values()[random.nextInt(4)]
+        override fun next(from: Cell) = Direction.random(random)
     }
-
 }

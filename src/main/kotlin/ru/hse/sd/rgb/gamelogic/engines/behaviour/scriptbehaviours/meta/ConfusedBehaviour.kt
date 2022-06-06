@@ -4,12 +4,12 @@ import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.MetaBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
 import ru.hse.sd.rgb.utils.messaging.messages.MoveTick
+import ru.hse.sd.rgb.utils.structures.Direction
 
 class ConfusedBehaviour(entity: GameEntity, childBehaviour: Behaviour) : MetaBehaviour(entity, childBehaviour) {
 

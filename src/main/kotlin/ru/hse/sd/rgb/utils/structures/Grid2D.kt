@@ -1,10 +1,6 @@
 package ru.hse.sd.rgb.utils.structures
 
-import ru.hse.sd.rgb.utils.Cell
-
 class Grid2D<T>(val w: Int, val h: Int, init: (Int, Int) -> T) : AbstractCollection<T>() {
-
-//    constructor(w: Int, h: Int, init: () -> T) : this(w, h, { _, _ -> init() }) // no todo: report
 
     constructor(data: List<List<T>>) : this(data[0].size, data.size, { x, y -> data[y][x] }) {
         for (l in data) if (l.size != w) throw IllegalArgumentException("not rectangle data")

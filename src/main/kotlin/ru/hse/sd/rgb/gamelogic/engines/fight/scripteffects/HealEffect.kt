@@ -1,11 +1,11 @@
 package ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.engines.fight.*
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.utils.unreachable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("heal")
@@ -40,5 +40,4 @@ class HealEffect(
 
         unsafeMethods.unsafeAttack(unit, targetUnit)
     }
-
 }

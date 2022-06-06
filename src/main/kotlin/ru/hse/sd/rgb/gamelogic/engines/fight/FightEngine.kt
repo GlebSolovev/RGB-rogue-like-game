@@ -1,8 +1,5 @@
 package ru.hse.sd.rgb.gamelogic.engines.fight
 
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.Serializable
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
@@ -12,6 +9,9 @@ import ru.hse.sd.rgb.utils.messaging.messages.HpChanged
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.unreachable
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.Serializable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
@@ -31,6 +31,7 @@ data class BaseColorStats(
     val updateEffects: List<BaseColorUpdateEffect>
 )
 
+@Suppress("TooManyFunctions")
 class FightEngine(
     baseColors: List<BaseColorStats>,
     interactionMatrix: Grid2D<Int>
@@ -191,4 +192,3 @@ class FightEngine(
 
     fun newTeamId() = teamGenerator.incrementAndGet()
 }
-

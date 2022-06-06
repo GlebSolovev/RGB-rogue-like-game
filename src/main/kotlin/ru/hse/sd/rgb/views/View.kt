@@ -1,7 +1,7 @@
 package ru.hse.sd.rgb.views
 
-import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference

@@ -1,6 +1,5 @@
 package ru.hse.sd.rgb.gamelogic
 
-import kotlinx.coroutines.*
 import ru.hse.sd.rgb.gameloaders.ColorLoader
 import ru.hse.sd.rgb.gameloaders.Engines
 import ru.hse.sd.rgb.gameloaders.LevelLoader
@@ -12,6 +11,7 @@ import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.View
+import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
@@ -22,25 +22,27 @@ private val exceptionHandler = CoroutineExceptionHandler { _, e ->
 }
 
 val viewCoroutineScope = CoroutineScope(
-    Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-            + exceptionHandler
+    Executors.newSingleThreadExecutor().asCoroutineDispatcher() +
+        exceptionHandler
 )
 val gameCoroutineScope = CoroutineScope(
-    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()
-            + exceptionHandler
+    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher() +
+        exceptionHandler
 )
+
+const val ON_EXCEPTION_EXIT_CODE = 5
 
 fun onException() {
     gameCoroutineScope.cancel()
     viewCoroutineScope.cancel()
-    exitProcess(5)
+    exitProcess(ON_EXCEPTION_EXIT_CODE)
 }
 
 class Controller(
     private val levelLoader: LevelLoader,
     private val colorLoader: ColorLoader,
     val view: View
-    ) : Messagable() {
+) : Messagable() {
 
     private var stateRef: AtomicReference<ControllerState> = AtomicReference(GameInitState())
 

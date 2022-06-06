@@ -15,5 +15,4 @@ abstract class Messagable {
     }
 
     abstract suspend fun handleMessage(m: Message)
-
 }

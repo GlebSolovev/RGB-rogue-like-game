@@ -1,14 +1,16 @@
+@file:Suppress("WildcardImport")
+
 package ru.hse.sd.rgb.gameloaders
 
+import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
+import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
+import ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects.*
+import ru.hse.sd.rgb.utils.WrongConfigError
+import ru.hse.sd.rgb.utils.structures.Grid2D
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.decodeFromStream
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.*
-import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
-import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorUpdateEffect
-import ru.hse.sd.rgb.gamelogic.engines.fight.scripteffects.*
-import ru.hse.sd.rgb.utils.structures.Grid2D
-import ru.hse.sd.rgb.utils.WrongConfigError
 import java.io.File
 
 @Serializable
@@ -38,9 +40,10 @@ class FileColorLoader(private val colorsFilename: String) : ColorLoader {
             throw WrongConfigError("bad interaction matrix")
         return BaseColorParams(desc.baseColors, matrix)
     }
-
 }
 
-private fun parseInteractionMatrix(representation: List<String>) = Grid2D(representation.map { line ->
-    line.split("\\s+".toRegex()).map { it.toInt() }
-})
+private fun parseInteractionMatrix(representation: List<String>) = Grid2D(
+    representation.map { line ->
+        line.split("\\s+".toRegex()).map { it.toInt() }
+    }
+)

@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta
 
 import ru.hse.sd.rgb.controller

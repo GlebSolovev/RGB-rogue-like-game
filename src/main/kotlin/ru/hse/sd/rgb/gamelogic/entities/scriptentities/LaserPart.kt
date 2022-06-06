@@ -7,10 +7,10 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
@@ -96,5 +96,4 @@ class LaserPart(
         val unit = units.first()
         return LaserPart(ColorCellNoHp(unit.gameColor, unit.cell), persistMillis, dir, teamId)
     }
-
 }

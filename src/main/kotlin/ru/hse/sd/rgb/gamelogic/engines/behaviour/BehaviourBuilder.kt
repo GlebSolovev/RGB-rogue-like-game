@@ -117,5 +117,4 @@ object BehaviourBuilder {
             return Lifecycle(entity, topBehaviour)
         }
     }
-
 }
