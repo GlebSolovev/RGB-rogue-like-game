@@ -26,7 +26,7 @@ class Inventory(
     private val h: Int,
 ) {
     private var selectedCell: Cell = Cell(0, 0)
-    private val items: Grid2D<Item?> = Grid2D(w, h) { _, _, -> null }
+    private val items: Grid2D<Item?> = Grid2D(w, h) { _, _ -> null }
 
     inner class ViewInventory {
         private val swingAppearance = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200)
@@ -37,7 +37,7 @@ class Inventory(
             swingAppearance
         )
 
-        fun applyMessageToAppearance(m: Message) {} // TODO?
+        fun applyMessageToAppearance(m: Message) {} // TODO: maybe when low hp
     }
 
     val viewInventory = ViewInventory()

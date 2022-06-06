@@ -5,7 +5,7 @@ import ru.hse.sd.rgb.utils.Direction
 data class SwingUnitAppearance(
     val shape: SwingUnitShape,
     val scale: Double = 1.0,
-) // TODO: outline
+) // TODO: outline (for effects!)
 
 enum class SwingUnitShape {
     SQUARE,

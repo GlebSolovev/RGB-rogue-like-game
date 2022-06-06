@@ -10,16 +10,21 @@ import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
 
-abstract class ItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNoHp(color, cell))) {
+abstract class BasicItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNoHp(color, cell))) {
+
+    companion object {
+        const val DROP_TIMEOUT_MILLIS = 3000L
+    }
 
     abstract override val viewEntity: ViewEntity
 
-    protected abstract fun getNewItemInternal(picker: GameEntity): Item
+    protected abstract fun getNewItemUnconditionally(picker: GameEntity): Item
 
     // null if not ready to be picked up
     fun getNewItem(picker: GameEntity): Item? {
-        if (lifeStartTimeMillis == -1L || System.currentTimeMillis() - lifeStartTimeMillis < 3000) return null
-        return getNewItemInternal(picker)
+        if (lifeStartTimeMillis == null || System.currentTimeMillis() - lifeStartTimeMillis!! < DROP_TIMEOUT_MILLIS)
+            return null
+        return getNewItemUnconditionally(picker)
     }
 
     final override val physicalEntity = object : PhysicalEntity() {
@@ -37,7 +42,7 @@ abstract class ItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNo
 
     final override val behaviourEntity = SingleBehaviourEntity(itemBaseBehaviour)
 
-    private var lifeStartTimeMillis: Long = -1L
+    private var lifeStartTimeMillis: Long? = null
 
     override fun onLifeStart() {
         lifeStartTimeMillis = System.currentTimeMillis()

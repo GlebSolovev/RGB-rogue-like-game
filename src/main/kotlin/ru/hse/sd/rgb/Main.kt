@@ -11,16 +11,17 @@ import ru.hse.sd.rgb.utils.messaging.messages.StartControllerMessage
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.swing.SwingView
 
-//val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
-const val colorsFilename: String = "src/main/resources/gameColors.yaml"
+//private val levelFilename: String? = null // "src/main/resources/sampleLevel.description" // TODO: CLI argument
+private const val colorsFilename: String = "src/main/resources/gameColors.yaml"
 
-val levelLoader = RandomLevelLoader.builder {
+private val levelLoader = RandomLevelLoader.builder {
     width = 70
     height = random(50..60)
     chamberMinSize = 10
     heroInventory = InventoryDescription(3, 4)
     factory = FieryFactory()
     heroColor = RGB(200, 60, 200)
+    heroHp = 1000
 }
 
 val controller = Controller(

@@ -1,5 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.engines.behaviour
 
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.ExpiringBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.messaging.messages.ApplyBehaviourMessage
 
@@ -39,29 +40,28 @@ class BehaviourEngine {
         })
     }
 
-    // note: is permanent
     fun applyConfusedBehaviour(
         entity: GameEntity,
+        durationPeriodMillis: Long?
     ) {
-        entity.receive(ApplyBehaviourMessage {
-            entity.behaviourEntity.createConfusedBehaviour(it)
-        })
+        if (durationPeriodMillis == null) {
+            entity.receive(ApplyBehaviourMessage {
+                entity.behaviourEntity.createConfusedBehaviour(it)
+            })
+        } else {
+            applyExpiringBehaviour(entity, durationPeriodMillis) {
+                entity.behaviourEntity.createConfusedBehaviour(it)
+            }
+        }
     }
 
-    // TODO: currently caller must use entity.behaviourEntity to create appropriate temporary behaviour
-    // but the whole purpose of this class is to avoid that
-
-    fun applyExpiringBehaviour(
+    private fun applyExpiringBehaviour(
         entity: GameEntity,
         durationPeriodMillis: Long,
         createTemporaryBehaviour: (Behaviour) -> Behaviour,
     ) {
         entity.receive(ApplyBehaviourMessage {
-            entity.behaviourEntity.createExpiringBehaviour(
-                it,
-                durationPeriodMillis,
-                createTemporaryBehaviour
-            )
+            ExpiringBehaviour(entity, it, durationPeriodMillis, createTemporaryBehaviour)
         })
     }
 }

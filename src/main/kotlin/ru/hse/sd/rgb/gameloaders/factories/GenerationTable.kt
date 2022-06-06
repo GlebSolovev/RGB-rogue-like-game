@@ -24,7 +24,7 @@ class GenerationTable<T> private constructor(
         weightSum = sum
     }
 
-    fun roll(): T {
+    fun roll(): T { // NOTE: https://youtu.be/dQw4w9WgXcQ
         val value = random.nextInt(weightSum)
         val index = cdfList.binarySearch(value).let { if (it < 0) -it - 2 else it }
         return entries[index].result()

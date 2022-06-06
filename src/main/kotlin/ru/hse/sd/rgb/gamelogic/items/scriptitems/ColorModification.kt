@@ -4,7 +4,7 @@ import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.items.Item
-import ru.hse.sd.rgb.gamelogic.items.ItemEntity
+import ru.hse.sd.rgb.gamelogic.items.BasicItemEntity
 import ru.hse.sd.rgb.utils.Cell
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -15,13 +15,28 @@ import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
 class ColorModificationItem(
-    color: RGB,
     holder: GameEntity,
-    private val rgbDelta: RGBDelta, // TODO: isAbsolute
-) : Item(color, holder) {
+    private val rgbDelta: RGBDelta,
+) : Item(holder) {
 
-    override val viewItem = object : ViewItem(this) {
-        override fun getSwingAppearance() = SwingUnitAppearance(SwingUnitShape.SPINNING_SQUARE, 0.9)
+    companion object {
+        val SWING_VIEW_SHAPE = SwingUnitShape.SPINNING_SQUARE
+    }
+
+    override val viewItem = object : ViewItem() {
+        override fun getSwingAppearance() =
+            SwingUnitAppearance(SWING_VIEW_SHAPE, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
+
+        override val color: RGB = this@ColorModificationItem.rgbDelta.convertToViewRGB()
+
+        override val description = run {
+            fun colorToText(dc: Int) = if (dc > 0) "+$dc" else "$dc"
+            val (dr, dg, db) = rgbDelta
+            val rt = colorToText(dr)
+            val gt = colorToText(dg)
+            val bt = colorToText(db)
+            "R: $rt   G: $gt   B: $bt"
+        }
     }
 
     override val isReusable = false
@@ -33,25 +48,17 @@ class ColorModificationItem(
         controller.view.receive(EntityUpdated(holder))
     }
 
-    override val description = run {
-        fun colorToText(dc: Int) = if (dc > 0) "+$dc" else "$dc"
-        val (dr, dg, db) = rgbDelta
-        val rt = colorToText(dr)
-        val gt = colorToText(dg)
-        val bt = colorToText(db)
-        "R: $rt   G: $gt   B: $bt"
-    }
-
-    override fun getNewItemEntity(cell: Cell): ItemEntity = ColorModificationEntity(cell, rgbDelta)
+    override fun getNewItemEntity(cell: Cell): BasicItemEntity = ColorModificationEntity(cell, rgbDelta)
 }
 
-class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) : ItemEntity(cell, rgbDelta.exaggerate()) {
+class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) :
+    BasicItemEntity(cell, rgbDelta.convertToViewRGB()) {
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SPINNING_SQUARE)
+            override val swingAppearance = SwingUnitAppearance(ColorModificationItem.SWING_VIEW_SHAPE)
         }
     }
 
-    override fun getNewItemInternal(picker: GameEntity) =
-        ColorModificationItem(this.units.first().gameColor, picker, rgbDelta)
+    override fun getNewItemUnconditionally(picker: GameEntity) =
+        ColorModificationItem(picker, rgbDelta)
 }

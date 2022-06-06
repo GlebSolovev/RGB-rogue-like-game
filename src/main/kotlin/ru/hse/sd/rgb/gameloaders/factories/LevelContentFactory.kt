@@ -15,12 +15,6 @@ abstract class LevelContentFactory {
     abstract val glitchSpawnRate: Double
     abstract val sharpySpawnCount: Int
 
-    abstract val colorModificationSpawnRate: Double
-    abstract val colorModificationRGBDeltaGenerationTable: GenerationTable<RGBDelta>
-
-    abstract val instantHealSpawnRate: Double
-    abstract val instantHealGenerationTable: GenerationTable<Int>
-
     abstract val wallColor: RGB
     open fun createWall(cell: Cell): Wall = Wall(wallColor, cell)
 
@@ -39,4 +33,17 @@ abstract class LevelContentFactory {
         sharpySeeingDepth,
         controller.fighting.newTeamId()
     )
+
+    abstract val colorModificationSpawnRate: Double
+    abstract val colorModificationRGBDeltaGenerationTable: GenerationTable<RGBDelta>
+
+    abstract val instantHealSpawnRate: Double
+    abstract val instantHealGenerationTable: GenerationTable<Int>
+}
+
+fun GenerationTableBuilder<RGBDelta>.addDefaults(eachWeight: Int = 1) = apply {
+    outcome(eachWeight) { RGBDelta(20, 0, 0) }
+    outcome(eachWeight) { RGBDelta(0, 20, 0) }
+    outcome(eachWeight) { RGBDelta(0, 0, 20) }
+    outcome(eachWeight) { RGBDelta(-10, -10, -10) }
 }

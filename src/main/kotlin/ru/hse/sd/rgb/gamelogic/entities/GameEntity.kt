@@ -66,12 +66,6 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         open fun createConfusedBehaviour(
             childBehaviour: Behaviour,
         ): Behaviour = ConfusedBehaviour(this@GameEntity, childBehaviour)
-
-        open fun createExpiringBehaviour(
-            childBehaviour: Behaviour,
-            lastingPeriodMillis: Long,
-            createTemporaryBehaviour: (Behaviour) -> Behaviour,
-        ): Behaviour = ExpiringBehaviour(this@GameEntity, childBehaviour, lastingPeriodMillis, createTemporaryBehaviour)
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
@@ -89,12 +83,6 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         ): Behaviour = singleBehaviour
 
         override fun createConfusedBehaviour(childBehaviour: Behaviour): Behaviour = singleBehaviour
-
-        override fun createExpiringBehaviour(
-            childBehaviour: Behaviour,
-            lastingPeriodMillis: Long,
-            createTemporaryBehaviour: (Behaviour) -> Behaviour
-        ): Behaviour = singleBehaviour
     }
 
     abstract val viewEntity: ViewEntity

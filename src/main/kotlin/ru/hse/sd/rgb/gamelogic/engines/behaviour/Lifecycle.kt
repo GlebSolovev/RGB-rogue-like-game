@@ -74,8 +74,4 @@ class Lifecycle(
             }
         }
     }
-
-//    override fun tickersGroup(tickClass: KClass<out Tick>) = notAllowed
-//    override fun traverseTickers(onEach: (Ticker) -> Unit) = notAllowed
-//    override fun traverseSubtree(onEach: (Behaviour) -> Unit) = notAllowed
 }

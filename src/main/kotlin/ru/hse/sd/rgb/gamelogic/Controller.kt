@@ -16,7 +16,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.exitProcess
 
-val exceptionHandler = CoroutineExceptionHandler { _, e ->
+private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     e.printStackTrace()
     onException()
 }
@@ -36,10 +36,9 @@ fun onException() {
     exitProcess(5)
 }
 
-
 class Controller(
-    val levelLoader: LevelLoader,
-    val colorLoader: ColorLoader,
+    private val levelLoader: LevelLoader,
+    private val colorLoader: ColorLoader,
     val view: View
     ) : Messagable() {
 
@@ -122,7 +121,7 @@ class Controller(
         get() = stateRef.get().engines.fighting
     val creation
         get() = stateRef.get().engines.creation
-    val behaviour
+    val behaviourEngine
         get() = stateRef.get().engines.behaviour
 
     val hero: Hero

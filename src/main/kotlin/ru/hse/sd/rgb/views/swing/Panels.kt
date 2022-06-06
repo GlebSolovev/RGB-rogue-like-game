@@ -114,10 +114,10 @@ private fun convertToSwingShape(
         }
         SwingUnitShape.PLUS -> {
             val unit = tileSize.scaled() / 3
-            //   1 2
-            // B C 3 4
-            // A 9 6 5
-            //   8 7
+            //     1  2
+            // 11  12 3  4
+            // 10  9  6  5
+            //     8  7
             val xs = intArrayOf(
                 spX + unit, spX + 2 * unit, spX + 2 * unit, spX + 3 * unit,
                 spX + 3 * unit, spX + 2 * unit, spX + 2 * unit, spX + unit,
@@ -144,11 +144,11 @@ private fun convertToSwingShape(
             )
         }
         SwingUnitShape.SPIRAL -> {
-            val scaleCoef = 0.8
+            val scaleCoefficient = 0.8
             val unit = tileSize.scaled() / 2.0
 
             var curW = 2 * unit
-            var curH = 2 * unit * scaleCoef
+            var curH = 2 * unit * scaleCoefficient
             fun offsetX() = (2 * unit - curW) / 2.0
             fun offsetY() = (2 * unit - curH) / 2.0
 
@@ -156,9 +156,9 @@ private fun convertToSwingShape(
                 Arc2D.Double(spX + offsetX(), spY + offsetY(), curW, curH, start, 110.0, Arc2D.CHORD)
 
             var flag = true
-            val arcs = (0..450 step 90).map {
+            val arcs = (0..(5 * 90) step 90).map {
                 val result = arc((it % 360).toDouble())
-                if (flag) curW *= scaleCoef.pow(2) else curH *= scaleCoef.pow(2)
+                if (flag) curW *= scaleCoefficient.pow(2) else curH *= scaleCoefficient.pow(2)
                 flag = !flag
                 result
             }
@@ -296,9 +296,9 @@ class GameInventoryPanel(
 
         val statsMargin = (invOffsetX * textMarginCoef).toInt()
         val hero = controller.hero
-        val hps = hero.units.map { (it as HpGameUnit).hp }
-        val rgbs = hero.units.map { it.gameColor }
-        g.drawTextCustom("Stats:   HP=$hps   RGB=$rgbs", statsMargin, invOffsetY)
+        val unitsHp = hero.units.map { (it as HpGameUnit).hp }
+        val unitsRgb = hero.units.map { it.gameColor }
+        g.drawTextCustom("Stats:   HP=$unitsHp   RGB=$unitsRgb", statsMargin, invOffsetY)
         // TODO: display info per each unit properly
     }
 
@@ -312,6 +312,7 @@ class LoadingPanel : JPanel() {
         g.color = Color.WHITE
         g.stroke = BasicStroke(5f)
         g.drawArc(width / 2, height / 2, 50, 50, ((System.currentTimeMillis() / 10) % 360).toInt(), 300)
+        // TODO: spinning color square
     }
 }
 

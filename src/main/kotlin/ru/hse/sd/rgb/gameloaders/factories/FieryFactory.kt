@@ -25,7 +25,8 @@ class FieryFactory : LevelContentFactory() {
         .outcome(5) { RGBDelta(10, 5, 5) }
         .outcome(1) { RGBDelta(50, 0, 0) }
         .outcome(4) { RGBDelta(30, -10, -10) }
-        .build() // TODO: thoughtful generation
+        .addDefaults(2)
+        .build()
 
     override val instantHealSpawnRate = 1.0 / (45 * 45)
     override val instantHealGenerationTable = GenerationTable.builder<Int>()

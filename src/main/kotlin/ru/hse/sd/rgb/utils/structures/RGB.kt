@@ -38,10 +38,20 @@ data class RGBDelta(val dr: Int, val dg: Int, val db: Int) {
         require(dr in -255..255 && dg in -255..255 && db in -255..255)
     }
 
-    fun exaggerate(): RGB {
+    fun convertToViewRGB(): RGB { // TODO: maybe improve
         fun limit(c: Int) = min(255, max(0, c))
-        fun exaggerate(dc: Int) = limit(128 + dc * 4)
-        return RGB(exaggerate(dr), exaggerate(dg), exaggerate(db))
+        fun exaggerate(dc: Int) = (dc + 10) * 4
+
+        var rgbR = exaggerate(dr)
+        var rgbG = exaggerate(dg)
+        var rgbB = exaggerate(db)
+        if(dr < 0 && dg < 0 && db < 0) return RGB(0, 0, 0)
+        when (maxOf(dr, dg, db)) {
+            dr -> rgbR += 100 + (dr + 10)
+            dg -> rgbG += 100 + (dg + 10)
+            db -> rgbB += 100 + (db + 10)
+        }
+        return RGB(limit(rgbR), limit(rgbG), limit(rgbB))
     }
 }
 

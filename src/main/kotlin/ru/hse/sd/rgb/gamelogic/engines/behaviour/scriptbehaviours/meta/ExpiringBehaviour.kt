@@ -15,7 +15,7 @@ class ExpiringBehaviour(
     createTemporaryBehaviour: (Behaviour) -> Behaviour,
 ) : MetaBehaviour(entity, childBehaviour) {
 
-    private val expireTick = ExpireTick()
+    private val expireTick = ExpireTick() // NOTE: for === below
     private val expiryTicker = Ticker(lastingPeriodMillis, entity, expireTick)
 
     private val temporaryBehaviour = createTemporaryBehaviour(childBehaviour)

@@ -2,9 +2,7 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.controller
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.State
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.*
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
@@ -13,9 +11,11 @@ import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.items.Inventory
-import ru.hse.sd.rgb.gamelogic.items.ItemEntity
+import ru.hse.sd.rgb.gamelogic.items.BasicItemEntity
 import ru.hse.sd.rgb.utils.Direction
+import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.randomCell
 import ru.hse.sd.rgb.views.ViewUnit
@@ -77,7 +77,21 @@ class Hero(
 
     private val heroBehaviour = HeroBehaviour()
     override val lifecycle = BehaviourBuilder.lifecycle(this, heroBehaviour).build()
-    override val behaviourEntity = SingleBehaviourEntity(heroBehaviour)
+
+    override val behaviourEntity = object : SingleBehaviourEntity(heroBehaviour) {
+        override fun createConfusedBehaviour(childBehaviour: Behaviour): Behaviour =
+            object : MetaBehaviour(this@Hero, childBehaviour) {
+                override suspend fun handleMessage(message: Message) {
+                    if (message is UserMoved) {
+                        childBehaviour.handleMessage(UserMoved(message.dir.opposite()))
+                    } else {
+                        childBehaviour.handleMessage(message)
+                    }
+                }
+
+                override fun traverseTickers(onEach: (Ticker) -> Unit) = ignore
+            }
+    }
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
 
@@ -103,7 +117,7 @@ class Hero(
 
             override suspend fun handleCollidedWith(message: CollidedWith): State {
                 when (val itemEntity = message.otherUnit.parent) {
-                    is ItemEntity -> {
+                    is BasicItemEntity -> {
                         val item = itemEntity.getNewItem(this@Hero)
                         if (item != null && inventory.addItem(item)) {
                             controller.creation.die(itemEntity)
