@@ -5,7 +5,6 @@ import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
@@ -59,43 +58,12 @@ class RandomLevelLoader private constructor(
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
         val maze = maze ?: throw IllegalStateException("loadHero() has not been called yet")
 
-        for (x in 1 until w - 1) for (y in 1 until h - 1) if (maze[x, y]) entities.add(
-            levelFactory.createWall(Cell(x, y))
-        )
-        // add outline walls (BREAKABLE)
-        for (x in 0 until w) {
-            entities.add(levelFactory.createWall(Cell(x, 0)))
-            entities.add(levelFactory.createWall(Cell(x, h - 1)))
-        }
-        for (y in 1 until h - 1) {
-            entities.add(levelFactory.createWall(Cell(0, y)))
-            entities.add(levelFactory.createWall(Cell(w - 1, y)))
-        }
-
-        fun Sequence<Cell>.spawnWrapper(count: Int, action: (Cell) -> GameEntity): Sequence<Cell> {
-            take(count).forEach { entities.add(action(it)) }
-            return drop(count)
-        }
-
-        getEmptyCells(w, h, entities)
-            .asSequence()
-            .shuffled(random)
-            .spawnWrapper(levelFactory.glitchSpawnCount) { levelFactory.createGlitch(it) }
-            .spawnWrapper(levelFactory.sharpySpawnCount) { levelFactory.createSharpy(it) }
-            .spawnWrapper(levelFactory.colorModificationSpawnCount) { levelFactory.createColorModification(it) }
-            .spawnWrapper(levelFactory.instantHealSpawnCount) { levelFactory.createInstantHeal(it) }
-            .firstOrNull() ?: error("not enough empty cells to spawn all entities") // force lazy sequence operations
+        val entities = createLevelEntities(w, h, maze, levelFactory, random)
 
         return LevelDescription(
             GameWorldDescription(w, h, entities, levelFactory.bgColor),
             heroInventory
         )
-    }
-
-    private fun getEmptyCells(w: Int, h: Int, entities: Set<GameEntity>): Set<Cell> {
-        val occupiedCells: Set<Cell> =
-            entities.flatMap { entity -> entity.units.map<GameUnit, Cell> { it.cell } }.toSet()
-        return Grid2D(w, h) { x, y -> Cell(x, y) }.toSet() subtract occupiedCells
     }
 
     // ------------ builder ------------

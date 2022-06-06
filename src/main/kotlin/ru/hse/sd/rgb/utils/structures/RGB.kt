@@ -42,6 +42,7 @@ object RGBSerializer : KSerializer<RGB> {
     }
 }
 
+@Serializable(with = RGBDeltaSerializer::class)
 data class RGBDelta(val dr: Int, val dg: Int, val db: Int) {
 
     companion object {
@@ -72,6 +73,19 @@ data class RGBDelta(val dr: Int, val dg: Int, val db: Int) {
             db -> rgbB += 100 + (db + 10)
         }
         return RGB(limitComponent(rgbR), limitComponent(rgbG), limitComponent(rgbB))
+    }
+}
+
+object RGBDeltaSerializer : KSerializer<RGBDelta> {
+    override val descriptor = PrimitiveSerialDescriptor("RGBDelta", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: RGBDelta) {
+        val (dr, dg, db) = value
+        encoder.encodeString("$dr $dg $db")
+    }
+
+    override fun deserialize(decoder: Decoder): RGBDelta {
+        val (dr, dg, db) = decoder.decodeString().split(" +".toRegex()).map { it.toInt() }
+        return RGBDelta(dr, dg, db)
     }
 }
 
