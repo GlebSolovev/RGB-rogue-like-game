@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  assemble:
+  validate_on_os:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -33,23 +33,10 @@ jobs:
           ./gradlew assemble
         shell: bash
 
-  test:
-    needs: assemble
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-
-    steps:
       - name: Execute gradle test
         run: ./gradlew test
         shell: bash
 
-  lint:
-    needs: assemble
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Execute gradle lint
+      - name: Execute gradle lint (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: ./gradlew lint
-        shell: bash
