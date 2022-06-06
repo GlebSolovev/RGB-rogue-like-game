@@ -7,9 +7,6 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.gamelogic.items.scriptitems.ColorModificationEntity
-import ru.hse.sd.rgb.gamelogic.items.scriptitems.InstantHealEntity
-import ru.hse.sd.rgb.utils.nextChance
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -41,7 +38,7 @@ class RandomLevelLoader private constructor(
 
     override fun loadHero(): Hero {
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
-        maze = generateMaze(w, h, chamberMinSize, passageSize)
+        maze = generateMaze(w, h, chamberMinSize, passageSize, random)
 
         val heroCell = maze!!.withCoords().asSequence()
             .filterNot { it.value }
@@ -75,34 +72,19 @@ class RandomLevelLoader private constructor(
             entities.add(levelFactory.createWall(Cell(w - 1, y)))
         }
 
-        repeat(levelFactory.sharpySpawnCount) {
-            val emptyCells = getEmptyCells(w, h, entities)
-            val sharpy = levelFactory.createSharpy(emptyCells.random())
-            entities.add(sharpy)
+        fun Sequence<Cell>.spawnWrapper(count: Int, action: (Cell) -> GameEntity): Sequence<Cell> {
+            take(count).forEach { entities.add(action(it)) }
+            return drop(count)
         }
 
-        maze.withCoords().forEach { (x, y, _) ->
-            fun trySpawnRandomGeneratedEntity(chance: Double, createEntity: (Cell) -> GameEntity) {
-                if (random.nextChance(chance)) {
-                    val cell = Cell(x, y)
-                    val currentEmptyCells = getEmptyCells(w, h, entities)
-                    if (cell in currentEmptyCells) {
-                        entities.add(createEntity(cell))
-                    }
-                }
-            }
-            trySpawnRandomGeneratedEntity(levelFactory.glitchSpawnRate) { cell ->
-                levelFactory.createGlitch(cell)
-            }
-            // TODO: fix occasional 'invalid entities' exception
-            trySpawnRandomGeneratedEntity(levelFactory.colorModificationSpawnRate) { cell ->
-                val rgbDelta = levelFactory.colorModificationRGBDeltaGenerationTable.roll()
-                ColorModificationEntity(cell, rgbDelta)
-            }
-            trySpawnRandomGeneratedEntity(levelFactory.instantHealSpawnRate) { cell ->
-                InstantHealEntity(cell, levelFactory.instantHealGenerationTable.roll())
-            }
-        }
+        getEmptyCells(w, h, entities)
+            .asSequence()
+            .shuffled(random)
+            .spawnWrapper(levelFactory.glitchSpawnCount) { levelFactory.createGlitch(it) }
+            .spawnWrapper(levelFactory.sharpySpawnCount) { levelFactory.createSharpy(it) }
+            .spawnWrapper(levelFactory.colorModificationSpawnCount) { levelFactory.createColorModification(it) }
+            .spawnWrapper(levelFactory.instantHealSpawnCount) { levelFactory.createInstantHeal(it) }
+            .firstOrNull() ?: error("not enough empty cells to spawn all entities") // force lazy sequence operations
 
         return LevelDescription(
             GameWorldDescription(w, h, entities, levelFactory.bgColor),
@@ -171,7 +153,7 @@ class RandomLevelLoader private constructor(
                 override val bgColor: RGB = RGB(0, 0, 0)
                 override val wallColor: RGB = RGB(100, 100, 100)
 
-                override val glitchSpawnRate = 0.0
+                override val glitchSpawnCount = 0
                 override val glitchHp = 1
                 override val glitchClonePeriod = 5000L
 
@@ -181,7 +163,7 @@ class RandomLevelLoader private constructor(
                 override val sharpyMovePeriodMillis: Long = 2000
                 override val sharpySeeingDepth: Int = 5
 
-                override val colorModificationSpawnRate = 1.0 / (30 * 30)
+                override val colorModificationSpawnCount = 5
                 override val colorModificationRGBDeltaGenerationTable = GenerationTable.builder<RGBDelta>()
                     .outcome(1) { RGBDelta(10, 0, 0) }
                     .outcome(1) { RGBDelta(0, 10, 0) }
@@ -189,7 +171,7 @@ class RandomLevelLoader private constructor(
                     .outcome(1) { RGBDelta(-10, -10, -10) }
                     .build()
 
-                override val instantHealSpawnRate = 1.0 / (40 * 40)
+                override val instantHealSpawnCount = 5
                 override val instantHealGenerationTable = GenerationTable.builder<Int>()
                     .outcome(1) { 1 }
                     .build()

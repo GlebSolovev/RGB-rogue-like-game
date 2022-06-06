@@ -5,6 +5,8 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Glitch
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Sharpy
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
+import ru.hse.sd.rgb.gamelogic.items.scriptitems.ColorModificationEntity
+import ru.hse.sd.rgb.gamelogic.items.scriptitems.InstantHealEntity
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
@@ -12,17 +14,20 @@ import ru.hse.sd.rgb.utils.structures.RGBDelta
 abstract class LevelContentFactory {
 
     abstract val bgColor: RGB
-    abstract val glitchSpawnRate: Double
-    abstract val sharpySpawnCount: Int
 
     abstract val wallColor: RGB
     open fun createWall(cell: Cell): Wall = Wall(wallColor, cell)
 
+    // TODO: discuss count vs rate
+    // count advantage: fixed and certain range of values
+    // rate advantage: implicitly takes level size into account
+    abstract val glitchSpawnCount: Int
     abstract val glitchHp: Int
     abstract val glitchClonePeriod: Long
     open fun createGlitch(cell: Cell): Glitch =
         Glitch(cell, glitchHp, glitchClonePeriod, controller.fighting.newTeamId())
 
+    abstract val sharpySpawnCount: Int
     abstract val sharpyColor: RGB
     abstract val sharpyHp: Int
     abstract val sharpyMovePeriodMillis: Long
@@ -34,11 +39,17 @@ abstract class LevelContentFactory {
         controller.fighting.newTeamId()
     )
 
-    abstract val colorModificationSpawnRate: Double
+    abstract val colorModificationSpawnCount: Int
     abstract val colorModificationRGBDeltaGenerationTable: GenerationTable<RGBDelta>
+    open fun createColorModification(cell: Cell): ColorModificationEntity = ColorModificationEntity(
+        cell, colorModificationRGBDeltaGenerationTable.roll()
+    )
 
-    abstract val instantHealSpawnRate: Double
+    abstract val instantHealSpawnCount: Int
     abstract val instantHealGenerationTable: GenerationTable<Int>
+    open fun createInstantHeal(cell: Cell): InstantHealEntity = InstantHealEntity(
+        cell, instantHealGenerationTable.roll()
+    )
 }
 
 @Suppress("MagicNumber")
