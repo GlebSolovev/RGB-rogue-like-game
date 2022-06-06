@@ -6,7 +6,7 @@
 
 .library-name a::before {
     content: '';
-    background: url("../images/todo-logo.png") center no-repeat;
+    background: url("../images/rgb-logo.png") center no-repeat;
     background-size: contain;
     position: absolute;
     width: var(--logo-width);

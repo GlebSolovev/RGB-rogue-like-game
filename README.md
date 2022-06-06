@@ -1,6 +1,6 @@
 # RGB-rogue-like-game
 
-<img src="todo-logo.png" align="right" />
+<img src="rgb-logo.png" align="right"  alt="RGB logo"/>
 
 ## Краткое описание
 _Software Design HW: rogue-like 2D game "RGB" with tile graphics_
