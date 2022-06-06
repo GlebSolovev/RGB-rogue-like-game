@@ -1,4 +1,6 @@
-# RGB-rogue-like-game
+# RGB-rogue-like-game 
+
+[![Run tests](https://github.com/GlebSolovev/RGB-rogue-like-game/actions/workflows/ci-validate.yml/badge.svg?branch=dev)](https://github.com/GlebSolovev/RGB-rogue-like-game/actions/workflows/ci-validate.yml)
 
 <img src="rgb-logo.png" align="right"  alt="RGB logo"/>
 
