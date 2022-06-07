@@ -4,14 +4,15 @@ package ru.hse.sd.rgb.gameloaders.factories
 
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
+import kotlin.random.Random
 
-class ColdFactory : LevelContentFactory() {
+class ColdFactory(random: Random = Random) : LevelContentFactory() {
 
     override val bgColor = RGB(0, 10, 50)
 
     override val wallColor: RGB = RGB(100, 120, 200)
 
-    override val glitchSpawnRate = 1.0 / (60 * 60)
+    override val glitchSpawnCount = random.nextInt(0, 2)
     override val glitchHp = 1
     override val glitchClonePeriod = 5000L
 
@@ -21,7 +22,7 @@ class ColdFactory : LevelContentFactory() {
     override val sharpyMovePeriodMillis: Long = 1100
     override val sharpySeeingDepth: Int = 10
 
-    override val colorModificationSpawnRate = 1.0 / (20 * 20)
+    override val colorModificationSpawnCount = random.nextInt(7, 10)
     override val colorModificationRGBDeltaGenerationTable = GenerationTable.builder<RGBDelta>()
         .outcome(7) { RGBDelta(0, 0, 15) }
         .outcome(7) { RGBDelta(0, 10, 10) }
@@ -31,11 +32,11 @@ class ColdFactory : LevelContentFactory() {
         .addDefaults(2)
         .build()
 
-    override val instantHealSpawnRate = 1.0 / (40 * 40)
+    override val instantHealSpawnCount = random.nextInt(2, 4)
     override val instantHealGenerationTable = GenerationTable.builder<Int>()
         .outcome(2) { 3 }
         .outcome(1) { 5 }
         .build()
 
-    override val colorInverterCountRate = 1
+    override val colorInverterSpawnCount = 1
 }

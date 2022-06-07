@@ -4,24 +4,25 @@ package ru.hse.sd.rgb.gameloaders.factories
 
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
+import kotlin.random.Random
 
-class FieryFactory : LevelContentFactory() {
+class FieryFactory(random: Random = Random) : LevelContentFactory() {
 
     override val bgColor = RGB(70, 20, 0)
 
     override val wallColor = RGB(200, 110, 60)
 
-    override val glitchSpawnRate = 1.0 / (40 * 40)
+    override val glitchSpawnCount = random.nextInt(0, 3)
     override val glitchHp = 1
     override val glitchClonePeriod = 4000L
 
-    override val sharpySpawnCount: Int = 4
+    override val sharpySpawnCount: Int = random.nextInt(3, 6)
     override val sharpyColor = RGB(70, 50, 50)
     override val sharpyHp: Int = 4
     override val sharpyMovePeriodMillis: Long = 900
     override val sharpySeeingDepth: Int = 20
 
-    override val colorModificationSpawnRate = 1.0 / (20 * 20)
+    override val colorModificationSpawnCount = random.nextInt(5, 15)
     override val colorModificationRGBDeltaGenerationTable = GenerationTable.builder<RGBDelta>()
         .outcome(5) { RGBDelta(20, 0, 0) }
         .outcome(5) { RGBDelta(10, 5, 5) }
@@ -30,10 +31,10 @@ class FieryFactory : LevelContentFactory() {
         .addDefaults(2)
         .build()
 
-    override val instantHealSpawnRate = 1.0 / (45 * 45)
+    override val instantHealSpawnCount = random.nextInt(1, 6)
     override val instantHealGenerationTable = GenerationTable.builder<Int>()
         .outcome(1) { 4 }
         .build()
 
-    override val colorInverterCountRate = 1
+    override val colorInverterSpawnCount = 1
 }

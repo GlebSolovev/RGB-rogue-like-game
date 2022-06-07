@@ -25,7 +25,7 @@ class ColorModificationItem(
 
     override val viewItem = object : ViewNonReusableItem() {
         override fun getSwingAppearance() =
-            SwingUnitAppearance(SWING_VIEW_SHAPE, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
+            SwingUnitAppearance(SWING_VIEW_SHAPE, null, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
 
         override val color: RGB = this@ColorModificationItem.rgbDelta.convertToViewRGB()
 
@@ -55,7 +55,7 @@ class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) :
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(ColorModificationItem.SWING_VIEW_SHAPE)
+            override val swingAppearance = SwingUnitAppearance(ColorModificationItem.SWING_VIEW_SHAPE, null)
         }
     }
 

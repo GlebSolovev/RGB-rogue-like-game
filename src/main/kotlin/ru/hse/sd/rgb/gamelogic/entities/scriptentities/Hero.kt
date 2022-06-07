@@ -39,11 +39,13 @@ class Hero(
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
             override val swingAppearance = SwingUnitAppearance(
                 SwingUnitShape.SQUARE,
+                outlineColor,
                 swingScaleFactors.getOrDefault(unit, DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR)
             )
         }
 
         override fun applyMessageToAppearance(m: Message) {
+            super.applyMessageToAppearance(m)
             // TODO: allow to easily reuse this code in other GameEntities
             when (m) {
                 is HpChanged -> {
@@ -94,6 +96,14 @@ class Hero(
                     } else {
                         childBehaviour.handleMessage(message)
                     }
+                }
+
+                override fun onStart() {
+                    entity.receive(SetConfused(true))
+                }
+
+                override fun onStop() {
+                    entity.receive(SetConfused(false))
                 }
 
                 override fun traverseTickers(onEach: (Ticker) -> Unit) = ignore
@@ -155,6 +165,8 @@ class Hero(
             override suspend fun handleUserSelect(): State = this
 
             override suspend fun handleUserDrop(): State = this
+
+            override suspend fun handleSetConfused(message: SetConfused): State = this
 
             override suspend fun handleColorTick(tick: ColorTick): State {
                 controller.fighting.update(

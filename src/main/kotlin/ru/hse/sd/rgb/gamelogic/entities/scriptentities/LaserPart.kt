@@ -28,7 +28,7 @@ class LaserPart(
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.RECTANGLE(dir))
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.RECTANGLE(dir), outlineColor)
         }
     }
 

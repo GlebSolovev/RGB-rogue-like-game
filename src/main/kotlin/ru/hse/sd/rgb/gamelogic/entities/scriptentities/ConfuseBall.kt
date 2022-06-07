@@ -25,7 +25,7 @@ class ConfuseBall(
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SPIRAL)
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SPIRAL, outlineColor)
         }
     }
 

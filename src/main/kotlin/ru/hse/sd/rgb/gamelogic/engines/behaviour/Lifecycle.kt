@@ -23,7 +23,7 @@ class Lifecycle(
                         lifeCycleState = LifecycleState.ONGOING
                         controller.view.receive(EntityUpdated(entity))
                         entity.onLifeStart()
-                        childBehaviour.startSubtreeTickers()
+                        childBehaviour.startSubtree()
                     }
                     is LifeEnded -> lifeCycleState = LifecycleState.DEAD
                     else -> ignore
@@ -37,28 +37,26 @@ class Lifecycle(
                         message.dieRoutine()
                         controller.view.receive(EntityRemoved(entity))
                         entity.onLifeEnd()
-                        childBehaviour.stopSubtreeTickers()
+                        childBehaviour.stopSubtree()
                     }
                     is ApplyBehaviourMessage -> {
                         childBehaviour = message.createNewBehaviour(childBehaviour)
-                        childBehaviour.startTickers()
-                        entity.viewEntity.applyMessageToAppearance(message)
+                        childBehaviour.start()
                     }
                     is RemoveBehaviourMessage -> {
                         val child = childBehaviour
                         if (child === message.target) {
                             childBehaviour = child.childBehaviour
-                            child.stopTickers()
+                            child.stop()
                         } else {
                             childBehaviour.traverseSubtree {
                                 val itChild = (it as? MetaBehaviour)?.childBehaviour
                                 if (itChild === message.target) {
                                     it.childBehaviour = itChild.childBehaviour
-                                    itChild.stopTickers()
+                                    itChild.stop()
                                 }
                             }
                         }
-                        entity.viewEntity.applyMessageToAppearance(message)
                     }
                     else -> {
                         childBehaviour.handleMessage(message)

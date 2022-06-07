@@ -7,6 +7,7 @@ import ru.hse.sd.rgb.utils.structures.Cell
 class ItemsEngine {
 
     // TODO: itemEntity.getNewItem(pickerEntity) thread-safety is needed so far :(
+    // TODO: lock pickerEntity to prevent multiple pick
     suspend fun tryPick(pickerEntity: GameEntity, itemEntity: ItemEntity): Item? {
         val item = itemEntity.getNewItem(pickerEntity)
         if (item != null) controller.creation.die(itemEntity)

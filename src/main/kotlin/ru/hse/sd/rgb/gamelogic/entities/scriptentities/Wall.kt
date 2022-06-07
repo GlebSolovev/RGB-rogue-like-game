@@ -21,7 +21,7 @@ class Wall(colorCells: Set<ColorCellNoHp>) : GameEntity(colorCells) {
 
     override val viewEntity: ViewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SQUARE)
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SQUARE, outlineColor)
         }
 
         override fun applyMessageToAppearance(m: Message) = ignore

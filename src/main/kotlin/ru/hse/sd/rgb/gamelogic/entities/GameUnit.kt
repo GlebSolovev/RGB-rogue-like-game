@@ -3,6 +3,7 @@ package ru.hse.sd.rgb.gamelogic.entities
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
+import kotlinx.serialization.Serializable
 import java.util.concurrent.atomic.AtomicLong
 
 typealias GameUnitId = Long
@@ -54,9 +55,14 @@ class HpGameUnit(
     )
 }
 
-sealed class ColorCell(open val color: RGB, open val cell: Cell)
+@Serializable
+sealed class ColorCell {
+    abstract val color: RGB
+    abstract val cell: Cell
+}
 
-data class ColorCellNoHp(override val color: RGB, override val cell: Cell) : ColorCell(color, cell)
+@Serializable
+data class ColorCellNoHp(override val color: RGB, override val cell: Cell) : ColorCell()
 
-class ColorCellHp(override val color: RGB, override val cell: Cell, val maxHp: Int) :
-    ColorCell(color, cell)
+@Serializable
+class ColorCellHp(override val color: RGB, override val cell: Cell, val maxHp: Int) : ColorCell()

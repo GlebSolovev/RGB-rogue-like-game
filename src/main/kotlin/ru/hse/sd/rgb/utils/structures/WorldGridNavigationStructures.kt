@@ -1,7 +1,14 @@
 package ru.hse.sd.rgb.utils.structures
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlin.random.Random
 
+@Serializable(with = CellSerializer::class)
 data class Cell(val x: Int, val y: Int)
 data class GridShift(val dx: Int, val dy: Int)
 
@@ -34,5 +41,18 @@ enum class Direction {
 
     companion object {
         fun random(random: Random = Random) = listOf(UP, LEFT, DOWN, RIGHT).random(random)
+    }
+}
+
+object CellSerializer : KSerializer<Cell> {
+    override val descriptor = PrimitiveSerialDescriptor("Cell", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: Cell) {
+        val (x, y) = value
+        encoder.encodeString("$x $y")
+    }
+
+    override fun deserialize(decoder: Decoder): Cell {
+        val (x, y) = decoder.decodeString().split(" +".toRegex()).map { it.toInt() }
+        return Cell(x, y)
     }
 }

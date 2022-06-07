@@ -33,7 +33,7 @@ class Sharpy(
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.STAR_8)
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.STAR_8, outlineColor)
         }
     }
 

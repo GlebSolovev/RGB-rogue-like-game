@@ -2,14 +2,14 @@ package ru.hse.sd.rgb.gameloaders.factories
 
 import kotlin.random.Random
 
-private data class TableEntry<T>(
+data class TableEntry<T>(
     val weight: Int,
     val result: () -> T
 )
 
-class GenerationTable<T> private constructor(
+class GenerationTable<T>(
     private val entries: List<TableEntry<T>>,
-    private val random: Random
+    private val random: Random = Random
 ) {
 
     private val weightSum: Int

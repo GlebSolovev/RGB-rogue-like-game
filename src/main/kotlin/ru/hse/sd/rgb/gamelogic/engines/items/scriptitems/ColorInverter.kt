@@ -24,7 +24,7 @@ class ColorInverterItem(holder: GameEntity) : ReusableItem(holder) {
 
     override val viewItem: ViewItem = object : ViewReusableItem() {
         override fun getSwingAppearance() =
-            SwingUnitAppearance(SWING_VIEW_SHAPE, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
+            SwingUnitAppearance(SWING_VIEW_SHAPE, null, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
 
         override val color = INVERTER_COLOR
         override val description: String = "When equipped, inverts current RGB"
@@ -49,7 +49,7 @@ class ColorInverterEntity(cell: Cell) : BasicItemEntity(cell, ColorInverterItem.
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(ColorInverterItem.SWING_VIEW_SHAPE)
+            override val swingAppearance = SwingUnitAppearance(ColorInverterItem.SWING_VIEW_SHAPE, null)
         }
     }
 

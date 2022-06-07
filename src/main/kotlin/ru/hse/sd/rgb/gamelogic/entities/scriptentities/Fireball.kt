@@ -24,7 +24,7 @@ class Fireball(
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.CIRCLE)
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.CIRCLE, outlineColor)
         }
     }
 

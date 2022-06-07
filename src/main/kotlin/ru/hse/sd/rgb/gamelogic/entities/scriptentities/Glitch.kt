@@ -37,7 +37,7 @@ class Glitch(
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SQUARE)
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.SQUARE, outlineColor)
         }
     }
 

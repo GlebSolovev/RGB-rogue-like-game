@@ -24,6 +24,19 @@ class ExpiringBehaviour(
         onEach(expiryTicker)
     }
 
+    override fun traverseSubtree(onEach: (Behaviour) -> Unit) {
+        onEach(this)
+        temporaryBehaviour.traverseSubtree(onEach)
+    }
+
+    override fun onStart() {
+        temporaryBehaviour.onStart()
+    }
+
+    override fun onStop() {
+        temporaryBehaviour.onStop()
+    }
+
     override suspend fun handleMessage(message: Message) {
         if (message === expireTick) {
             entity.receive(RemoveBehaviourMessage(this))

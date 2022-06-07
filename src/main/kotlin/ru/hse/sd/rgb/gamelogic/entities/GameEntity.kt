@@ -1,11 +1,15 @@
 package ru.hse.sd.rgb.gamelogic.entities
 
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Lifecycle
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.*
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
+import ru.hse.sd.rgb.utils.messaging.messages.SetConfused
 import ru.hse.sd.rgb.utils.structures.Direction
+import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
 import java.util.*
@@ -20,7 +24,15 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
             return units.map { convertUnit(it) }.toSet()
         }
 
-        open fun applyMessageToAppearance(m: Message) {}
+        protected var outlineColor: RGB? = null
+
+        open fun applyMessageToAppearance(m: Message) {
+            // TODO: remember stack of effects to unset them correctly
+            if (m is SetConfused) { // TODO: maybe generalize for different effects? (no, single unit on fire)
+                outlineColor = if (m.enabled) ConfusedBehaviour.EFFECT_COLOR else null
+                controller.view.receive(EntityUpdated(this@GameEntity))
+            }
+        }
     }
 
     abstract inner class PhysicalEntity {

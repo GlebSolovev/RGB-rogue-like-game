@@ -15,6 +15,7 @@ abstract class State {
         is UserToggledInventory -> handleUserToggledInventory()
         is UserSelect -> handleUserSelect()
         is UserDrop -> handleUserDrop()
+        is SetConfused -> handleSetConfused(message)
         is ColorTick -> handleColorTick(message)
         is MoveTick -> handleMoveTick()
         is RepaintTick -> handleRepaintTick()
@@ -34,6 +35,8 @@ abstract class State {
     open suspend fun handleUserToggledInventory(): State = messageNotSupported
     open suspend fun handleUserSelect(): State = messageNotSupported
     open suspend fun handleUserDrop(): State = messageNotSupported
+
+    open suspend fun handleSetConfused(message: SetConfused): State = messageNotSupported
 
     open suspend fun handleColorTick(tick: ColorTick): State = messageNotSupported
 
