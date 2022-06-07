@@ -81,6 +81,11 @@ operator fun RGB.plus(delta: RGBDelta): RGB {
     return RGB(limitComponent(r + dr), limitComponent(g + dg), limitComponent(b + db))
 }
 
+fun RGB.invert(): RGB {
+    val (r, g, b) = this
+    return RGB(RGB.MAX_COMPONENT_VALUE - r, RGB.MAX_COMPONENT_VALUE - g, RGB.MAX_COMPONENT_VALUE - b)
+}
+
 private fun limitComponent(c: Int) = min(RGB.MAX_COMPONENT_VALUE, max(RGB.MIN_COMPONENT_VALUE, c))
 
 fun generateRandomColor(random: Random = Random): RGB =

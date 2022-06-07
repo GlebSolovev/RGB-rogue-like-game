@@ -1,5 +1,6 @@
-package ru.hse.sd.rgb.gamelogic.items
+package ru.hse.sd.rgb.gamelogic.engines.items
 
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.utils.structures.*
 import java.awt.Color
 
@@ -9,6 +10,7 @@ data class InventorySwingAppearance(
     val highlightColor: Color,
     val scale: Double,
     val itemBgAlpha: Int,
+    val equippedItemHighlightAlpha: Int
 )
 
 data class InventoryViewSnapshot(
@@ -18,13 +20,14 @@ data class InventoryViewSnapshot(
     val swingAppearance: InventorySwingAppearance
 )
 
+// should be not thread-safe, only its holder entity operates with it
 class Inventory(
     private val w: Int,
     private val h: Int,
 ) {
 
     companion object {
-        val DEFAULT_SWING_APPEARANCE = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200)
+        val DEFAULT_SWING_APPEARANCE = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200, 128)
     }
 
     private var selectedCell: Cell = Cell(0, 0)
@@ -34,7 +37,7 @@ class Inventory(
         private val swingAppearance = DEFAULT_SWING_APPEARANCE
 
         fun takeViewSnapshot() = InventoryViewSnapshot(
-            items.map { it?.viewItem }, // TODO: should be concurrent?
+            items.map { it?.viewItem },
             selectedCell,
             swingAppearance
         )
@@ -42,9 +45,10 @@ class Inventory(
 
     val viewInventory = ViewInventory()
 
-    // return false if inventory is full, true otherwise
+    fun isNotFull(): Boolean = findEmptyCell() != null
+
     fun addItem(item: Item): Boolean {
-        val cell = findEmptyCell() ?: return false
+        val cell = findEmptyCell() ?: throw IllegalArgumentException("can't add item into full inventory")
         items[cell] = item
         return true
     }
@@ -72,9 +76,14 @@ class Inventory(
         return true
     }
 
-    fun dropCurrent(): Item? {
-        val item = items[selectedCell] ?: return null
-        items[selectedCell] = null
-        return item
+    // returns true if item was dropped
+    suspend fun dropCurrent(cell: Cell): Boolean {
+        val item = items[selectedCell] ?: return false
+
+        if (controller.itemsEngine.tryDrop(item, cell)) {
+            items[selectedCell] = null
+            return true
+        }
+        return false
     }
 }

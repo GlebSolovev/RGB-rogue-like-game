@@ -1,10 +1,10 @@
-package ru.hse.sd.rgb.gamelogic.items.scriptitems
+package ru.hse.sd.rgb.gamelogic.engines.items.scriptitems
 
 import ru.hse.sd.rgb.controller
+import ru.hse.sd.rgb.gamelogic.engines.items.BasicItemEntity
+import ru.hse.sd.rgb.gamelogic.engines.items.NonReusableItem
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
-import ru.hse.sd.rgb.gamelogic.items.BasicItemEntity
-import ru.hse.sd.rgb.gamelogic.items.Item
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -16,14 +16,14 @@ import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
 class ColorModificationItem(
     holder: GameEntity,
-    private val rgbDelta: RGBDelta,
-) : Item(holder) {
+    private val rgbDelta: RGBDelta
+) : NonReusableItem(holder) {
 
     companion object {
         val SWING_VIEW_SHAPE = SwingUnitShape.SPINNING_SQUARE
     }
 
-    override val viewItem = object : ViewItem() {
+    override val viewItem = object : ViewNonReusableItem() {
         override fun getSwingAppearance() =
             SwingUnitAppearance(SWING_VIEW_SHAPE, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
 
@@ -39,7 +39,6 @@ class ColorModificationItem(
         }
     }
 
-    override val isReusable = false
     override suspend fun use() {
         // TODO: select unit
         for (unit in holder.units) {
@@ -53,12 +52,12 @@ class ColorModificationItem(
 
 class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) :
     BasicItemEntity(cell, rgbDelta.convertToViewRGB()) {
+
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
             override val swingAppearance = SwingUnitAppearance(ColorModificationItem.SWING_VIEW_SHAPE)
         }
     }
 
-    override fun getNewItemUnconditionally(picker: GameEntity) =
-        ColorModificationItem(picker, rgbDelta)
+    override fun getNewItemUnconditionally(picker: GameEntity) = ColorModificationItem(picker, rgbDelta)
 }

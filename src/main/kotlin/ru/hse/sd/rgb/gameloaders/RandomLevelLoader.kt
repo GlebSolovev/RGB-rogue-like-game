@@ -3,12 +3,13 @@ package ru.hse.sd.rgb.gameloaders
 import ru.hse.sd.rgb.gameloaders.factories.GenerationTable
 import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
+import ru.hse.sd.rgb.gamelogic.engines.items.scriptitems.ColorInverterEntity
+import ru.hse.sd.rgb.gamelogic.engines.items.scriptitems.ColorModificationEntity
+import ru.hse.sd.rgb.gamelogic.engines.items.scriptitems.InstantHealEntity
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.gamelogic.items.scriptitems.ColorModificationEntity
-import ru.hse.sd.rgb.gamelogic.items.scriptitems.InstantHealEntity
 import ru.hse.sd.rgb.utils.nextChance
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
@@ -65,7 +66,7 @@ class RandomLevelLoader private constructor(
         for (x in 1 until w - 1) for (y in 1 until h - 1) if (maze[x, y]) entities.add(
             levelFactory.createWall(Cell(x, y))
         )
-        // add outline walls (BREAKABLE)
+        // add outline walls
         for (x in 0 until w) {
             entities.add(levelFactory.createWall(Cell(x, 0)))
             entities.add(levelFactory.createWall(Cell(x, h - 1)))
@@ -94,7 +95,6 @@ class RandomLevelLoader private constructor(
             trySpawnRandomGeneratedEntity(levelFactory.glitchSpawnRate) { cell ->
                 levelFactory.createGlitch(cell)
             }
-            // TODO: fix occasional 'invalid entities' exception
             trySpawnRandomGeneratedEntity(levelFactory.colorModificationSpawnRate) { cell ->
                 val rgbDelta = levelFactory.colorModificationRGBDeltaGenerationTable.roll()
                 ColorModificationEntity(cell, rgbDelta)
@@ -102,6 +102,11 @@ class RandomLevelLoader private constructor(
             trySpawnRandomGeneratedEntity(levelFactory.instantHealSpawnRate) { cell ->
                 InstantHealEntity(cell, levelFactory.instantHealGenerationTable.roll())
             }
+        }
+
+        repeat(levelFactory.colorInverterCountRate) {
+            val emptyCells = getEmptyCells(w, h, entities)
+            entities.add(ColorInverterEntity(emptyCells.random()))
         }
 
         return LevelDescription(
@@ -193,6 +198,8 @@ class RandomLevelLoader private constructor(
                 override val instantHealGenerationTable = GenerationTable.builder<Int>()
                     .outcome(1) { 1 }
                     .build()
+
+                override val colorInverterCountRate = 1
             }
         }
     }

@@ -4,6 +4,7 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourEngine
 import ru.hse.sd.rgb.gamelogic.engines.creation.CreationEngine
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
+import ru.hse.sd.rgb.gamelogic.engines.items.ItemsEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
@@ -31,7 +32,8 @@ data class Engines(
     val physics: PhysicsEngine,
     val fighting: FightEngine,
     val creation: CreationEngine,
-    val behaviour: BehaviourEngine
+    val behaviourEngine: BehaviourEngine,
+    val itemsEngine: ItemsEngine
 )
 
 data class LevelBasicParams(
@@ -67,8 +69,9 @@ class Loader(
         val fighting = FightEngine(baseColorList, interactionMatrix)
         val creation = CreationEngine(physics, fighting)
         val behaviour = BehaviourEngine()
+        val itemsEngine = ItemsEngine()
 
-        return Engines(physics, fighting, creation, behaviour)
+        return Engines(physics, fighting, creation, behaviour, itemsEngine)
     }
 
     fun loadHero(): Hero = levelLoader.loadHero()

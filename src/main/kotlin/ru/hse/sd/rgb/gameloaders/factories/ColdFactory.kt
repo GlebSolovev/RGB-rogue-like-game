@@ -36,4 +36,6 @@ class ColdFactory : LevelContentFactory() {
         .outcome(2) { 3 }
         .outcome(1) { 5 }
         .build()
+
+    override val colorInverterCountRate = 1
 }

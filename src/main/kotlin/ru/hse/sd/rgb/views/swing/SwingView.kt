@@ -2,7 +2,7 @@
 
 package ru.hse.sd.rgb.views.swing
 
-import ru.hse.sd.rgb.gamelogic.items.InventoryViewSnapshot
+import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.Ticker.Companion.createTicker
@@ -241,3 +241,4 @@ class SwingView(repaintPeriodMillis: Long) : View() {
 }
 
 fun RGB.toSwingColor() = Color(r, g, b)
+fun Color.toRGB() = RGB(this.red, this.green, this.blue)

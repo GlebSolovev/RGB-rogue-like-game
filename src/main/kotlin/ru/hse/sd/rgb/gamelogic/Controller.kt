@@ -124,7 +124,9 @@ class Controller(
     val creation
         get() = stateRef.get().engines.creation
     val behaviourEngine
-        get() = stateRef.get().engines.behaviour
+        get() = stateRef.get().engines.behaviourEngine
+    val itemsEngine
+        get() = stateRef.get().engines.itemsEngine
 
     val hero: Hero
         get() = stateRef.get().hero

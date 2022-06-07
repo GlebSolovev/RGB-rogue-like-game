@@ -39,6 +39,8 @@ abstract class LevelContentFactory {
 
     abstract val instantHealSpawnRate: Double
     abstract val instantHealGenerationTable: GenerationTable<Int>
+
+    abstract val colorInverterCountRate: Int
 }
 
 @Suppress("MagicNumber")

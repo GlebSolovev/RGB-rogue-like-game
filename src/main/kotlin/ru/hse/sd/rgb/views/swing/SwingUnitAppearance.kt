@@ -190,6 +190,12 @@ enum class SwingUnitShape {
             }
             return path
         }
+    },
+    CROSS {
+        override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape {
+            // TODO: implement CROSS instead of PLUS
+            return PLUS.convertToSwingShape(spX, spY, scaledTileSize)
+        }
     }
     ;
 

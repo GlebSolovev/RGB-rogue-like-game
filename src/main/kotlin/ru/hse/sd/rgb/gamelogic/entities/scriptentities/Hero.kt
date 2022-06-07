@@ -6,12 +6,12 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.*
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
+import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
+import ru.hse.sd.rgb.gamelogic.engines.items.ItemEntity
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
-import ru.hse.sd.rgb.gamelogic.items.BasicItemEntity
-import ru.hse.sd.rgb.gamelogic.items.Inventory
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
@@ -123,16 +123,14 @@ class Hero(
             }
 
             override suspend fun handleCollidedWith(message: CollidedWith): State {
-                when (val itemEntity = message.otherUnit.parent) {
-                    is BasicItemEntity -> {
-                        val item = itemEntity.getNewItem(this@Hero)
-                        if (item != null && inventory.addItem(item)) {
-                            controller.creation.die(itemEntity)
-                        }
+                val collidedWithEntity = message.otherUnit.parent
+                if (collidedWithEntity is ItemEntity) {
+                    if (inventory.isNotFull()) {
+                        val item = controller.itemsEngine.tryPick(this@Hero, collidedWithEntity) ?: return this
+                        inventory.addItem(item)
                     }
-                    else -> {
-                        controller.fighting.attack(message.myUnit, message.otherUnit)
-                    }
+                } else {
+                    controller.fighting.attack(message.myUnit, message.otherUnit)
                 }
                 return this
             }
@@ -190,14 +188,8 @@ class Hero(
             }
 
             override suspend fun handleUserDrop(): State {
-                val item = inventory.dropCurrent()
-                if (item != null) {
-                    val itemEntity = item.getNewItemEntity(randomCell())
-                    if (controller.creation.tryAddToWorld(itemEntity))
-                        controller.view.receive(EntityUpdated(itemEntity))
-                    // TODO: fix: when dropped on incompatible, entity doesn't spawn but the item is gone
-                }
-                sendInvUpdate()
+                if (inventory.dropCurrent(randomCell())) sendInvUpdate()
+                // TODO: if false show message "Can't drop item, try again"
                 return this
             }
         }

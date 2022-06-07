@@ -34,4 +34,6 @@ class FieryFactory : LevelContentFactory() {
     override val instantHealGenerationTable = GenerationTable.builder<Int>()
         .outcome(1) { 4 }
         .build()
+
+    override val colorInverterCountRate = 1
 }

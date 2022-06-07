@@ -3,8 +3,8 @@
 package ru.hse.sd.rgb.views.swing
 
 import ru.hse.sd.rgb.controller
+import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
-import ru.hse.sd.rgb.gamelogic.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.views.DrawablesMap
@@ -132,13 +132,19 @@ class GameInventoryPanel(
                 val pxX = invOffsetX + gx * itemSize
                 val pxY = invOffsetY + gy * itemSize
 
-                g.color = Color(0, 0, 0, invSnapshot.swingAppearance.itemBgAlpha)
+                val item = invSnapshot.itemsGrid[Cell(gx, gy)]
+
+                if (item != null && item.isEquipped) {
+                    val (hr, hg, hb) = invSnapshot.swingAppearance.highlightColor.toRGB()
+                    g.color = Color(hr, hg, hb, invSnapshot.swingAppearance.equippedItemHighlightAlpha)
+                } else {
+                    g.color = Color(0, 0, 0, invSnapshot.swingAppearance.itemBgAlpha)
+                }
                 g.fillRect(pxX, pxY, itemSize, itemSize)
 
                 g.color = invSnapshot.swingAppearance.gridColor
                 g.drawRect(pxX, pxY, itemSize, itemSize)
 
-                val item = invSnapshot.itemsGrid[Cell(gx, gy)]
                 if (item != null) {
                     g.color = item.color.toSwingColor()
                     g.fill(convertToSwingShape(item.getSwingAppearance(), pxX, pxY, itemSize))

@@ -1,8 +1,8 @@
 package ru.hse.sd.rgb.utils.messaging.messages
 
 import ru.hse.sd.rgb.gameloaders.LevelDescription
+import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
-import ru.hse.sd.rgb.gamelogic.items.Inventory
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Tick
