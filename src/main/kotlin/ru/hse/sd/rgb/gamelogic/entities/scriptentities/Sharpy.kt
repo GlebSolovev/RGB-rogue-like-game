@@ -2,15 +2,13 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.MoveUsingUpdatingPath
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.*
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.DirectAttackHeroBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.UponSeeingBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
+import ru.hse.sd.rgb.gamelogic.engines.items.scriptitems.InstantHealEntity
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
@@ -29,6 +27,8 @@ class Sharpy(
 
     companion object {
         const val DIRECT_ATTACK_MOVE_PERIOD_COEFFICIENT: Double = 0.25
+        const val MAX_HP_TO_INSTANT_HEAL_AMOUNT_COEFFICIENT = 0.2
+        const val ON_DIE_ITEM_DROP_PROBABILITY = 0.1
     }
 
     override val viewEntity = object : ViewEntity() {
@@ -59,6 +59,14 @@ class Sharpy(
             }
             add { AttackOnCollision(entity, childBlock) }
             add { DieOnFatalAttack(entity, childBlock) }
+            add {
+                DropItemOnDie(entity, childBlock, ON_DIE_ITEM_DROP_PROBABILITY) {
+                    InstantHealEntity(
+                        units.first().cell,
+                        (colorCellHp.maxHp * MAX_HP_TO_INSTANT_HEAL_AMOUNT_COEFFICIENT).toInt()
+                    )
+                }
+            }
         }
         .add {
             UponSeeingBehaviour(entity, childBehaviour, controller.hero, seeingDepth) {

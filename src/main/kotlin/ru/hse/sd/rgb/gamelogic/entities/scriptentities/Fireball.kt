@@ -42,6 +42,7 @@ class Fireball(
     private val behaviour = BehaviourBuilder.metaFromBlocks(NoneBehaviour(this))
         .add { MoveDirectlyTowardsCell(entity, childBlock, movePeriodMillis, targetCell) }
         .add { AttackOnCollision(entity, childBlock) }
+        .add { AnnihilateItems(entity, childBlock) }
         .add {
             FireEnemyOnCollision(entity, childBlock, burningAttackPeriodMillis, burningAttack, burningDurationMillis)
         }

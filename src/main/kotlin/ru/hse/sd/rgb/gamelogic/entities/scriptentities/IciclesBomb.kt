@@ -9,7 +9,7 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.messaging.Message
-import ru.hse.sd.rgb.utils.messaging.messages.CollidedWith
+import ru.hse.sd.rgb.utils.messaging.messages.Dying
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.views.ViewUnit
@@ -54,9 +54,7 @@ class IciclesBomb(
         .add {
             object : BehaviourBuildingBlock(entity, childBlock) {
                 override suspend fun handleMessage(message: Message) {
-                    if (message is CollidedWith &&
-                        message.otherUnit.parent.fightEntity.teamId != entity.fightEntity.teamId
-                    ) {
+                    if (message is Dying) {
                         repeat(iciclesCount) {
                             val ballUnit = units.first()
                             val icicleTargetCell = controller.physics.generateRandomTarget(this@IciclesBomb)
@@ -76,6 +74,7 @@ class IciclesBomb(
             }
         }
         .add { DieOnCollisionWithOtherTeam(entity, childBlock) }
+        .add { IgnoreCollisionsWithItems(entity, childBlock) }
         .add { DieOnFatalAttack(entity, childBlock) }
         .build()
     override val behaviourEntity = SingleBehaviourEntity(icicleBallBaseBehaviour)

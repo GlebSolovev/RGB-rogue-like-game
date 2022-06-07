@@ -8,9 +8,10 @@ import ru.hse.sd.rgb.utils.structures.RGB
 // messages required to be handled in Behaviour-s
 
 // game logic messages
-data class HpChanged(val myUnit: GameUnit, val isFatal: Boolean) : Message()
-data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : Message()
+data class HpChanged(val myUnit: GameUnit, val isFatal: Boolean) : SaveInNotStartedAndReplayInOngoingMessage()
+data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : SaveInNotStartedAndReplayInOngoingMessage()
 class DoMove : Message()
+class Dying : SaveInNotStartedAndReplayInOngoingMessage() // message behaviours about dying
 
 // messages from View
 data class UserMoved(val dir: Direction) : Message()
@@ -19,4 +20,4 @@ class UserSelect : Message()
 class UserDrop : Message()
 
 // cosmetic messages
-data class SetEffectColor(val enabled: Boolean, val color: RGB) : Message()
+data class SetEffectColor(val enabled: Boolean, val color: RGB) : SaveInNotStartedAndReplayInOngoingMessage()

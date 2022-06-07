@@ -6,6 +6,7 @@ import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.unreachable
+import java.util.*
 
 class Lifecycle(
     private val entity: GameEntity,
@@ -14,6 +15,9 @@ class Lifecycle(
     private enum class LifecycleState { NOT_STARTED, ONGOING, DEAD }
 
     private var lifeCycleState: LifecycleState = LifecycleState.NOT_STARTED
+
+    private val saveInNotStartedAndReplayInOngoingMessages: Queue<SaveInNotStartedAndReplayInOngoingMessage> =
+        LinkedList()
 
     suspend fun handleMessage(message: Message) {
         when (lifeCycleState) {
@@ -24,9 +28,16 @@ class Lifecycle(
                         controller.view.receive(EntityUpdated(entity))
                         entity.onLifeStart()
                         childBehaviour.startSubtree()
+                        while (saveInNotStartedAndReplayInOngoingMessages.isNotEmpty()) {
+                            val savedMessage = saveInNotStartedAndReplayInOngoingMessages.remove()
+                            handleMessage(savedMessage)
+                        }
                     }
                     is LifeEnded -> lifeCycleState = LifecycleState.DEAD
-                    else -> ignore
+                    else -> {
+                        if (message is SaveInNotStartedAndReplayInOngoingMessage)
+                            saveInNotStartedAndReplayInOngoingMessages.add(message)
+                    }
                 }
             }
             LifecycleState.ONGOING -> {

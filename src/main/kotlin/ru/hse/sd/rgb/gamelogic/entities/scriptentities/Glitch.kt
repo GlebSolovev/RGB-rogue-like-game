@@ -4,12 +4,11 @@ import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.*
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
+import ru.hse.sd.rgb.gamelogic.engines.items.scriptitems.ColorModificationEntity
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
@@ -33,6 +32,8 @@ class Glitch(
 
     companion object {
         const val REPAINT_PERIOD_MILLIS = 100L
+        const val TO_RGB_DELTA_SCALE_COEFFICIENT = 0.1
+        const val ON_DIE_ITEM_DROP_PROBABILITY = 0.8
     }
 
     override val viewEntity = object : ViewEntity() {
@@ -57,9 +58,27 @@ class Glitch(
     private val glitchBaseBehaviour = GlitchBaseBehaviour()
     override val lifecycle = BehaviourBuilder.lifecycle(this, glitchBaseBehaviour).addBlocks {
         add { AttackOnCollision(entity, childBlock) }
+        add { AnnihilateItems(entity, childBlock) }
         add { DieOnFatalAttack(entity, childBlock) }
         add { EnableColorUpdate(entity, childBlock, ControlParams(AttackType.HERO_TARGET, HealType.RANDOM_TARGET)) }
+        add {
+            DropItemOnDie(entity, childBlock, ON_DIE_ITEM_DROP_PROBABILITY) {
+                ColorModificationEntity(
+                    cell,
+                    convertGlitchColorToRGBDelta(units.first().gameColor)
+                )
+            }
+        }
     }.build()
+
+    private fun convertGlitchColorToRGBDelta(rgb: RGB): RGBDelta {
+        val (r, g, b) = rgb
+        return RGBDelta(
+            (r * TO_RGB_DELTA_SCALE_COEFFICIENT).toInt(),
+            (g * TO_RGB_DELTA_SCALE_COEFFICIENT).toInt(),
+            (b * TO_RGB_DELTA_SCALE_COEFFICIENT).toInt()
+        )
+    }
 
     override val behaviourEntity = object : BehaviourEntity() {
         override fun createDirectAttackHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long): Behaviour =

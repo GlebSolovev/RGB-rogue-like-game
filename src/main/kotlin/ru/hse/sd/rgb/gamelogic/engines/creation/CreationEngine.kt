@@ -5,6 +5,7 @@ import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.gameCoroutineScope
 import ru.hse.sd.rgb.utils.messaging.Ticker
+import ru.hse.sd.rgb.utils.messaging.messages.Dying
 import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
 import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
 import kotlinx.coroutines.Job
@@ -47,6 +48,7 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
             entityCoroutines.remove(entity)!!.cancel()
             Ticker.tryStopTickers(entity)
         }
-        entity.receive(LifeEnded(dieRoutine))
+        entity.receive(Dying()) // trigger onDie behaviours
+        entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
     }
 }
