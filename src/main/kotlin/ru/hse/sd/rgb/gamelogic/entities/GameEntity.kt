@@ -14,6 +14,7 @@ import ru.hse.sd.rgb.views.GameEntityViewSnapshot
 import ru.hse.sd.rgb.views.ViewUnit
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.max
 
 abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
@@ -26,12 +27,32 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
         protected var outlineColor: RGB? = null
 
+        private val effectColorCount = mutableMapOf<RGB, Int>()
+        private val currentEffectColors = linkedSetOf<RGB>()
+
         open fun applyMessageToAppearance(m: Message) {
-            // TODO: remember stack of effects to unset them correctly
-            if (m is SetEffectColor) {
-                outlineColor = if (m.enabled) m.color else null
-                controller.view.receive(EntityUpdated(this@GameEntity))
+            if (m !is SetEffectColor) return
+
+            // update structures
+            val colorCount = effectColorCount.getOrPut(m.color) { 0 }
+            val newColorCount = max(0, colorCount + if (m.enabled) 1 else -1)
+            effectColorCount[m.color] = newColorCount
+
+            if (colorCount == 0 && newColorCount > 0) currentEffectColors.add(m.color)
+                .let { if (!it) throw IllegalStateException("must be new color") }
+            if (colorCount > 0 && newColorCount == 0) currentEffectColors.remove(m.color)
+                .let { if (!it) throw IllegalStateException("must be one of current color") }
+
+            // set the newest color
+            outlineColor = if (newColorCount > 0) {
+                m.color
+            } else if (outlineColor !in currentEffectColors) {
+                currentEffectColors.lastOrNull()
+            } else {
+                null
             }
+
+            controller.view.receive(EntityUpdated(this@GameEntity))
         }
     }
 
