@@ -17,8 +17,6 @@ fun unreachable(info: Any): Nothing {
     unreachable
 }
 
-val notAllowed: Nothing get() = error("method not allowed")
-
 operator fun <T, U, V> Map<Pair<T, U>, V>.get(t: T, u: U) = this[t to u]
 
 operator fun <Y> AtomicReference<Y>.getValue(x: Any?, p: KProperty<*>): Y = this.get()
@@ -29,9 +27,6 @@ operator fun <Y> AtomicReference<Y>.setValue(x: Any?, p: KProperty<*>, value: Y)
 fun Random.nextChance(probability: Double): Boolean = this.nextDouble() < probability
 
 fun <T> ConcurrentHashSet(): MutableSet<T> = Collections.newSetFromMap(ConcurrentHashMap())
-
-fun <T> Collection<T>.randomElementOrNull(random: Random = Random) = this.shuffled(random).firstOrNull()
-fun <T> Collection<T>.randomElement(random: Random = Random) = this.shuffled(random).first()
 
 private const val EPS = 1e-8
 infix fun Double.sameAs(d: Double) = abs(this - d) < EPS

@@ -2,7 +2,7 @@ package ru.hse.sd.rgb.gamelogic.engines.items
 
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 
-abstract class ReusableItem(holder: GameEntity) : Item(holder) {
+abstract class ReusableItem(holder: GameEntity, isEquipped: Boolean) : Item(holder) {
 
     final override val isReusable: Boolean = true
 
@@ -10,7 +10,7 @@ abstract class ReusableItem(holder: GameEntity) : Item(holder) {
         EQUIPPED, UNEQUIPPED
     }
 
-    private var equippedState = EquippedState.UNEQUIPPED
+    private var equippedState = if (isEquipped) EquippedState.EQUIPPED else EquippedState.UNEQUIPPED
 
     abstract inner class ViewReusableItem : ViewItem() {
         final override val isEquipped: Boolean
@@ -31,4 +31,8 @@ abstract class ReusableItem(holder: GameEntity) : Item(holder) {
     protected abstract suspend fun equip()
 
     protected abstract suspend fun unequip()
+
+    abstract inner class ReusableItemPersistence : ItemPersistence() {
+        protected val isEquipped = isEquipped()
+    }
 }

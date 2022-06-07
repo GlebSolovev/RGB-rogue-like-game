@@ -3,6 +3,7 @@
 package ru.hse.sd.rgb.views.swing
 
 import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
+import ru.hse.sd.rgb.gamelogic.viewCoroutineScope
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.*
 import ru.hse.sd.rgb.utils.messaging.Ticker.Companion.createTicker
@@ -127,6 +128,10 @@ class SwingView(repaintPeriodMillis: Long) : View() {
             is EntityRemoved -> this.also {
                 drawables.remove(m.gameEntity)!!
             }
+            is GameViewStopped -> SwingLoadingState().also {
+                drawables.clear()
+                playingData = null
+            }
             else -> unreachable(m)
         }
     }
@@ -182,8 +187,11 @@ class SwingView(repaintPeriodMillis: Long) : View() {
                 drawables.remove(m.gameEntity)!!
             }
             is UserQuit -> this.also {
-//                quitListeners.forEach { it.receive(m) } // this is unintuitive
+//                quitListeners.forEach { it.receive(m) } // unintuitive, better just close the inventory
                 inventoryListeners.forEach { it.receive(UserToggledInventory()) }
+            }
+            is GameViewStopped -> SwingLoadingState().also {
+                drawables.clear()
             }
             else -> unreachable(m)
         }
@@ -207,7 +215,6 @@ class SwingView(repaintPeriodMillis: Long) : View() {
                         invDesc.invGridW, invDesc.invGridH
                     )
                 )
-
                 SwingPlayingState(DrawablesMap())
             }
             is UserQuit -> this.also {
@@ -221,7 +228,7 @@ class SwingView(repaintPeriodMillis: Long) : View() {
 
     override var state: AtomicReference<ViewState> = AtomicReference(SwingLoadingState())
 
-    private val ticker: Ticker = createTicker(repaintPeriodMillis, ViewTick())
+    private val ticker: Ticker = createTicker(repaintPeriodMillis, ViewTick(), viewCoroutineScope)
 
     override fun initialize() {
         window.defaultCloseOperation = JFrame.EXIT_ON_CLOSE // TODO: maybe save something on exit?

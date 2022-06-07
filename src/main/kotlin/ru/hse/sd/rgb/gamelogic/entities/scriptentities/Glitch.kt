@@ -14,7 +14,6 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
-import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.CloneTick
@@ -96,7 +95,7 @@ class Glitch(
                     val cells = units.map { it.cell }.toSet()
                     val adjacentCells =
                         cells.flatMap { cell -> Direction.values().map { cell + it.toShift() } }.toSet() subtract cells
-                    val targetCell = adjacentCells.randomElement()
+                    val targetCell = adjacentCells.random()
 
                     val clone = clone(targetCell)
                     val cloneIsPopulated = controller.creation.tryAddToWorld(clone)

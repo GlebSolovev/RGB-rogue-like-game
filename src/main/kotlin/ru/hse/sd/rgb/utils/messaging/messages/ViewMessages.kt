@@ -26,6 +26,7 @@ data class EntityUpdated(val gameEntity: GameEntity) : Message() {
 data class EntityRemoved(val gameEntity: GameEntity) : Message()
 
 data class GameViewStarted(val level: LevelDescription) : Message()
+class GameViewStopped : Message()
 
 class InventoryOpened(inventory: Inventory) : Message() {
     val invSnapshot = inventory.viewInventory.takeViewSnapshot()

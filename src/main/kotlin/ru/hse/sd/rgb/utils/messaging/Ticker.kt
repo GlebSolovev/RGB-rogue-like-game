@@ -13,6 +13,7 @@ class Ticker(
     periodMillis: Long,
     private val target: Messagable,
     val tick: Tick,
+    private val scope: CoroutineScope = tickerCoroutineScope,
 ) {
     private lateinit var coroutineJob: Job
     var isTicking: Boolean by AtomicReference(false)
@@ -22,7 +23,7 @@ class Ticker(
 
     fun start() {
         if (isTicking) return
-        coroutineJob = tickerCoroutineScope.launch {
+        coroutineJob = scope.launch {
             tickingRoutine()
         }
         isTicking = true
@@ -47,16 +48,20 @@ class Ticker(
     companion object {
         private val tickers = ConcurrentHashMap<Messagable, MutableSet<Ticker>>()
 
-        fun Messagable.createTicker(periodMillis: Long, tick: Tick = Tick()) = Ticker(periodMillis, this, tick)
+        private var tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
+
+        fun Messagable.createTicker(
+            periodMillis: Long,
+            tick: Tick = Tick(),
+            scope: CoroutineScope = tickerCoroutineScope,
+        ) = Ticker(periodMillis, this, tick, scope)
 
         fun tryStopTickers(m: Messagable) {
             tickers[m]?.let { for (t in it) t.stop() }
             tickers.remove(m)
         }
 
-        private var tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
-
-        fun resetAll() {
+        fun stopDefaultScope() {
             tickerCoroutineScope.cancel()
             tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
         }

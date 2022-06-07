@@ -34,6 +34,12 @@ sealed class Item(protected val holder: GameEntity) {
     abstract fun getNewItemEntity(cell: Cell): ItemEntity
 
     abstract suspend fun use()
+
+    abstract fun extractPersistence(): ItemPersistence
+}
+
+abstract class ItemPersistence {
+    abstract fun convertToItem(holder: GameEntity): Item
 }
 
 abstract class ItemEntity(cell: Cell, color: RGB, private val respawned: Boolean) :

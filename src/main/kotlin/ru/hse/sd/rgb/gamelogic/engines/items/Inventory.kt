@@ -1,6 +1,8 @@
 package ru.hse.sd.rgb.gamelogic.engines.items
 
 import ru.hse.sd.rgb.controller
+import ru.hse.sd.rgb.gameloaders.InventoryDescription
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.structures.*
 import java.awt.Color
 
@@ -20,18 +22,19 @@ data class InventoryViewSnapshot(
     val swingAppearance: InventorySwingAppearance
 )
 
-// should be not thread-safe, only its holder entity operates with it
+// doesn't need to be thread-safe, only its holder entity operates with it
 class Inventory(
-    private val w: Int,
-    private val h: Int,
+    private val items: Grid2D<Item?>,
+    private var selectedCell: Cell = Cell(0, 0),
 ) {
-
     companion object {
         val DEFAULT_SWING_APPEARANCE = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200, 128)
     }
 
-    private var selectedCell: Cell = Cell(0, 0)
-    private val items: Grid2D<Item?> = Grid2D(w, h) { _, _ -> null }
+    constructor(w: Int, h: Int) : this(Grid2D(w, h) { _, _ -> null })
+
+    private val w = items.w
+    private val h = items.h
 
     inner class ViewInventory {
         private val swingAppearance = DEFAULT_SWING_APPEARANCE
@@ -69,6 +72,7 @@ class Inventory(
             selectedCell = nextCell
     }
 
+    // TODO: handle equipping-unequipping many times a second
     suspend fun useCurrent(): Boolean {
         val item = items[selectedCell] ?: return false
         item.use()
@@ -86,4 +90,21 @@ class Inventory(
         }
         return false
     }
+
+    fun extractPersistence() = InventoryPersistence(
+        items.map { it?.extractPersistence() },
+        selectedCell
+    )
+}
+
+class InventoryPersistence(
+    private val itemsPersistence: Grid2D<ItemPersistence?>,
+    private val selectedCell: Cell,
+) {
+    fun convertToInventory(holder: GameEntity) = Inventory(
+        itemsPersistence.map { it?.convertToItem(holder) },
+        selectedCell
+    )
+
+    val description = InventoryDescription(itemsPersistence.w, itemsPersistence.h)
 }

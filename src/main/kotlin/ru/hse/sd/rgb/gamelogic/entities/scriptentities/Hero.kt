@@ -1,7 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.controller
-import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.*
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.BurningBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.ConfusedBehaviour
@@ -11,6 +10,7 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
+import ru.hse.sd.rgb.gamelogic.engines.items.InventoryPersistence
 import ru.hse.sd.rgb.gamelogic.engines.items.ItemEntity
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
@@ -22,23 +22,46 @@ import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.randomCell
 import ru.hse.sd.rgb.utils.sameAs
-import ru.hse.sd.rgb.utils.structures.Direction
+import ru.hse.sd.rgb.utils.structures.*
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
+data class HeroPersistence(
+    val unitsPersistence: List<HpUnitPersistence>,
+    val inventoryPersistence: InventoryPersistence,
+    val singleDirMovePeriodLimit: Long,
+    // TODO: experience
+) {
+    data class HpUnitPersistence(
+        val relativeShift: GridShift,
+        val color: RGB,
+        val hp: Int,
+        val maxHp: Int,
+    ) {
+        fun convertToColorCellHp(firstCell: Cell): ColorCellHp = ColorCellHp(
+            color, firstCell + relativeShift, hp, maxHp
+        )
+    }
+}
+
 class Hero(
-    colorCells: Set<ColorCellHp>,
-    invDesc: InventoryDescription,
-    private var singleDirMovePeriodLimit: Long
-) : GameEntity(colorCells) {
+    spawnCell: Cell,
+    heroPersistence: HeroPersistence,
+) : GameEntity(
+    run { heroPersistence.unitsPersistence.map { it.convertToColorCellHp(spawnCell) }.toSet() }
+) {
 
     companion object {
         const val DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR = 1.0
         const val ADDITIONAL_FROZEN_SLOW_DOWN_COEFFICIENT = 0.5
     }
 
-    override val viewEntity = object : ViewEntity() {
+    private var singleDirMovePeriodLimit = heroPersistence.singleDirMovePeriodLimit
+
+    override val viewEntity: ViewEntity = HeroViewEntity()
+
+    private inner class HeroViewEntity : ViewEntity() {
         private val swingScaleFactors = mutableMapOf<GameUnit, Double>()
 
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
@@ -53,19 +76,20 @@ class Hero(
             super.applyMessageToAppearance(m)
             // TODO: allow to easily reuse this code in other GameEntities
             when (m) {
-                is HpChanged -> {
-                    val unit = m.myUnit as HpGameUnit
-                    val scale = unit.hp.toDouble() / unit.maxHp
-                    if (scale.sameAs(DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR) ||
-                        scale > DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR
-                    ) {
-                        swingScaleFactors.remove(unit)
-                    } else {
-                        swingScaleFactors[unit] = scale
-                    }
-                    controller.view.receive(EntityUpdated(this@Hero))
-                }
+                is HpChanged -> calculateScaleHp(m.myUnit as HpGameUnit)
             }
+        }
+
+        fun calculateScaleHp(unit: HpGameUnit) {
+            val scale = unit.hp.toDouble() / unit.maxHp
+            if (scale.sameAs(DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR) ||
+                scale > DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR
+            ) {
+                swingScaleFactors.remove(unit)
+            } else {
+                swingScaleFactors[unit] = scale
+            }
+            controller.view.receive(EntityUpdated(this@Hero))
         }
     }
 
@@ -82,6 +106,7 @@ class Hero(
     override fun onLifeStart() {
         controller.view.receive(SubscribeToMovement(this))
         controller.view.receive(SubscribeToInventory(this))
+        for (unit in units) (viewEntity as HeroViewEntity).calculateScaleHp(unit as HpGameUnit)
     }
 
     override fun onLifeEnd() {
@@ -152,7 +177,7 @@ class Hero(
             }
     }
 
-    private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
+    private val inventory: Inventory = heroPersistence.inventoryPersistence.convertToInventory(this)
 
     private inner class HeroBehaviour : NoneBehaviour(this) {
 
@@ -247,5 +272,15 @@ class Hero(
                 return this
             }
         }
+    }
+
+    fun extractPersistence(): HeroPersistence {
+        val unitList = units.toList()
+        val first = unitList.first()
+        val unitsPersistence = unitList.map {
+            it as HpGameUnit
+            HeroPersistence.HpUnitPersistence(first.cell - it.cell, it.gameColor, it.hp, it.maxHp)
+        }
+        return HeroPersistence(unitsPersistence, inventory.extractPersistence(), singleDirMovePeriodLimit)
     }
 }

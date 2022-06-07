@@ -10,6 +10,8 @@ import ru.hse.sd.rgb.utils.messaging.Message
 class StartControllerMessage : Message()
 data class FinishControllerMessage(val isWin: Boolean) : Message()
 class UserQuit : Message()
+data class NextLevel(val nextLevelDescriptionFilename: String) : Message()
+class DoLoadLevel : Message()
 
 // for LifecycleBehaviour
 class LifeStarted : Message()

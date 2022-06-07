@@ -1,8 +1,9 @@
 levelFactory:
   baseFactoryType: FIERY
   customBgColor: 0 0 0
-  customSharpySpawnCount: 0
-  customGlitchSpawnCount: 1
+  customSharpySpawnCount: 30
+  customSharpyHp: 1000
+  customGlitchSpawnCount: 10
 
 mazeRepresentation: [
 "...................................................",
@@ -21,15 +22,7 @@ mazeRepresentation: [
 "...................................................",
 "..................................................."]
 
-heroDescription:
-  unitsDescription:
-    - color: 220 240 250
-      cell: 26 7
-      maxHp: 10
-  inventory:
-    invGridW: 3
-    invGridH: 3
-  movePeriodLimit: 50
+heroSpawnCell: 26 7
 
 customEntities:
   - !<sharpy>
@@ -44,3 +37,7 @@ customEntities:
     hp: 5
     movePeriodMillis: 1000
     seeingDepth: 10
+
+levelPortalDescription:
+  cell: 13 7
+  nextLevelDescriptionFilename: "src/main/resources/sampleLevel2.yaml"

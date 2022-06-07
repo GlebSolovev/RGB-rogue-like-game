@@ -9,6 +9,7 @@ import ru.hse.sd.rgb.gamelogic.engines.items.ItemsEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.HeroPersistence
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -53,7 +54,7 @@ data class BaseColorParams(
 
 interface LevelLoader {
     fun loadBasicParams(): LevelBasicParams
-    fun loadHero(): Hero
+    fun populateHero(heroPersistence: HeroPersistence): Hero
     fun loadLevelDescription(): LevelDescription
 }
 
@@ -61,7 +62,7 @@ interface ColorLoader {
     fun loadColors(): BaseColorParams
 }
 
-class Loader(
+class GameLoader(
     private val levelLoader: LevelLoader,
     private val colorLoader: ColorLoader
 ) {
@@ -79,7 +80,7 @@ class Loader(
         return Engines(physics, fighting, creation, behaviour, itemsEngine)
     }
 
-    fun loadHero(): Hero = levelLoader.loadHero()
+    fun populateHero(heroPersistence: HeroPersistence): Hero = levelLoader.populateHero(heroPersistence)
 
     fun loadLevel(): LevelDescription = levelLoader.loadLevelDescription()
 }

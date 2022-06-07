@@ -2,6 +2,7 @@ package ru.hse.sd.rgb.gamelogic.engines.items.scriptitems
 
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.items.BasicItemEntity
+import ru.hse.sd.rgb.gamelogic.engines.items.ItemPersistence
 import ru.hse.sd.rgb.gamelogic.engines.items.NonReusableItem
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
@@ -32,6 +33,10 @@ class InstantHealItem(holder: GameEntity, private val healAmount: Int) : NonReus
         for (unit in holder.units) { // TODO: select unit
             controller.fighting.attackDirectly(unit, -healAmount)
         }
+    }
+
+    override fun extractPersistence() = object : ItemPersistence() {
+        override fun convertToItem(holder: GameEntity) = InstantHealItem(holder, healAmount)
     }
 }
 

@@ -15,7 +15,7 @@ import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
-class ColorInverterItem(holder: GameEntity) : ReusableItem(holder) {
+class ColorInverterItem(holder: GameEntity, isEquipped: Boolean = false) : ReusableItem(holder, isEquipped) {
 
     companion object {
         val INVERTER_COLOR = RGB(240, 240, 240)
@@ -43,6 +43,10 @@ class ColorInverterItem(holder: GameEntity) : ReusableItem(holder) {
     override suspend fun equip() = invertColors()
 
     override suspend fun unequip() = invertColors()
+
+    override fun extractPersistence() = object : ReusableItemPersistence() {
+        override fun convertToItem(holder: GameEntity) = ColorInverterItem(holder, isEquipped)
+    }
 }
 
 class ColorInverterEntity(cell: Cell, respawned: Boolean = false) :

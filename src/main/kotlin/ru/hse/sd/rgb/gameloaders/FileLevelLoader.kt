@@ -6,6 +6,8 @@ import ru.hse.sd.rgb.gameloaders.factories.OverloadableFactory
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.HeroPersistence
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.LevelPortal
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Sharpy
 import ru.hse.sd.rgb.utils.WrongConfigError
 import ru.hse.sd.rgb.utils.structures.Cell
@@ -49,56 +51,66 @@ class SharpyDescription(
 }
 
 @Serializable
-data class HeroDescription(
-    val unitsDescription: List<ColorCellHp>,
-    val inventory: InventoryDescription,
-    val movePeriodLimit: Long,
+data class LevelPortalDescription(
+    val cell: Cell,
+    val nextLevelDescriptionFilename: String
 )
 
 @Serializable
 data class FileLevelDescription(
     val levelFactory: OverloadableFactory,
     val mazeRepresentation: List<String>,
-    val heroDescription: HeroDescription,
+    val heroSpawnCell: Cell,
     val customEntities: List<GameEntityDescription>,
+    val levelPortalDescription: LevelPortalDescription? = null,
 )
 
 class FileLevelLoader(filename: String, private val random: Random = Random) : LevelLoader {
 
     private val levelFactory: LevelContentFactory
     private val maze: Grid2D<Boolean>
-    private val heroDescription: HeroDescription
+    private val heroSpawnCell: Cell
     private val customEntitiesDescriptions: List<GameEntityDescription>
+    private val levelPortalDescription: LevelPortalDescription?
 
     private var hero: Hero? = null
+    private lateinit var invDesc: InventoryDescription
+
+    private val allEntities = mutableSetOf<GameEntity>()
 
     init {
         val format = Yaml(serializersModule = entitiesSerializersModule)
         val desc = format.decodeFromStream<FileLevelDescription>(File(filename).inputStream())
         levelFactory = desc.levelFactory
         maze = parseMaze(desc.mazeRepresentation)
-        heroDescription = desc.heroDescription
+        heroSpawnCell = desc.heroSpawnCell
         customEntitiesDescriptions = desc.customEntities
+        levelPortalDescription = desc.levelPortalDescription
     }
 
     override fun loadBasicParams() = LevelBasicParams(maze.w, maze.h)
 
-    override fun loadHero(): Hero {
-        val (colorCells, invDesc, movePeriodLimit) = heroDescription
-        hero = Hero(colorCells.toSet(), invDesc, movePeriodLimit)
+    override fun populateHero(heroPersistence: HeroPersistence): Hero {
+        hero = Hero(heroSpawnCell, heroPersistence)
+        invDesc = heroPersistence.inventoryPersistence.description
+        allEntities.add(hero!!)
         return hero!!
     }
 
     override fun loadLevelDescription(): LevelDescription {
         hero ?: error("loadHero() has not been called yet")
-        val factoryEntities = createLevelEntities(maze.w, maze.h, maze, levelFactory, random)
-        val customEntities = customEntitiesDescriptions.map {
-            it.createEntity()
-        }.toMutableSet()
-        customEntities.add(hero!!)
+        allEntities.addAll(createLevelEntities(maze.w, maze.h, maze, levelFactory, random))
+        allEntities.addAll(
+            customEntitiesDescriptions.map { it.createEntity() }
+        )
+        if (levelPortalDescription != null) {
+            allEntities.add(
+                LevelPortal(levelPortalDescription.cell, levelPortalDescription.nextLevelDescriptionFilename)
+            )
+        }
         return LevelDescription(
-            GameWorldDescription(maze.w, maze.h, factoryEntities union customEntities, levelFactory.bgColor),
-            heroDescription.inventory
+            GameWorldDescription(maze.w, maze.h, allEntities, levelFactory.bgColor),
+            invDesc
         )
     }
 }

@@ -2,6 +2,7 @@ package ru.hse.sd.rgb.gamelogic.engines.items.scriptitems
 
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.items.BasicItemEntity
+import ru.hse.sd.rgb.gamelogic.engines.items.ItemPersistence
 import ru.hse.sd.rgb.gamelogic.engines.items.NonReusableItem
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
@@ -47,6 +48,10 @@ class ColorModificationItem(
     }
 
     override fun getNewItemEntity(cell: Cell): BasicItemEntity = ColorModificationEntity(cell, rgbDelta, true)
+
+    override fun extractPersistence() = object : ItemPersistence() {
+        override fun convertToItem(holder: GameEntity) = ColorModificationItem(holder, rgbDelta)
+    }
 }
 
 class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta, respawned: Boolean = false) :

@@ -50,7 +50,7 @@ class HpGameUnit(
         parent,
         colorCellHp.color,
         colorCellHp.cell,
-        colorCellHp.maxHp,
+        colorCellHp.hp,
         colorCellHp.maxHp
     )
 }
@@ -65,4 +65,6 @@ sealed class ColorCell {
 data class ColorCellNoHp(override val color: RGB, override val cell: Cell) : ColorCell()
 
 @Serializable
-class ColorCellHp(override val color: RGB, override val cell: Cell, val maxHp: Int) : ColorCell()
+class ColorCellHp(override val color: RGB, override val cell: Cell, val hp: Int, val maxHp: Int) : ColorCell() {
+    constructor(color: RGB, cell: Cell, maxHp: Int) : this(color, cell, maxHp, maxHp)
+}

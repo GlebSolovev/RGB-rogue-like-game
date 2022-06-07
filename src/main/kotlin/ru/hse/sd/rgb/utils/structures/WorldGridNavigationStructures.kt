@@ -10,9 +10,12 @@ import kotlin.random.Random
 
 @Serializable(with = CellSerializer::class)
 data class Cell(val x: Int, val y: Int)
+@Serializable
 data class GridShift(val dx: Int, val dy: Int)
 
 operator fun Cell.plus(p: GridShift) = Cell(x + p.dx, y + p.dy)
+
+operator fun Cell.minus(c: Cell) = GridShift(x - c.x, y - c.y)
 
 enum class Direction {
     UP, LEFT, DOWN, RIGHT, NOPE;

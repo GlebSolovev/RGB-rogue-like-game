@@ -1,14 +1,21 @@
+@file:Suppress("WildcardImport")
+
 package ru.hse.sd.rgb.gamelogic
 
-import ru.hse.sd.rgb.gameloaders.ColorLoader
-import ru.hse.sd.rgb.gameloaders.Engines
-import ru.hse.sd.rgb.gameloaders.LevelLoader
-import ru.hse.sd.rgb.gameloaders.Loader
+import ru.hse.sd.rgb.gameloaders.*
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourEngine
+import ru.hse.sd.rgb.gamelogic.engines.creation.CreationEngine
+import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
+import ru.hse.sd.rgb.gamelogic.engines.items.ItemsEngine
+import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.HeroPersistence
+import ru.hse.sd.rgb.utils.getValue
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.setValue
 import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.View
 import kotlinx.coroutines.*
@@ -21,14 +28,16 @@ private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     onException()
 }
 
+private fun createGameCoroutineScope() = CoroutineScope(
+    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher() +
+        exceptionHandler
+)
+
 val viewCoroutineScope = CoroutineScope(
     Executors.newSingleThreadExecutor().asCoroutineDispatcher() +
         exceptionHandler
 )
-val gameCoroutineScope = CoroutineScope(
-    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher() +
-        exceptionHandler
-)
+var gameCoroutineScope = createGameCoroutineScope()
 
 const val ON_EXCEPTION_EXIT_CODE = 5
 
@@ -39,19 +48,26 @@ fun onException() {
 }
 
 class Controller(
-    private val levelLoader: LevelLoader,
-    private val colorLoader: ColorLoader,
+    initialLevelLoader: LevelLoader,
+    private val colorLoader: ColorLoader, // TODO: changing base colors between levels is absurd, but can be added
+    heroLoader: HeroLoader,
     val view: View
 ) : Messagable() {
 
-    private var stateRef: AtomicReference<ControllerState> = AtomicReference(GameInitState())
+    private var state: ControllerState by AtomicReference<ControllerState>(
+        GameInitState(
+            initialLevelLoader,
+            colorLoader,
+            heroLoader.loadHeroInitParams().convertToInitialHeroPersistence()
+        )
+    )
 
     override suspend fun handleMessage(m: Message) {
-        stateRef.get().next(m)
+        state = state.next(m)
     }
 
     private abstract class ControllerState {
-        abstract suspend fun next(m: Message)
+        abstract suspend fun next(m: Message): ControllerState
 
         open val engines: Engines
             get() = throw IllegalStateException("no engines in this state")
@@ -60,15 +76,22 @@ class Controller(
             get() = throw IllegalStateException("no hero will save you")
     }
 
-    private inner class GameInitState : ControllerState() {
-        val loader = Loader(levelLoader, colorLoader)
+    private inner class GameInitState(
+        levelLoader: LevelLoader,
+        colorLoader: ColorLoader,
+        private val heroPersistence: HeroPersistence,
+    ) : ControllerState() {
+        val gameLoader = GameLoader(levelLoader, colorLoader)
 
-        override lateinit var engines: Engines
         override lateinit var hero: Hero
+        override lateinit var engines: Engines
 
-        override suspend fun next(m: Message): Unit = when (m) {
+        override suspend fun next(m: Message) = when (m) {
             is StartControllerMessage -> {
                 startGame()
+            }
+            is DoLoadLevel -> {
+                loadLevel()
             }
             is UserQuit -> {
                 quit()
@@ -76,26 +99,27 @@ class Controller(
             else -> unreachable
         }
 
-        private suspend fun startGame() {
+        private suspend fun startGame(): GamePlayingState {
             viewCoroutineScope.launch {
                 view.initialize()
                 view.messagingRoutine()
             }
             view.receive(SubscribeToQuit(this@Controller))
 
-            // load engines before loading entities
-            engines = loader.loadEngines()
+            return loadLevel()
+        }
 
-            hero = loader.loadHero() // invariant: hero always exists
+        private suspend fun loadLevel(): GamePlayingState {
+            engines = gameLoader.loadEngines() // load engines before loading entities
+            hero = gameLoader.populateHero(heroPersistence) // invariant: hero always exists
 
-            val level = loader.loadLevel()
+            val level = gameLoader.loadLevel()
             val (gameDesc, _) = level
 
             creation.addAllToWorld(gameDesc.allEntities) {
                 view.receive(GameViewStarted(level))
             }
-
-            stateRef.set(GamePlayingState(engines, hero))
+            return GamePlayingState(engines, hero)
         }
     }
 
@@ -103,31 +127,38 @@ class Controller(
         override val engines: Engines,
         override val hero: Hero
     ) : ControllerState() {
-        override suspend fun next(m: Message): Unit = when (m) {
+        override suspend fun next(m: Message) = when (m) {
             is FinishControllerMessage, is UserQuit -> { // TODO: finish screen
                 quit()
+            }
+            is NextLevel -> {
+                val heroPersistence = hero.extractPersistence() // TODO: not thread-safe
+                stopGame()
+                view.receive(GameViewStopped())
+                val nextLevelLoader = FileLevelLoader(m.nextLevelDescriptionFilename)
+                receive(DoLoadLevel())
+                GameInitState(nextLevelLoader, colorLoader, heroPersistence)
             }
             else -> unreachable
         }
     }
 
-    private fun quit(): Nothing {
+    private fun stopGame() {
         gameCoroutineScope.cancel()
-        Ticker.resetAll()
+        gameCoroutineScope = createGameCoroutineScope()
+        Ticker.stopDefaultScope()
+    }
+
+    private fun quit(): Nothing {
+        stopGame()
         exitProcess(0)
     }
 
-    val physics
-        get() = stateRef.get().engines.physics
-    val fighting
-        get() = stateRef.get().engines.fighting
-    val creation
-        get() = stateRef.get().engines.creation
-    val behaviourEngine
-        get() = stateRef.get().engines.behaviourEngine
-    val itemsEngine
-        get() = stateRef.get().engines.itemsEngine
+    val physics: PhysicsEngine get() = state.engines.physics
+    val fighting: FightEngine get() = state.engines.fighting
+    val creation: CreationEngine get() = state.engines.creation
+    val behaviourEngine: BehaviourEngine get() = state.engines.behaviourEngine
+    val itemsEngine: ItemsEngine get() = state.engines.itemsEngine
 
-    val hero: Hero
-        get() = stateRef.get().hero
+    val hero: Hero get() = state.hero
 }
