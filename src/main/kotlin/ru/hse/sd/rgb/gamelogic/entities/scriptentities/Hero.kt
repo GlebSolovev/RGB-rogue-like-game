@@ -93,10 +93,15 @@ class Hero(
         override fun createConfusedBehaviour(childBehaviour: Behaviour): Behaviour =
             object : MetaBehaviour(this@Hero, childBehaviour) {
                 override suspend fun handleMessage(message: Message) {
-                    if (message is UserMoved) {
-                        childBehaviour.handleMessage(UserMoved(message.dir.opposite()))
-                    } else {
-                        childBehaviour.handleMessage(message)
+                    when (message) {
+                        is UserMoved -> {
+                            childBehaviour.handleMessage(UserMoved(message.dir.opposite()))
+                        }
+                        is ColorTick -> controller.fighting.update(
+                            message.unit,
+                            ControlParams(AttackType.RANDOM_TARGET, HealType.RANDOM_TARGET)
+                        )
+                        else -> childBehaviour.handleMessage(message)
                     }
                 }
 
