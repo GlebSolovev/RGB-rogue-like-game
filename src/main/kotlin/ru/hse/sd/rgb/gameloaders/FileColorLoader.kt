@@ -26,6 +26,7 @@ private val module = SerializersModule {
         subclass(LaserEffect::class)
         subclass(HealEffect::class)
         subclass(ConfuseEffect::class)
+        subclass(RedSmolderEffect::class)
     }
 }
 

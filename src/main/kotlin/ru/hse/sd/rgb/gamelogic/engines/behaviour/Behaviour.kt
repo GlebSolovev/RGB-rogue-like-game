@@ -40,9 +40,7 @@ sealed class Behaviour(val entity: GameEntity) {
 
     abstract fun traverseSubtree(onEach: (Behaviour) -> Unit)
 
-    fun startSubtree() = traverseSubtree {
-        it.start()
-    }
+    fun startSubtree() = traverseSubtree { it.start() }
 
     fun stopSubtree() = traverseSubtree { it.stop() }
 }

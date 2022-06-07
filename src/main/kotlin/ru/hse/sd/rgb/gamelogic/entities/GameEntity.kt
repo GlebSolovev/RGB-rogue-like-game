@@ -7,7 +7,7 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.*
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
-import ru.hse.sd.rgb.utils.messaging.messages.SetConfused
+import ru.hse.sd.rgb.utils.messaging.messages.SetEffectColor
 import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.GameEntityViewSnapshot
@@ -28,8 +28,8 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
         open fun applyMessageToAppearance(m: Message) {
             // TODO: remember stack of effects to unset them correctly
-            if (m is SetConfused) { // TODO: maybe generalize for different effects? (no, single unit on fire)
-                outlineColor = if (m.enabled) ConfusedBehaviour.EFFECT_COLOR else null
+            if (m is SetEffectColor) {
+                outlineColor = if (m.enabled) m.color else null
                 controller.view.receive(EntityUpdated(this@GameEntity))
             }
         }
@@ -76,8 +76,21 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
             UponSeeingBehaviour(this@GameEntity, childBehaviour, targetEntity, seeingDepth, createSeeingBehaviour)
 
         open fun createConfusedBehaviour(
-            childBehaviour: Behaviour,
+            childBehaviour: Behaviour
         ): Behaviour = ConfusedBehaviour(this@GameEntity, childBehaviour)
+
+        open fun createBurningBehaviour(
+            childBehaviour: Behaviour,
+            attackPeriodMillis: Long,
+            attack: Int,
+            initialDurationMillis: Long?
+        ): Behaviour = BurningBehaviour(
+            this@GameEntity,
+            childBehaviour,
+            attackPeriodMillis,
+            attack,
+            initialDurationMillis
+        )
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
@@ -95,6 +108,13 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         ): Behaviour = singleBehaviour
 
         override fun createConfusedBehaviour(childBehaviour: Behaviour): Behaviour = singleBehaviour
+
+        override fun createBurningBehaviour(
+            childBehaviour: Behaviour,
+            attackPeriodMillis: Long,
+            attack: Int,
+            initialDurationMillis: Long?
+        ): Behaviour = singleBehaviour
     }
 
     abstract val viewEntity: ViewEntity

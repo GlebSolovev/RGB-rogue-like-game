@@ -3,6 +3,7 @@ package ru.hse.sd.rgb.utils.messaging.messages
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.structures.Direction
+import ru.hse.sd.rgb.utils.structures.RGB
 
 // messages required to be handled in Behaviour-s
 
@@ -18,4 +19,4 @@ class UserSelect : Message()
 class UserDrop : Message()
 
 // cosmetic messages
-data class SetConfused(val enabled: Boolean) : Message()
+data class SetEffectColor(val enabled: Boolean, val color: RGB) : Message()

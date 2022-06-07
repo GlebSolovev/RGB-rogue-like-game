@@ -13,7 +13,10 @@ import kotlinx.serialization.Serializable
 class FireballEffect(
     private val count: Int,
     private val movePeriodMillis: Long,
-    private val isControllable: Boolean
+    private val isControllable: Boolean,
+    private val burningAttackPeriodMillis: Long,
+    private val burningAttack: Int,
+    private val burningDurationMillis: Long?,
 ) : BaseColorUpdateEffect {
 
     override suspend fun activate(
@@ -31,6 +34,9 @@ class FireballEffect(
                 ColorCellNoHp(unit.gameColor, unit.cell),
                 movePeriodMillis,
                 targetCell,
+                burningAttackPeriodMillis,
+                burningAttack,
+                burningDurationMillis,
                 unit.parent.fightEntity.teamId
             )
             controller.creation.tryAddToWorld(fireball)

@@ -48,29 +48,49 @@ class BehaviourEngine {
 
     fun applyConfusedBehaviour(
         entity: GameEntity,
-        durationPeriodMillis: Long?
+        durationMillis: Long?
     ) {
-        if (durationPeriodMillis == null) {
+        if (durationMillis == null) {
             entity.receive(
                 ApplyBehaviourMessage {
                     entity.behaviourEntity.createConfusedBehaviour(it)
                 }
             )
         } else {
-            applyExpiringBehaviour(entity, durationPeriodMillis) {
+            applyExpiringBehaviour(entity, durationMillis) {
                 entity.behaviourEntity.createConfusedBehaviour(it)
             }
         }
     }
 
+    fun applyBurningBehaviour(
+        entity: GameEntity,
+        attackPeriodMillis: Long,
+        attack: Int,
+        durationMillis: Long?
+    ) {
+        if (durationMillis == null) {
+            entity.receive(
+                ApplyBehaviourMessage {
+                    entity.behaviourEntity.createBurningBehaviour(it, attackPeriodMillis, attack, durationMillis)
+                }
+            )
+        } else {
+            applyExpiringBehaviour(entity, durationMillis) {
+                entity.behaviourEntity.createBurningBehaviour(it, attackPeriodMillis, attack, durationMillis)
+            }
+        }
+    }
+    // TODO: wrap durationMillis == null case
+
     private fun applyExpiringBehaviour(
         entity: GameEntity,
-        durationPeriodMillis: Long,
+        durationMillis: Long,
         createTemporaryBehaviour: (Behaviour) -> Behaviour,
     ) {
         entity.receive(
             ApplyBehaviourMessage {
-                ExpiringBehaviour(entity, it, durationPeriodMillis, createTemporaryBehaviour)
+                ExpiringBehaviour(entity, it, durationMillis, createTemporaryBehaviour)
             }
         )
     }

@@ -9,7 +9,6 @@ import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.utils.structures.RGBDelta
-import ru.hse.sd.rgb.utils.structures.plus
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
@@ -42,7 +41,7 @@ class ColorModificationItem(
     override suspend fun use() {
         // TODO: select unit
         for (unit in holder.units) {
-            controller.fighting.changeRGB(unit, unit.gameColor + rgbDelta)
+            controller.fighting.changeRGB(unit, rgbDelta)
         }
         controller.view.receive(EntityUpdated(holder))
     }

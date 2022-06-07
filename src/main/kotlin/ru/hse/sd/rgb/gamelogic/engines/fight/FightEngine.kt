@@ -8,6 +8,8 @@ import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
 import ru.hse.sd.rgb.utils.messaging.messages.HpChanged
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.structures.RGBDelta
+import ru.hse.sd.rgb.utils.structures.plus
 import ru.hse.sd.rgb.utils.unreachable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -152,6 +154,12 @@ class FightEngine(
     suspend fun changeRGB(unit: GameUnit, newRgb: RGB) {
         withLockedUnits(setOf(unit)) {
             unsafeMethods.unsafeChangeRGB(unit, newRgb)
+        }
+    }
+
+    suspend fun changeRGB(unit: GameUnit, delta: RGBDelta) {
+        withLockedUnits(setOf(unit)) {
+            unsafeMethods.unsafeChangeRGB(unit, unit.gameColor + delta)
         }
     }
 

@@ -15,7 +15,7 @@ abstract class State {
         is UserToggledInventory -> handleUserToggledInventory()
         is UserSelect -> handleUserSelect()
         is UserDrop -> handleUserDrop()
-        is SetConfused -> handleSetConfused(message)
+        is SetEffectColor -> handleSetEffectColor(message)
         is ColorTick -> handleColorTick(message)
         is MoveTick -> handleMoveTick()
         is RepaintTick -> handleRepaintTick()
@@ -23,6 +23,7 @@ abstract class State {
         is ContinueTick -> handleContinueTick()
         is WatcherTick -> handleWatcherTick()
         is CloneTick -> handleCloneTick()
+        is BurnTick -> handleBurnTick()
         is ExpireTick -> handleExpireTick()
         else -> unreachable("State doesn't have method for this message")
     }
@@ -36,7 +37,7 @@ abstract class State {
     open suspend fun handleUserSelect(): State = messageNotSupported
     open suspend fun handleUserDrop(): State = messageNotSupported
 
-    open suspend fun handleSetConfused(message: SetConfused): State = messageNotSupported
+    open suspend fun handleSetEffectColor(message: SetEffectColor): State = messageNotSupported
 
     open suspend fun handleColorTick(tick: ColorTick): State = messageNotSupported
 
@@ -46,6 +47,7 @@ abstract class State {
     open suspend fun handleContinueTick(): State = messageNotSupported
     open suspend fun handleWatcherTick(): State = messageNotSupported
     open suspend fun handleCloneTick(): State = messageNotSupported
+    open suspend fun handleBurnTick(): State = messageNotSupported
     open suspend fun handleExpireTick(): State = messageNotSupported
 
     // TODO: message to change Behaviour, service, stop ticker

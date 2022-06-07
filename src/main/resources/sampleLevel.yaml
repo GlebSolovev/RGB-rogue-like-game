@@ -23,7 +23,7 @@ mazeRepresentation: [
 
 heroDescription:
   unitsDescription:
-    - color: 200 60 60
+    - color: 255 0 0
       cell: 26 7
       maxHp: 10
   inventory:

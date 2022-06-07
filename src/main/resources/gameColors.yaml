@@ -17,6 +17,9 @@ baseColors:
         count: 1
         movePeriodMillis: 50
         isControllable: true
+        burningAttackPeriodMillis: 2000
+        burningAttack: 1
+        burningDurationMillis: 2500
 
   - name: "FLAME RED"
     rgb: 220 0 0
@@ -26,6 +29,9 @@ baseColors:
         count: 3
         movePeriodMillis: 50
         isControllable: true
+        burningAttackPeriodMillis: 1500
+        burningAttack: 1
+        burningDurationMillis: 5000
 
   - name: "HELL RED"
     rgb: 255 0 0
@@ -35,7 +41,13 @@ baseColors:
         count: 66
         movePeriodMillis: 50
         isControllable: true
-      # TODO: SMOLDER
+        burningAttackPeriodMillis: 1000
+        burningAttack: 2
+        burningDurationMillis: 4000
+
+      - !<red_smolder>
+        attack: 1
+        decreaseRed: 5
 
   - name: "SEA BLUE"
     rgb: 0 100 170

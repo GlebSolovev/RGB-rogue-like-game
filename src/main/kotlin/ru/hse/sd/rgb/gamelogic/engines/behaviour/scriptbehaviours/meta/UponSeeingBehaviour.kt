@@ -22,7 +22,8 @@ class UponSeeingBehaviour(
         const val WATCH_PERIOD_MILLIS = 100L
     }
 
-    private val watcherTicker = Ticker(WATCH_PERIOD_MILLIS, entity, WatcherTick())
+    private val watcherTick = WatcherTick() // NOTE: for === below
+    private val watcherTicker = Ticker(WATCH_PERIOD_MILLIS, entity, watcherTick)
 
     override fun traverseTickers(onEach: (Ticker) -> Unit) {
         onEach(watcherTicker)
@@ -45,7 +46,7 @@ class UponSeeingBehaviour(
     private var currentBehaviour = childBehaviour
 
     override suspend fun handleMessage(message: Message) {
-        if (message is WatcherTick) {
+        if (message === watcherTick) {
             handleWatcherTick()
         } else {
             currentBehaviour.handleMessage(message)

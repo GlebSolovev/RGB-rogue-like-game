@@ -3,6 +3,8 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.*
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.BurningBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.ConfusedBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
@@ -99,15 +101,30 @@ class Hero(
                 }
 
                 override fun onStart() {
-                    entity.receive(SetConfused(true))
+                    entity.receive(SetEffectColor(true, ConfusedBehaviour.CONFUSED_EFFECT_COLOR))
                 }
 
                 override fun onStop() {
-                    entity.receive(SetConfused(false))
+                    entity.receive(SetEffectColor(false, ConfusedBehaviour.CONFUSED_EFFECT_COLOR))
                 }
 
                 override fun traverseTickers(onEach: (Ticker) -> Unit) = ignore
             }
+
+        override fun createBurningBehaviour(
+            childBehaviour: Behaviour,
+            attackPeriodMillis: Long,
+            attack: Int,
+            initialDurationMillis: Long?
+        ): Behaviour {
+            return BurningBehaviour(
+                this@Hero,
+                childBehaviour,
+                attackPeriodMillis,
+                attack,
+                initialDurationMillis
+            )
+        }
     }
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)
@@ -140,7 +157,7 @@ class Hero(
                         inventory.addItem(item)
                     }
                 } else {
-                    controller.fighting.attackDirectly(message.myUnit, message.otherUnit)
+                    controller.fighting.attack(message.myUnit, message.otherUnit)
                 }
                 return this
             }
@@ -166,7 +183,7 @@ class Hero(
 
             override suspend fun handleUserDrop(): State = this
 
-            override suspend fun handleSetConfused(message: SetConfused): State = this
+            override suspend fun handleSetEffectColor(message: SetEffectColor): State = this
 
             override suspend fun handleColorTick(tick: ColorTick): State {
                 controller.fighting.update(
