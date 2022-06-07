@@ -21,12 +21,15 @@ class BurningBehaviour(
 
     companion object {
         val BURNING_EFFECT_COLOR = RGB(220, 30, 0)
-        const val SPREAD_BURNINGS_DURATION_COEFFICIENT = 0.5
-        const val SPREAD_BURNINGS_ENABLE = false // TODO: fight stack overflow if enabled
+
+        const val SPREAD_BURNING_PERIOD_LIMIT_MILLIS = 2000
+        const val SPREAD_BURNING_DURATION_COEFFICIENT = 0.8
     }
 
     private val burnTick = BurnTick()
     private val burningTicker = Ticker(attackPeriodMillis, entity, burnTick)
+
+    private var lastSpreadBurningMillis = System.currentTimeMillis()
 
     override fun onStart() {
         entity.receive(SetEffectColor(true, BURNING_EFFECT_COLOR))
@@ -40,14 +43,16 @@ class BurningBehaviour(
         when (message) {
             burnTick -> controller.fighting.attackDirectly(entity.units.random(), attack)
             is CollidedWith -> {
-                if (SPREAD_BURNINGS_ENABLE) {
+                val currentMillis = System.currentTimeMillis()
+                if (currentMillis - lastSpreadBurningMillis >= SPREAD_BURNING_PERIOD_LIMIT_MILLIS) {
                     controller.behaviourEngine.applyBurningBehaviour(
                         message.otherUnit.parent,
                         attackPeriodMillis,
                         attack,
                         if (initialDurationMillis == null) null
-                        else (initialDurationMillis * SPREAD_BURNINGS_DURATION_COEFFICIENT).toLong()
+                        else (initialDurationMillis * SPREAD_BURNING_DURATION_COEFFICIENT).toLong()
                     )
+                    lastSpreadBurningMillis = currentMillis
                 }
                 childBehaviour.handleMessage(message)
             }
