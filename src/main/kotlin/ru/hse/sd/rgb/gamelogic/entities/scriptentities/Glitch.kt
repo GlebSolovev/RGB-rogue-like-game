@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 
 import ru.hse.sd.rgb.controller
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
@@ -61,7 +62,20 @@ class Glitch(
         add { EnableColorUpdate(entity, childBlock, ControlParams(AttackType.HERO_TARGET, HealType.RANDOM_TARGET)) }
     }.build()
 
-    override val behaviourEntity = SingleBehaviourEntity(glitchBaseBehaviour) // TODO: normal behaviourEntity
+    override val behaviourEntity = object : BehaviourEntity() {
+        override fun createDirectAttackHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long): Behaviour =
+            glitchBaseBehaviour
+
+        override fun createDirectFleeFromHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long): Behaviour =
+            glitchBaseBehaviour
+
+        override fun createUponSeeingBehaviour(
+            childBehaviour: Behaviour,
+            targetEntity: GameEntity,
+            seeingDepth: Int,
+            createSeeingBehaviour: (Behaviour) -> Behaviour
+        ): Behaviour = glitchBaseBehaviour
+    }
 
     private inner class GlitchBaseBehaviour : NoneBehaviour(this) {
         private val repaintTicker = Ticker(REPAINT_PERIOD_MILLIS, this@Glitch, RepaintTick())
