@@ -5,6 +5,8 @@ import ru.hse.sd.rgb.gameloaders.InventoryDescription
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.*
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.BurningBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.ConfusedBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.FrozenBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.MultiplySpeedBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
@@ -33,6 +35,7 @@ class Hero(
 
     companion object {
         const val DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR = 1.0
+        const val ADDITIONAL_FROZEN_SLOW_DOWN_COEFFICIENT = 0.5
     }
 
     override val viewEntity = object : ViewEntity() {
@@ -130,6 +133,23 @@ class Hero(
                 initialDurationMillis
             )
         }
+
+        override fun createFrozenBehaviour(childBehaviour: Behaviour, slowDownCoefficient: Double): Behaviour =
+            object : MultiplySpeedBehaviour(this@Hero, childBehaviour, slowDownCoefficient) {
+                private val totalSlowDownCoefficient = slowDownCoefficient * ADDITIONAL_FROZEN_SLOW_DOWN_COEFFICIENT
+
+                override fun onStart() {
+                    super.onStart()
+                    entity.receive(SetEffectColor(true, FrozenBehaviour.FROZEN_EFFECT_COLOR))
+                    singleDirMovePeriodLimit = (singleDirMovePeriodLimit / totalSlowDownCoefficient).toLong()
+                }
+
+                override fun onStop() {
+                    super.onStop()
+                    entity.receive(SetEffectColor(false, FrozenBehaviour.FROZEN_EFFECT_COLOR))
+                    singleDirMovePeriodLimit = (singleDirMovePeriodLimit * totalSlowDownCoefficient).toLong()
+                }
+            }
     }
 
     private val inventory: Inventory = Inventory(invDesc.invGridW, invDesc.invGridH)

@@ -91,6 +91,11 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
             attack,
             initialDurationMillis
         )
+
+        open fun createFrozenBehaviour(
+            childBehaviour: Behaviour,
+            slowDownCoefficient: Double
+        ): Behaviour = FrozenBehaviour(this@GameEntity, childBehaviour, slowDownCoefficient)
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
@@ -114,6 +119,11 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
             attackPeriodMillis: Long,
             attack: Int,
             initialDurationMillis: Long?
+        ): Behaviour = singleBehaviour
+
+        override fun createFrozenBehaviour(
+            childBehaviour: Behaviour,
+            slowDownCoefficient: Double
         ): Behaviour = singleBehaviour
     }
 

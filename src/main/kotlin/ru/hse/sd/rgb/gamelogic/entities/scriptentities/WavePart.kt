@@ -3,7 +3,7 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnCollision
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnCollisionWithOtherTeam
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.MoveTowardsDirection
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
@@ -43,7 +43,7 @@ class WavePart(
         .addBlocks {
             add { DieOnFatalAttack(entity, childBlock) }
             add { AttackOnCollision(entity, childBlock) }
-            add { DieOnCollision(entity, childBlock) }
+            add { DieOnCollisionWithOtherTeam(entity, childBlock) }
             add { MoveTowardsDirection(entity, childBlock, movePeriodMillis, dir) }
         }.build()
 

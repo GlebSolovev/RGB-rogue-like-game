@@ -3,7 +3,7 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.ConfuseOnCollision
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnCollision
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnCollisionWithOtherTeam
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.MoveDirectlyTowardsCell
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
@@ -42,7 +42,7 @@ class ConfuseBall(
     private val confuseBallBaseBehaviour = BehaviourBuilder.metaFromBlocks(NoneBehaviour(this))
         .add { MoveDirectlyTowardsCell(entity, childBlock, movePeriodMillis, targetCell) }
         .add { ConfuseOnCollision(entity, childBlock, confuseDurationMillis) }
-        .add { DieOnCollision(entity, childBlock) }
+        .add { DieOnCollisionWithOtherTeam(entity, childBlock) }
         .add { DieOnFatalAttack(entity, childBlock) }
         .build()
     override val behaviourEntity = SingleBehaviourEntity(confuseBallBaseBehaviour)

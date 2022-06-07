@@ -8,24 +8,29 @@ import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Direction
+import ru.hse.sd.rgb.utils.structures.Paths2D
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 
-@Suppress("LongParameterList")
-class Fireball(
+class Icicle(
     colorCell: ColorCellNoHp,
     movePeriodMillis: Long,
     targetCell: Cell,
-    burningAttackPeriodMillis: Long,
-    burningAttack: Int,
-    burningDurationMillis: Long?,
+    private val slowDownCoefficient: Double,
+    private val frozenDurationMillis: Long?,
     teamId: Int,
 ) : GameEntity(setOf(colorCell)) {
 
+    private val path = Paths2D.straightLine(colorCell.cell, targetCell)
+
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.CIRCLE, outlineColor)
+            override val swingAppearance: SwingUnitAppearance
+                get() {
+                    val currentDir = path.next(units.first().cell)
+                    return SwingUnitAppearance(SwingUnitShape.TRIANGLE(currentDir), outlineColor)
+                }
         }
     }
 
@@ -39,18 +44,16 @@ class Fireball(
         override val teamId = teamId
     }
 
-    private val behaviour = BehaviourBuilder.metaFromBlocks(NoneBehaviour(this))
-        .add { MoveDirectlyTowardsCell(entity, childBlock, movePeriodMillis, targetCell) }
+    private val icicleBaseBehaviour = BehaviourBuilder.metaFromBlocks(NoneBehaviour(this))
+        .add { MoveUsingStaticPath(entity, childBlock, movePeriodMillis, path) }
         .add { AttackOnCollision(entity, childBlock) }
-        .add {
-            FireEnemyOnCollision(entity, childBlock, burningAttackPeriodMillis, burningAttack, burningDurationMillis)
-        }
+        .add { FreezeEnemyOnCollision(entity, childBlock, slowDownCoefficient, frozenDurationMillis) }
         .add { DieOnCollisionWithOtherTeam(entity, childBlock) }
         .add { DieOnFatalAttack(entity, childBlock) }
         .build()
-    override val behaviourEntity = SingleBehaviourEntity(behaviour)
+    override val behaviourEntity = SingleBehaviourEntity(icicleBaseBehaviour)
 
     override val lifecycle = BehaviourBuilder.lifecycle(this)
-        .add { behaviour }
+        .add { icicleBaseBehaviour }
         .build()
 }

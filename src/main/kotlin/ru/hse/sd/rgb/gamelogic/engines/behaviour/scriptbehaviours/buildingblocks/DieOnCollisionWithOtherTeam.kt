@@ -6,7 +6,7 @@ import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.CollidedWith
 
-class DieOnCollision(entity: GameEntity, childBlock: BehaviourBuildingBlock?) :
+class DieOnCollisionWithOtherTeam(entity: GameEntity, childBlock: BehaviourBuildingBlock?) :
     BehaviourBuildingBlock(entity, childBlock) {
 
     override suspend fun handleMessage(message: Message) {

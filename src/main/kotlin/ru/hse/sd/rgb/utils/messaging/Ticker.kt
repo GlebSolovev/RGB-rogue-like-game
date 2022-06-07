@@ -18,7 +18,7 @@ class Ticker(
     var isTicking: Boolean by AtomicReference(false)
 
     var periodMillis: Long by AtomicReference(periodMillis)
-    var periodCoef: Double by AtomicReference(1.0)
+    var periodCoefficient: Double by AtomicReference(1.0)
 
     fun start() {
         if (isTicking) return
@@ -39,7 +39,7 @@ class Ticker(
     private suspend fun CoroutineScope.tickingRoutine() {
         while (isActive) {
             // TODO: recalculate delay on periodMillis update
-            delay((periodMillis * periodCoef).toLong())
+            delay((periodMillis * periodCoefficient).toLong())
             target.receive(tick)
         }
     }

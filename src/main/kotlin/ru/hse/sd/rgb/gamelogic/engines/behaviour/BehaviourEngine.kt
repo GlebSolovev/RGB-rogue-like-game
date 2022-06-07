@@ -46,20 +46,9 @@ class BehaviourEngine {
         )
     }
 
-    fun applyConfusedBehaviour(
-        entity: GameEntity,
-        durationMillis: Long?
-    ) {
-        if (durationMillis == null) {
-            entity.receive(
-                ApplyBehaviourMessage {
-                    entity.behaviourEntity.createConfusedBehaviour(it)
-                }
-            )
-        } else {
-            applyExpiringBehaviour(entity, durationMillis) {
-                entity.behaviourEntity.createConfusedBehaviour(it)
-            }
+    fun applyConfusedBehaviour(entity: GameEntity, durationMillis: Long?) {
+        wrapIntoExpiringIfDurationIsNotNull(entity, durationMillis) {
+            entity.behaviourEntity.createConfusedBehaviour(it)
         }
     }
 
@@ -69,19 +58,28 @@ class BehaviourEngine {
         attack: Int,
         durationMillis: Long?
     ) {
-        if (durationMillis == null) {
-            entity.receive(
-                ApplyBehaviourMessage {
-                    entity.behaviourEntity.createBurningBehaviour(it, attackPeriodMillis, attack, durationMillis)
-                }
-            )
-        } else {
-            applyExpiringBehaviour(entity, durationMillis) {
-                entity.behaviourEntity.createBurningBehaviour(it, attackPeriodMillis, attack, durationMillis)
-            }
+        wrapIntoExpiringIfDurationIsNotNull(entity, durationMillis) {
+            entity.behaviourEntity.createBurningBehaviour(it, attackPeriodMillis, attack, durationMillis)
         }
     }
-    // TODO: wrap durationMillis == null case
+
+    fun applyFrozenBehaviour(entity: GameEntity, slowDownCoefficient: Double, durationMillis: Long?) {
+        wrapIntoExpiringIfDurationIsNotNull(entity, durationMillis) {
+            entity.behaviourEntity.createFrozenBehaviour(it, slowDownCoefficient)
+        }
+    }
+
+    private fun wrapIntoExpiringIfDurationIsNotNull(
+        entity: GameEntity,
+        durationMillis: Long?,
+        createBehaviour: (Behaviour) -> Behaviour
+    ) {
+        if (durationMillis == null) {
+            entity.receive(ApplyBehaviourMessage { createBehaviour(it) })
+        } else {
+            applyExpiringBehaviour(entity, durationMillis) { createBehaviour(it) }
+        }
+    }
 
     private fun applyExpiringBehaviour(
         entity: GameEntity,
