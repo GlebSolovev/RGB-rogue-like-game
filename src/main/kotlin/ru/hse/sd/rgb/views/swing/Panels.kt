@@ -180,9 +180,22 @@ class GameInventoryPanel(
 
         val statsMargin = (invOffsetX * textMarginCoefficient).toInt()
         val hero = controller.hero
-        val unitsHp = hero.units.map { (it as HpGameUnit).hp }
+        val unitsHp = hero.units.map {
+            val hpUnit = (it as HpGameUnit)
+            "${hpUnit.hp} / ${hpUnit.maxHp}"
+        }
         val unitsRgb = hero.units.map { it.gameColor }
-        g.drawTextCustom("Stats:   HP=$unitsHp   RGB=$unitsRgb", statsMargin, invOffsetY)
+        val unitsColorNames = hero.units.map { controller.fighting.getBaseColorName(it) }
+        val statsText = """
+            Stats:
+            
+            HP=$unitsHp
+            
+            RGB=$unitsRgb
+            
+            Colors=$unitsColorNames
+        """.trimIndent()
+        g.drawTextCustom(statsText, statsMargin, invOffsetY)
         // TODO: display info per each unit properly
     }
 }
@@ -204,6 +217,14 @@ private const val CUSTOM_FONT_SIZE = 20
 private val customFont = Font(Font.SANS_SERIF, Font.BOLD, CUSTOM_FONT_SIZE)
 
 fun Graphics2D.drawTextCustom(text: String, atX: Int, atY: Int) {
-    val textLayout = TextLayout(text, customFont, fontRenderContext)
-    textLayout.draw(this, atX.toFloat(), atY.toFloat())
+    val lines = text.lines()
+    var y = atY.toFloat()
+    val yShift = TextLayout(" ", customFont, fontRenderContext).ascent
+    for (line in lines) {
+        if (line != "") {
+            val textLayout = TextLayout(line, customFont, fontRenderContext)
+            textLayout.draw(this, atX.toFloat(), y)
+        }
+        y += yShift
+    }
 }

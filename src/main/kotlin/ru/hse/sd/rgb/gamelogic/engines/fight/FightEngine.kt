@@ -191,6 +191,8 @@ class FightEngine(
         }
     }
 
+    fun getBaseColorName(unit: GameUnit): String = getBaseColorStats(unit).name
+
     private fun getBaseColorStats(unit: GameUnit): BaseColorStats = unit.cachedBaseColorId.stats
 
     private val BaseColorId.stats
