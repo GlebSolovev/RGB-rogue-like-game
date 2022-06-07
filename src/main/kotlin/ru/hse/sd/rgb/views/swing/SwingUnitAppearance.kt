@@ -105,30 +105,13 @@ enum class SwingUnitShape {
             return Rectangle(spX + scaledTileSize / 3, spY, scaledTileSize / 3, scaledTileSize)
         }
     },
+    STAR_4 {
+        override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape =
+            drawStar(spX, spY, scaledTileSize, 4, 4.0, 2.0)
+    },
     STAR_8 {
-        override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape {
-            val centerX = spX + scaledTileSize / 2
-            val centerY = spY + scaledTileSize / 2
-            val innerRadius = scaledTileSize / 3.5
-            val outerRadius = scaledTileSize / 2.0
-            val numRays = 8
-            val startAngleRad = 0
-
-            val path = Path2D.Double()
-            val deltaAngleRad = Math.PI / numRays
-            for (i in 0 until (numRays * 2)) {
-                val angleRad = startAngleRad + i * deltaAngleRad
-                val ca = cos(angleRad)
-                val sa = sin(angleRad)
-                val relX = ca * (if (i % 2 == 0) outerRadius else innerRadius)
-                val relY = sa * (if (i % 2 == 0) outerRadius else innerRadius)
-
-                if (i == 0) path.moveTo(centerX + relX, centerY + relY)
-                else path.lineTo(centerX + relX, centerY + relY)
-            }
-            path.closePath()
-            return path
-        }
+        override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape =
+            drawStar(spX, spY, scaledTileSize, 8, 3.5, 2.0)
     },
     PLUS {
         override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape {
@@ -224,4 +207,35 @@ enum class SwingUnitShape {
             Direction.LEFT, Direction.RIGHT -> RECTANGLE_HORIZONTAL
         }
     }
+}
+
+@Suppress("LongParameterList")
+private fun drawStar(
+    spX: Int,
+    spY: Int,
+    scaledTileSize: Int,
+    numRays: Int,
+    innerRadiusScale: Double,
+    outerRadiusScale: Double,
+    startAngleRad: Int = 0
+): Shape {
+    val centerX = spX + scaledTileSize / 2
+    val centerY = spY + scaledTileSize / 2
+    val innerRadius = scaledTileSize / innerRadiusScale
+    val outerRadius = scaledTileSize / outerRadiusScale
+
+    val path = Path2D.Double()
+    val deltaAngleRad = Math.PI / numRays
+    for (i in 0 until (numRays * 2)) {
+        val angleRad = startAngleRad + i * deltaAngleRad
+        val ca = cos(angleRad)
+        val sa = sin(angleRad)
+        val relX = ca * (if (i % 2 == 0) outerRadius else innerRadius)
+        val relY = sa * (if (i % 2 == 0) outerRadius else innerRadius)
+
+        if (i == 0) path.moveTo(centerX + relX, centerY + relY)
+        else path.lineTo(centerX + relX, centerY + relY)
+    }
+    path.closePath()
+    return path
 }

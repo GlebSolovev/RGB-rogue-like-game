@@ -22,6 +22,10 @@ class Icicle(
     teamId: Int,
 ) : GameEntity(setOf(colorCell)) {
 
+    companion object {
+        const val ICICLE_SWING_VIEW_APPEARANCE_SCALE = 0.7
+    }
+
     private val path = Paths2D.straightLine(colorCell.cell, targetCell)
 
     override val viewEntity = object : ViewEntity() {
@@ -29,7 +33,11 @@ class Icicle(
             override val swingAppearance: SwingUnitAppearance
                 get() {
                     val currentDir = path.next(units.first().cell)
-                    return SwingUnitAppearance(SwingUnitShape.TRIANGLE(currentDir), outlineColor)
+                    return SwingUnitAppearance(
+                        SwingUnitShape.TRIANGLE(currentDir),
+                        outlineColor,
+                        ICICLE_SWING_VIEW_APPEARANCE_SCALE
+                    )
                 }
         }
     }

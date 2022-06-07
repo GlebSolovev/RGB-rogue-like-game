@@ -33,7 +33,7 @@ class IciclesBomb(
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.CIRCLE, outlineColor)
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.STAR_4, outlineColor)
         }
     }
 

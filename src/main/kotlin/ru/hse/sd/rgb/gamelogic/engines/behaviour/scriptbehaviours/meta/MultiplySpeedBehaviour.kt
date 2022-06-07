@@ -6,7 +6,6 @@ import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.Ticker
-import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
 import ru.hse.sd.rgb.utils.messaging.messages.MoveTick
 import ru.hse.sd.rgb.utils.messaging.messages.SetEffectColor
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -17,15 +16,20 @@ open class MultiplySpeedBehaviour(
     private val speedCoefficient: Double // > 1.0 = increase speed, < 1.0 = decrease speed
 ) : MetaBehaviour(entity, childBehaviour) {
 
+    private lateinit var onStartTickers: Set<Ticker>
+
+    // TODO: update GameUnits' color tickers via FightEngine to slow down attack
     private fun getTickersToModify(): Set<Ticker> =
-        childBehaviour.tickersGroup(MoveTick::class) + childBehaviour.tickersGroup(ColorTick::class)
+        childBehaviour.tickersGroup(MoveTick::class)
 
     override fun onStart() {
-        getTickersToModify().forEach { it.periodCoefficient /= speedCoefficient }
+        onStartTickers = getTickersToModify()
+        onStartTickers.forEach { it.periodCoefficient /= speedCoefficient }
     }
 
     override fun onStop() {
-        getTickersToModify().forEach { it.periodCoefficient *= speedCoefficient }
+        val onStopTickers = getTickersToModify() intersect onStartTickers
+        onStopTickers.forEach { it.periodCoefficient *= speedCoefficient }
     }
 
     override suspend fun handleMessage(message: Message) = childBehaviour.handleMessage(message)
