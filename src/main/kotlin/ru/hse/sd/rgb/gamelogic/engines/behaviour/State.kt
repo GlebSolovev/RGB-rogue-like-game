@@ -11,6 +11,7 @@ abstract class State {
         is HpChanged -> handleHpChanged(message)
         is CollidedWith -> handleCollidedWith(message)
         is DoMove -> handleDoMove()
+        is Dying -> handleDying()
         is UserMoved -> handleUserMoved(message)
         is UserToggledInventory -> handleUserToggledInventory()
         is UserSelect -> handleUserSelect()
@@ -31,6 +32,7 @@ abstract class State {
     open suspend fun handleHpChanged(message: HpChanged): State = messageNotSupported
     open suspend fun handleCollidedWith(message: CollidedWith): State = messageNotSupported
     open suspend fun handleDoMove(): State = messageNotSupported
+    open suspend fun handleDying(): State = messageNotSupported
 
     open suspend fun handleUserMoved(message: UserMoved): State = messageNotSupported
     open suspend fun handleUserToggledInventory(): State = messageNotSupported

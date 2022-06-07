@@ -187,6 +187,8 @@ class Hero(
                 return this
             }
 
+            override suspend fun handleDying(): State = this
+
             override suspend fun handleUserMoved(message: UserMoved): State {
                 val curMoveTime = System.currentTimeMillis()
                 if (!::lastMoveDir.isInitialized) lastMoveDir = message.dir

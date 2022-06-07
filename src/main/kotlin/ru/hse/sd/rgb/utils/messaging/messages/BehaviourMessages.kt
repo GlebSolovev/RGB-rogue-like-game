@@ -11,6 +11,7 @@ import ru.hse.sd.rgb.utils.structures.RGB
 data class HpChanged(val myUnit: GameUnit, val isFatal: Boolean) : Message()
 data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : Message()
 class DoMove : Message()
+class Dying : Message() // message behaviours about dying
 
 // messages from View
 data class UserMoved(val dir: Direction) : Message()
