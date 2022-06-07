@@ -3,6 +3,7 @@ package ru.hse.sd.rgb.gamelogic.entities.scriptentities
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AnnihilateItems
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
@@ -46,6 +47,7 @@ class LaserPart(
     override val lifecycle = BehaviourBuilder.lifecycle(this, laserPartDefaultBehaviour)
         .addBlocks {
             add { AttackOnCollision(entity, childBlock) }
+            add { AnnihilateItems(entity, childBlock) }
         }.build()
     override val behaviourEntity = SingleBehaviourEntity(laserPartDefaultBehaviour)
 

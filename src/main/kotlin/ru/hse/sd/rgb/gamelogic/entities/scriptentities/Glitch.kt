@@ -4,10 +4,7 @@ import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.Behaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.NoneBehaviour
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.AttackOnCollision
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DieOnFatalAttack
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.DropItemOnDie
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.*
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
@@ -62,6 +59,7 @@ class Glitch(
     private val glitchBaseBehaviour = GlitchBaseBehaviour()
     override val lifecycle = BehaviourBuilder.lifecycle(this, glitchBaseBehaviour).addBlocks {
         add { AttackOnCollision(entity, childBlock) }
+        add { AnnihilateItems(entity, childBlock) }
         add { DieOnFatalAttack(entity, childBlock) }
         add { EnableColorUpdate(entity, childBlock, ControlParams(AttackType.HERO_TARGET, HealType.RANDOM_TARGET)) }
         add {

@@ -14,5 +14,8 @@ class UserQuit : Message()
 // for LifecycleBehaviour
 class LifeStarted : Message()
 data class LifeEnded(val dieRoutine: suspend () -> Unit) : Message()
-data class ApplyBehaviourMessage(val createNewBehaviour: (Behaviour) -> Behaviour) : Message()
-data class RemoveBehaviourMessage(val target: MetaBehaviour) : Message()
+
+data class ApplyBehaviourMessage(val createNewBehaviour: (Behaviour) -> Behaviour) :
+    SaveInNotStartedAndReplayInOngoingMessage()
+
+data class RemoveBehaviourMessage(val target: MetaBehaviour) : SaveInNotStartedAndReplayInOngoingMessage()

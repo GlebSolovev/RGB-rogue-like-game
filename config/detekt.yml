@@ -19,6 +19,8 @@ complexity:
     threshold: 40
   NestedBlockDepth:
     threshold: 5
+  LongMethod:
+    threshold: 65
 
 style:
   ReturnCount:

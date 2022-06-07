@@ -57,6 +57,7 @@ class Icicle(
         .add { AttackOnCollision(entity, childBlock) }
         .add { FreezeEnemyOnCollision(entity, childBlock, slowDownCoefficient, frozenDurationMillis) }
         .add { DieOnCollisionWithOtherTeam(entity, childBlock) }
+        .add { IgnoreCollisionsWithItems(entity, childBlock) }
         .add { DieOnFatalAttack(entity, childBlock) }
         .build()
     override val behaviourEntity = SingleBehaviourEntity(icicleBaseBehaviour)
