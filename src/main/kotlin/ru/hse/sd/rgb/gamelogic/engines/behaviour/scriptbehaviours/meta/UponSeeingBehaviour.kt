@@ -28,6 +28,19 @@ class UponSeeingBehaviour(
         onEach(watcherTicker)
     }
 
+    override fun traverseSubtree(onEach: (Behaviour) -> Unit) {
+        onEach(this)
+        currentBehaviour.traverseSubtree(onEach)
+    }
+
+    override fun onStart() {
+        currentBehaviour.onStart()
+    }
+
+    override fun onStop() {
+        currentBehaviour.onStop()
+    }
+
     private val seeingBehavior = createSeeingBehaviour(childBehaviour)
     private var currentBehaviour = childBehaviour
 
@@ -49,17 +62,17 @@ class UponSeeingBehaviour(
                 if (isSeeingTarget()) {
                     state
                 } else {
-                    seeingBehavior.stopSubtreeTickers()
+                    seeingBehavior.stopSubtree()
                     currentBehaviour = childBehaviour
-                    childBehaviour.startSubtreeTickers()
+                    childBehaviour.startSubtree()
                     IsSeeingState.NOT_SEEING
                 }
             }
             IsSeeingState.NOT_SEEING -> {
                 if (isSeeingTarget()) {
-                    childBehaviour.stopSubtreeTickers()
+                    childBehaviour.stopSubtree()
                     currentBehaviour = seeingBehavior
-                    seeingBehavior.startSubtreeTickers()
+                    seeingBehavior.startSubtree()
                     IsSeeingState.SEEING
                 } else {
                     state

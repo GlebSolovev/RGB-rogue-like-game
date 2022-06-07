@@ -5,6 +5,7 @@ package ru.hse.sd.rgb.views.swing
 import ru.hse.sd.rgb.utils.d
 import ru.hse.sd.rgb.utils.imul
 import ru.hse.sd.rgb.utils.structures.Direction
+import ru.hse.sd.rgb.utils.structures.RGB
 import java.awt.Polygon
 import java.awt.Rectangle
 import java.awt.Shape
@@ -18,8 +19,9 @@ import kotlin.math.sin
 
 data class SwingUnitAppearance(
     val shape: SwingUnitShape,
+    val outlineRGB: RGB?,
     val scale: Double = 1.0,
-) // TODO: outline (for effects!)
+)
 
 enum class SwingUnitShape {
     SQUARE {

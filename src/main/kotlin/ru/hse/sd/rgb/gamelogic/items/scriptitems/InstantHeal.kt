@@ -20,7 +20,7 @@ class InstantHealItem(holder: GameEntity, private val healAmount: Int) : Item(ho
 
     override val viewItem = object : ViewItem() {
         override fun getSwingAppearance() =
-            SwingUnitAppearance(SWING_VIEW_SHAPE, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
+            SwingUnitAppearance(SWING_VIEW_SHAPE, null, DEFAULT_ITEM_INVENTORY_VIEW_UNIT_SCALE)
 
         override val color = HEAL_GREEN
         override val description: String = "Heals $healAmount HP instantly"
@@ -40,7 +40,7 @@ class InstantHealItem(holder: GameEntity, private val healAmount: Int) : Item(ho
 class InstantHealEntity(cell: Cell, private val healAmount: Int) : BasicItemEntity(cell, InstantHealItem.HEAL_GREEN) {
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            override val swingAppearance = SwingUnitAppearance(InstantHealItem.SWING_VIEW_SHAPE)
+            override val swingAppearance = SwingUnitAppearance(InstantHealItem.SWING_VIEW_SHAPE, null)
         }
     }
 

@@ -39,6 +39,7 @@ class Hero(
         override fun convertUnit(unit: GameUnit): ViewUnit = object : ViewUnit(unit) {
             override val swingAppearance = SwingUnitAppearance(
                 SwingUnitShape.SQUARE,
+                outlineColor,
                 swingScaleFactors.getOrDefault(unit, DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR)
             )
         }

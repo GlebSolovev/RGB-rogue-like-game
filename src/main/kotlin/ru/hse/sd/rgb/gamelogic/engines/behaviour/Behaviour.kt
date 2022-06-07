@@ -19,25 +19,32 @@ sealed class Behaviour(val entity: GameEntity) {
     abstract fun tickersGroup(tickClass: KClass<out Tick>): MutableSet<Ticker>
 
     abstract fun traverseTickers(onEach: (Ticker) -> Unit)
+    open fun onStart() {}
+    open fun onStop() {}
 
-    fun startTickers() {
+    fun start() {
         traverseTickers { ticker ->
             ticker.start()
             tickersGroup(ticker.tick::class).add(ticker)
         }
+        onStart()
     }
 
-    fun stopTickers() {
+    fun stop() {
         traverseTickers { ticker ->
             ticker.stop()
             tickersGroup(ticker.tick::class).remove(ticker)
         }
+        onStop()
     }
 
     abstract fun traverseSubtree(onEach: (Behaviour) -> Unit)
 
-    fun startSubtreeTickers() = traverseSubtree { it.startTickers() }
-    fun stopSubtreeTickers() = traverseSubtree { it.stopTickers() }
+    fun startSubtree() = traverseSubtree {
+        it.start()
+    }
+
+    fun stopSubtree() = traverseSubtree { it.stop() }
 }
 
 abstract class MetaBehaviour(
@@ -45,7 +52,7 @@ abstract class MetaBehaviour(
     var childBehaviour: Behaviour,
 ) : Behaviour(entity) {
 
-    final override fun traverseSubtree(onEach: (Behaviour) -> Unit) {
+    override fun traverseSubtree(onEach: (Behaviour) -> Unit) {
         onEach(this)
         childBehaviour.traverseSubtree(onEach)
     }

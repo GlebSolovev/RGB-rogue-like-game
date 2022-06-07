@@ -16,3 +16,6 @@ data class UserMoved(val dir: Direction) : Message()
 class UserToggledInventory : Message()
 class UserSelect : Message()
 class UserDrop : Message()
+
+// cosmetic messages
+data class SetConfused(val enabled: Boolean) : Message()

@@ -54,16 +54,26 @@ open class GamePanel(
         return Pair(offsetX + c.x * tileSize, offsetY + c.y * tileSize)
     }
 
+    @Suppress("MagicNumber")
     override fun paintComponent(graphics: Graphics) {
         val g = graphics as Graphics2D
         g.enableFancyRendering()
         g.color = bgColor
         g.fillRect(0, 0, width, height)
+        g.stroke = BasicStroke(3.0f)
         for ((_, viewUnits) in drawables) {
             for (viewUnit in viewUnits) {
                 g.color = viewUnit.rgb.toSwingColor()
+
                 val (pxX, pxY) = convertCellToPixels(viewUnit.cell)
-                g.fill(convertToSwingShape(viewUnit.swingAppearance, pxX, pxY, tileSize))
+                val shape = convertToSwingShape(viewUnit.swingAppearance, pxX, pxY, tileSize)
+                g.fill(shape)
+
+                val outlineColor = viewUnit.swingAppearance.outlineRGB?.toSwingColor()
+                if (outlineColor != null) {
+                    g.color = outlineColor
+                    g.draw(shape)
+                }
             }
         }
     }
