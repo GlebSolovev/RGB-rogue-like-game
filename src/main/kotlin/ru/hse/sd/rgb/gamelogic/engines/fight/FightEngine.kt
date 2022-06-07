@@ -52,6 +52,7 @@ class FightEngine(
     interface UnsafeMethods {
         fun unsafeChangeRGB(unit: GameUnit, newRgb: RGB)
         fun unsafeAttack(from: GameUnit, to: GameUnit)
+        fun unsafeAttackDirectly(to: GameUnit, attack: Int)
     }
 
     // TODO: is it a good idea?
@@ -64,16 +65,12 @@ class FightEngine(
         }
 
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
-            val isFatal = if (to is HpGameUnit) {
-                val atk = computeAttack(from, to)
-                val sameTeam = from.parent.fightEntity.teamId == to.parent.fightEntity.teamId
-                if (atk > 0 && sameTeam) return // don't attack teammates
-                if (atk < 0 && !sameTeam) return // don't heal enemies
-                to.hp -= atk
-                if (to.hp > to.maxHp) to.hp = to.maxHp
-                to.hp <= 0
-            } else false
-            to.parent.receive(HpChanged(to, isFatal))
+            if (to !is HpGameUnit) return
+            val atk = computeAttack(from, to)
+            val sameTeam = from.parent.fightEntity.teamId == to.parent.fightEntity.teamId
+            if (atk > 0 && sameTeam) return // don't attack teammates
+            if (atk < 0 && !sameTeam) return // don't heal enemies
+            unsafeAttackDirectly(to, atk)
         }
 
         fun updateUnitTicker(unit: GameUnit, updatePeriodMillis: Long?) {
@@ -89,6 +86,14 @@ class FightEngine(
                     currentTicker.periodMillis = updatePeriodMillis
                 }
             }
+        }
+
+        override fun unsafeAttackDirectly(to: GameUnit, attack: Int) {
+            if (to !is HpGameUnit) return
+            val toStartHp = to.hp
+            to.hp -= attack
+            if (to.hp > to.maxHp) to.hp = to.maxHp
+            if (toStartHp != to.hp) to.parent.receive(HpChanged(to, to.hp <= 0))
         }
     }
 
@@ -156,12 +161,10 @@ class FightEngine(
         }
     }
 
-    suspend fun heal(unit: GameUnit, amount: Int) {
-        withLockedUnits(setOf(unit)) {
-            if (unit is HpGameUnit) {
-                unit.hp += amount
-            }
-            unit.parent.receive(HpChanged(unit, false))
+    // attack can be negative = heal
+    suspend fun attackDirectly(to: GameUnit, attack: Int) {
+        withLockedUnits(setOf(to)) {
+            unsafeMethods.unsafeAttackDirectly(to, attack)
         }
     }
 
@@ -180,7 +183,7 @@ class FightEngine(
         }
     }
 
-    fun getBaseColorStats(unit: GameUnit): BaseColorStats = unit.cachedBaseColorId.stats
+    private fun getBaseColorStats(unit: GameUnit): BaseColorStats = unit.cachedBaseColorId.stats
 
     private val BaseColorId.stats
         get() = baseColorStats[this] ?: throw IllegalStateException("no base color with such id")

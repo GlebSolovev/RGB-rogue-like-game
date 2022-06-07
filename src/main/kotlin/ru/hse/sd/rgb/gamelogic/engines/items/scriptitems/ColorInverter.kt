@@ -30,7 +30,7 @@ class ColorInverterItem(holder: GameEntity) : ReusableItem(holder) {
         override val description: String = "When equipped, inverts current RGB"
     }
 
-    override fun getNewItemEntity(cell: Cell): ItemEntity = ColorInverterEntity(cell)
+    override fun getNewItemEntity(cell: Cell): ItemEntity = ColorInverterEntity(cell, true)
 
     private suspend fun invertColors() {
         // TODO: select unit
@@ -45,7 +45,8 @@ class ColorInverterItem(holder: GameEntity) : ReusableItem(holder) {
     override suspend fun unequip() = invertColors()
 }
 
-class ColorInverterEntity(cell: Cell) : BasicItemEntity(cell, ColorInverterItem.INVERTER_COLOR) {
+class ColorInverterEntity(cell: Cell, respawned: Boolean = false) :
+    BasicItemEntity(cell, ColorInverterItem.INVERTER_COLOR, respawned) {
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {

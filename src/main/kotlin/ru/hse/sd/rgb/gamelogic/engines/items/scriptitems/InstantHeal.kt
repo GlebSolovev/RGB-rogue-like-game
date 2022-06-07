@@ -26,16 +26,17 @@ class InstantHealItem(holder: GameEntity, private val healAmount: Int) : NonReus
         override val description: String = "Heals $healAmount HP instantly"
     }
 
-    override fun getNewItemEntity(cell: Cell): BasicItemEntity = InstantHealEntity(cell, healAmount)
+    override fun getNewItemEntity(cell: Cell): BasicItemEntity = InstantHealEntity(cell, healAmount, true)
 
     override suspend fun use() {
         for (unit in holder.units) { // TODO: select unit
-            controller.fighting.heal(unit, healAmount)
+            controller.fighting.attackDirectly(unit, -healAmount)
         }
     }
 }
 
-class InstantHealEntity(cell: Cell, private val healAmount: Int) : BasicItemEntity(cell, InstantHealItem.HEAL_GREEN) {
+class InstantHealEntity(cell: Cell, private val healAmount: Int, respawned: Boolean = false) :
+    BasicItemEntity(cell, InstantHealItem.HEAL_GREEN, respawned) {
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {

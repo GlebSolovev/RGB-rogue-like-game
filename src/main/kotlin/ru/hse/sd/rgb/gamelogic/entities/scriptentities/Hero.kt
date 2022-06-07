@@ -140,7 +140,7 @@ class Hero(
                         inventory.addItem(item)
                     }
                 } else {
-                    controller.fighting.attack(message.myUnit, message.otherUnit)
+                    controller.fighting.attackDirectly(message.myUnit, message.otherUnit)
                 }
                 return this
             }

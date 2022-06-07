@@ -47,11 +47,11 @@ class ColorModificationItem(
         controller.view.receive(EntityUpdated(holder))
     }
 
-    override fun getNewItemEntity(cell: Cell): BasicItemEntity = ColorModificationEntity(cell, rgbDelta)
+    override fun getNewItemEntity(cell: Cell): BasicItemEntity = ColorModificationEntity(cell, rgbDelta, true)
 }
 
-class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta) :
-    BasicItemEntity(cell, rgbDelta.convertToViewRGB()) {
+class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta, respawned: Boolean = false) :
+    BasicItemEntity(cell, rgbDelta.convertToViewRGB(), respawned) {
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {

@@ -30,12 +30,14 @@ sealed class Item(protected val holder: GameEntity) {
 
     abstract val viewItem: ViewItem
 
+    // TODO: make ItemEntity abstract inner class and create it using static method => don't forget about respawned
     abstract fun getNewItemEntity(cell: Cell): ItemEntity
 
     abstract suspend fun use()
 }
 
-abstract class ItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNoHp(color, cell))) {
+abstract class ItemEntity(cell: Cell, color: RGB, private val respawned: Boolean) :
+    GameEntity(setOf(ColorCellNoHp(color, cell))) {
 
     private var lifeStartTimeMillis: Long? = null
 
@@ -49,13 +51,13 @@ abstract class ItemEntity(cell: Cell, color: RGB) : GameEntity(setOf(ColorCellNo
     // MUST BE THREAD-SAFE!
     fun getNewItem(picker: GameEntity): Item? {
         if (lifeStartTimeMillis == null ||
-            System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS
+            (respawned && System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS)
         ) return null
         return getNewItemUnconditionally(picker)
     }
 }
 
-abstract class BasicItemEntity(cell: Cell, color: RGB) : ItemEntity(cell, color) {
+abstract class BasicItemEntity(cell: Cell, color: RGB, respawned: Boolean) : ItemEntity(cell, color, respawned) {
 
     final override val physicalEntity = object : PhysicalEntity() {
         override val isSolid = false
