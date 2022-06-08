@@ -18,6 +18,7 @@ abstract class State {
         is UserDrop -> handleUserDrop()
         is SetEffectColor -> handleSetEffectColor(message)
         is ExperienceLevelUpdate -> handleExperienceLevelUpdate(message)
+        is HeroNextLevel -> handleHeroNextLevel(message)
         is ColorTick -> handleColorTick(message)
         is MoveTick -> handleMoveTick()
         is RepaintTick -> handleRepaintTick()
@@ -43,6 +44,8 @@ abstract class State {
 
     open suspend fun handleSetEffectColor(message: SetEffectColor): State = messageNotSupported
     open suspend fun handleExperienceLevelUpdate(message: ExperienceLevelUpdate): State = messageNotSupported
+
+    open suspend fun handleHeroNextLevel(message: HeroNextLevel): State = messageNotSupported
 
     open suspend fun handleColorTick(tick: ColorTick): State = messageNotSupported
 

@@ -10,7 +10,7 @@ import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.CollidedWith
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
 import ru.hse.sd.rgb.utils.messaging.messages.ExperienceLevelUpdate
-import ru.hse.sd.rgb.utils.messaging.messages.NextLevel
+import ru.hse.sd.rgb.utils.messaging.messages.HeroNextLevel
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -79,7 +79,7 @@ class LevelPortal(
                     }
                     is CollidedWith -> {
                         if (isEnabled && message.otherUnit.parent is Hero) {
-                            controller.receive(NextLevel(nextLevelDescriptionFilename))
+                            controller.hero.receive(HeroNextLevel(nextLevelDescriptionFilename))
                         }
                     }
                 }

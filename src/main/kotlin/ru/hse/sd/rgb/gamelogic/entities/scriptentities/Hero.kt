@@ -208,6 +208,7 @@ class Hero(
             if (state !is InventoryState) inventoryViewUpdateTicker.stop()
         }
 
+        @Suppress("TooManyFunctions")
         private open inner class PlayingState : State() {
             private var lastMoveTime = System.currentTimeMillis()
             private lateinit var lastMoveDir: Direction
@@ -269,6 +270,13 @@ class Hero(
             }
 
             override suspend fun handleDoUpdateInventoryViewTick(): State = this
+
+            override suspend fun handleHeroNextLevel(message: HeroNextLevel): State {
+                controller.receive(
+                    ControllerNextLevel(message.nextLevelDescriptionFilename, extractPersistence())
+                )
+                return this
+            }
         }
 
         private inner class InventoryState : PlayingState() {
@@ -304,7 +312,7 @@ class Hero(
         }
     }
 
-    suspend fun extractPersistence(): HeroPersistence {
+    private suspend fun extractPersistence(): HeroPersistence {
         val unitList = units.toList()
         val first = unitList.first()
         val unitsPersistence = unitList.map {

@@ -135,8 +135,8 @@ class Controller(
             is FinishControllerMessage, is UserQuit -> { // TODO: finish screen
                 quit()
             }
-            is NextLevel -> {
-                val heroPersistence = hero.extractPersistence() // TODO: not thread-safe
+            is ControllerNextLevel -> {
+                val heroPersistence = m.heroPersistence
                 stopGame()
                 view.receive(GameViewStopped())
                 val nextLevelLoader = FileLevelLoader(m.nextLevelDescriptionFilename)
