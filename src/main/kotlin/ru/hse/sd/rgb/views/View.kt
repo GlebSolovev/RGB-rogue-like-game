@@ -30,7 +30,7 @@ abstract class View : Messagable() {
         }
     }
 
-    protected sealed class ViewState {
+    protected abstract class ViewState {
         abstract fun next(m: Message): ViewState
     }
 

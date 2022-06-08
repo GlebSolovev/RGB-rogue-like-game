@@ -37,4 +37,13 @@ class Grid2D<T>(val w: Int, val h: Int, init: (Int, Int) -> T) : AbstractCollect
         data.withIndex().map { (y, l) -> l.withIndex().map { (x, v) -> CoordinatedValue(x, y, v) } }.flatten()
 
     fun withIndex(): Nothing = throw UnsupportedOperationException()
+
+    override fun toString(): String {
+        val sb = StringBuilder()
+        for (row in data) {
+            for (v in row) sb.append(v.toString()).append(' ')
+            sb.append('\n')
+        }
+        return sb.toString()
+    }
 }

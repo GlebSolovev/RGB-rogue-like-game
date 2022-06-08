@@ -20,7 +20,7 @@ private const val HERO_FILENAME: String = "src/main/resources/sampleHero.yaml"
 
 private val levelLoader = FileLevelLoader(LEVEL_FILENAME)
 
-val controller = Controller(
+var controller = Controller(
     levelLoader,
     FileColorLoader(COLORS_FILENAME),
     FileExperienceLevelsLoader(HERO_EXPERIENCE_LEVELS_FILENAME),

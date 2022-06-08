@@ -1,0 +1,11 @@
+- requiredPoints: 10
+  actions:
+    - !<increase_max_hp>
+      onPercent: 100
+
+- requiredPoints: 20
+  actions:
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: 30 0 0

@@ -155,7 +155,7 @@ class Controller(
 
     private fun quit(): Nothing {
         stopGame()
-        exitProcess(0)
+        throw CancellationException()
     }
 
     val physics: PhysicsEngine get() = state.engines.physics
