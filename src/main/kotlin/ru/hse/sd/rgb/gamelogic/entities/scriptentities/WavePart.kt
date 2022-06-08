@@ -46,4 +46,8 @@ class WavePart(
         }.build()
 
     override val behaviourEntity = SingleBehaviourEntity(wavePartBaseBehaviour)
+
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
 }

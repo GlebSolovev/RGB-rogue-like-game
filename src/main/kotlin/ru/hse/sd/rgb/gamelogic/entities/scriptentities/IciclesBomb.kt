@@ -79,6 +79,10 @@ class IciclesBomb(
         .build()
     override val behaviourEntity = SingleBehaviourEntity(icicleBallBaseBehaviour)
 
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
+
     override val lifecycle = BehaviourBuilder.lifecycle(this)
         .add { icicleBallBaseBehaviour }
         .build()

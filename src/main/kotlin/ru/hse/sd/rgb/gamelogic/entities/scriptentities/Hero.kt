@@ -6,6 +6,7 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.BurningBe
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.ConfusedBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.FrozenBehaviour
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.MultiplySpeedBehaviour
+import ru.hse.sd.rgb.gamelogic.engines.experience.Experience
 import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
@@ -31,7 +32,7 @@ data class HeroPersistence(
     val unitsPersistence: List<HpUnitPersistence>,
     val inventoryPersistence: InventoryPersistence,
     val singleDirMovePeriodLimit: Long,
-    // TODO: experience
+    val experience: Experience
 ) {
     data class HpUnitPersistence(
         val relativeShift: GridShift,
@@ -47,7 +48,7 @@ data class HeroPersistence(
 
 class Hero(
     spawnCell: Cell,
-    heroPersistence: HeroPersistence,
+    private val heroPersistence: HeroPersistence,
 ) : GameEntity(
     run { heroPersistence.unitsPersistence.map { it.convertToColorCellHp(spawnCell) }.toSet() }
 ) {
@@ -55,6 +56,8 @@ class Hero(
     companion object {
         const val DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR = 1.0
         const val ADDITIONAL_FROZEN_SLOW_DOWN_COEFFICIENT = 0.5
+
+        const val INVENTORY_VIEW_UPDATE_PERIOD_MILLIS = 10L
     }
 
     private var singleDirMovePeriodLimit = heroPersistence.singleDirMovePeriodLimit
@@ -103,13 +106,17 @@ class Hero(
         override val teamId = controller.fighting.newTeamId()
     }
 
-    override fun onLifeStart() {
+    override suspend fun onLifeStart() {
         controller.view.receive(SubscribeToMovement(this))
         controller.view.receive(SubscribeToInventory(this))
         for (unit in units) (viewEntity as HeroViewEntity).calculateScaleHp(unit as HpGameUnit)
+
+        controller.experience.registerEntity(this, heroPersistence.experience)
     }
 
-    override fun onLifeEnd() {
+    override suspend fun onLifeEnd() {
+        controller.experience.unregisterEntity(this)
+
         controller.view.receive(UnsubscribeFromInventory(this))
         controller.view.receive(UnsubscribeFromMovement(this))
     }
@@ -177,6 +184,10 @@ class Hero(
             }
     }
 
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
+
     private val inventory: Inventory = heroPersistence.inventoryPersistence.convertToInventory(this)
 
     private inner class HeroBehaviour : NoneBehaviour(this) {
@@ -185,6 +196,16 @@ class Hero(
 
         override suspend fun handleMessage(message: Message) {
             state = state.next(message)
+        }
+
+        private val inventoryViewUpdateTicker =
+            Ticker(INVENTORY_VIEW_UPDATE_PERIOD_MILLIS, this@Hero, DoUpdateInventoryViewTick())
+
+        override fun traverseTickers(onEach: (Ticker) -> Unit) = onEach(inventoryViewUpdateTicker)
+
+        override fun onStart() {
+            // prevent unnecessary inventory ticker start
+            if (state !is InventoryState) inventoryViewUpdateTicker.stop()
         }
 
         private open inner class PlayingState : State() {
@@ -227,7 +248,8 @@ class Hero(
             }
 
             override suspend fun handleUserToggledInventory(): State {
-                controller.view.receive(InventoryOpened(inventory))
+                controller.view.receive(InventoryOpened.fromInventory(inventory))
+                inventoryViewUpdateTicker.start()
                 return InventoryState()
             }
 
@@ -245,44 +267,55 @@ class Hero(
                 // TODO: add default control params
                 return this
             }
+
+            override suspend fun handleDoUpdateInventoryViewTick(): State = this
         }
 
         private inner class InventoryState : PlayingState() {
 
-            private fun sendInvUpdate() = controller.view.receive(InventoryUpdated(inventory))
+            // InventoryUpdated is regularly sent to View by inventoryViewUpdateTicker automatically
 
             override suspend fun handleUserMoved(message: UserMoved): State {
                 inventory.moveSelection(message.dir)
-                sendInvUpdate()
                 return this
             }
 
             override suspend fun handleUserToggledInventory(): State {
                 controller.view.receive(InventoryClosed())
+                inventoryViewUpdateTicker.stop()
                 return PlayingState()
             }
 
             override suspend fun handleUserSelect(): State {
                 inventory.useCurrent()
-                sendInvUpdate()
                 return this
             }
 
             override suspend fun handleUserDrop(): State {
-                if (inventory.dropCurrent(randomCell())) sendInvUpdate()
+                inventory.dropCurrent(randomCell())
                 // TODO: if false show message "Can't drop item, try again"
+                return this
+            }
+
+            override suspend fun handleDoUpdateInventoryViewTick(): State {
+                controller.view.receive(InventoryUpdated.fromInventory(inventory))
                 return this
             }
         }
     }
 
-    fun extractPersistence(): HeroPersistence {
+    suspend fun extractPersistence(): HeroPersistence {
         val unitList = units.toList()
         val first = unitList.first()
         val unitsPersistence = unitList.map {
             it as HpGameUnit
             HeroPersistence.HpUnitPersistence(first.cell - it.cell, it.gameColor, it.hp, it.maxHp)
         }
-        return HeroPersistence(unitsPersistence, inventory.extractPersistence(), singleDirMovePeriodLimit)
+        return HeroPersistence(
+            unitsPersistence,
+            inventory.extractPersistence(),
+            singleDirMovePeriodLimit,
+            controller.experience.getExperience(this)!!
+        )
     }
 }

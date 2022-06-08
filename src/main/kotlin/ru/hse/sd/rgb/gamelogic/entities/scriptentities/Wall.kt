@@ -40,4 +40,8 @@ class Wall(colorCells: Set<ColorCellNoHp>) : GameEntity(colorCells) {
     private val wallBaseBehaviour = NoneBehaviour(this)
     override val lifecycle = BehaviourBuilder.lifecycle(this, wallBaseBehaviour).build()
     override val behaviourEntity = SingleBehaviourEntity(wallBaseBehaviour)
+
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
 }

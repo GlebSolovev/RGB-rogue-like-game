@@ -32,8 +32,11 @@ class Glitch(
 
     companion object {
         const val REPAINT_PERIOD_MILLIS = 100L
+
         const val TO_RGB_DELTA_SCALE_COEFFICIENT = 0.1
         const val ON_DIE_ITEM_DROP_PROBABILITY = 0.8
+
+        const val ON_DIE_EXPERIENCE_POINTS = 5
     }
 
     override val viewEntity = object : ViewEntity() {
@@ -93,6 +96,10 @@ class Glitch(
             seeingDepth: Int,
             createSeeingBehaviour: (Behaviour) -> Behaviour
         ): Behaviour = glitchBaseBehaviour
+    }
+
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int = ON_DIE_EXPERIENCE_POINTS
     }
 
     private inner class GlitchBaseBehaviour : NoneBehaviour(this) {

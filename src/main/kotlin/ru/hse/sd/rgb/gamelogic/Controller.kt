@@ -5,6 +5,7 @@ package ru.hse.sd.rgb.gamelogic
 import ru.hse.sd.rgb.gameloaders.*
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourEngine
 import ru.hse.sd.rgb.gamelogic.engines.creation.CreationEngine
+import ru.hse.sd.rgb.gamelogic.engines.experience.ExperienceEngine
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.items.ItemsEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
@@ -50,6 +51,7 @@ fun onException() {
 class Controller(
     initialLevelLoader: LevelLoader,
     private val colorLoader: ColorLoader, // TODO: changing base colors between levels is absurd, but can be added
+    private val experienceLevelsLoader: ExperienceLevelsLoader,
     heroLoader: HeroLoader,
     val view: View
 ) : Messagable() {
@@ -58,6 +60,7 @@ class Controller(
         GameInitState(
             initialLevelLoader,
             colorLoader,
+            experienceLevelsLoader,
             heroLoader.loadHeroInitParams().convertToInitialHeroPersistence()
         )
     )
@@ -79,9 +82,10 @@ class Controller(
     private inner class GameInitState(
         levelLoader: LevelLoader,
         colorLoader: ColorLoader,
+        experienceLevelsLoader: ExperienceLevelsLoader,
         private val heroPersistence: HeroPersistence,
     ) : ControllerState() {
-        val gameLoader = GameLoader(levelLoader, colorLoader)
+        val gameLoader = GameLoader(levelLoader, colorLoader, experienceLevelsLoader)
 
         override lateinit var hero: Hero
         override lateinit var engines: Engines
@@ -137,7 +141,7 @@ class Controller(
                 view.receive(GameViewStopped())
                 val nextLevelLoader = FileLevelLoader(m.nextLevelDescriptionFilename)
                 receive(DoLoadLevel())
-                GameInitState(nextLevelLoader, colorLoader, heroPersistence)
+                GameInitState(nextLevelLoader, colorLoader, experienceLevelsLoader, heroPersistence)
             }
             else -> unreachable
         }
@@ -159,6 +163,7 @@ class Controller(
     val creation: CreationEngine get() = state.engines.creation
     val behaviourEngine: BehaviourEngine get() = state.engines.behaviourEngine
     val itemsEngine: ItemsEngine get() = state.engines.itemsEngine
+    val experience: ExperienceEngine get() = state.engines.experience
 
     val hero: Hero get() = state.hero
 }

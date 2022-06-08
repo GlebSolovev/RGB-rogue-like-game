@@ -1,0 +1,65 @@
+- requiredPoints: 10
+  actions:
+    - !<increase_max_hp>
+      onPercent: 25
+
+- requiredPoints: 20
+  actions:
+    - !<increase_max_hp>
+      onPercent: 25
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: 30 0 0
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: 0 30 0
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: 0 0 30
+
+- requiredPoints: 50
+  actions:
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_inverter>
+
+- requiredPoints: 100
+  actions:
+    - !<increase_max_hp>
+      onPercent: 50
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<instant_heal>
+        healAmount: 100
+
+- requiredPoints: 100
+  actions:
+    - !<increase_max_hp>
+      onPercent: 20
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: 255 0 0
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: 0 255 0
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: 0 0 255
+
+    - !<spawn_item>
+      itemEntityCreator:
+        !<color_modification>
+        rgbDelta: -255 -255 -255

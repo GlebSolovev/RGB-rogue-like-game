@@ -37,6 +37,7 @@ style:
       - 'ru.hse.sd.rgb.utils.*'
       - 'ru.hse.sd.rgb.gamelogic.engines.fight.*'
       - 'ru.hse.sd.rgb.gamelogic.engines.behaviour.*'
+      - 'ru.hse.sd.rgb.gamelogic.engines.items.*'
   ForbiddenComment:
     allowedPatterns: 'TODO'
   MagicNumber:

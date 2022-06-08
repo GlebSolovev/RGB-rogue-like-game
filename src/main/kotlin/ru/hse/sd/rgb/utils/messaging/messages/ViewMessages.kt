@@ -2,6 +2,7 @@ package ru.hse.sd.rgb.utils.messaging.messages
 
 import ru.hse.sd.rgb.gameloaders.LevelDescription
 import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
+import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.messaging.Messagable
 import ru.hse.sd.rgb.utils.messaging.Message
@@ -28,12 +29,18 @@ data class EntityRemoved(val gameEntity: GameEntity) : Message()
 data class GameViewStarted(val level: LevelDescription) : Message()
 class GameViewStopped : Message()
 
-class InventoryOpened(inventory: Inventory) : Message() {
-    val invSnapshot = inventory.viewInventory.takeViewSnapshot()
+data class InventoryOpened(val invSnapshot: InventoryViewSnapshot) : Message() {
+    companion object {
+        suspend fun fromInventory(inventory: Inventory): InventoryOpened =
+            InventoryOpened(inventory.viewInventory.takeViewSnapshot())
+    }
 }
 
-class InventoryUpdated(inventory: Inventory) : Message() {
-    val invSnapshot = inventory.viewInventory.takeViewSnapshot()
+data class InventoryUpdated(val invSnapshot: InventoryViewSnapshot) : Message() {
+    companion object {
+        suspend fun fromInventory(inventory: Inventory): InventoryUpdated =
+            InventoryUpdated(inventory.viewInventory.takeViewSnapshot())
+    }
 }
 
 class InventoryClosed : Message()

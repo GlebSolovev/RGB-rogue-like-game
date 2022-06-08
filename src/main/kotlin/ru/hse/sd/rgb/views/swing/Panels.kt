@@ -2,9 +2,7 @@
 
 package ru.hse.sd.rgb.views.swing
 
-import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
-import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.utils.*
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.views.DrawablesMap
@@ -179,21 +177,24 @@ class GameInventoryPanel(
         }
 
         val statsMargin = (invOffsetX * textMarginCoefficient).toInt()
-        val hero = controller.hero
-        val unitsHp = hero.units.map {
-            val hpUnit = (it as HpGameUnit)
-            "${hpUnit.hp} / ${hpUnit.maxHp}"
-        }
-        val unitsRgb = hero.units.map { it.gameColor }
-        val unitsColorNames = hero.units.map { controller.fighting.getBaseColorName(it) }
+        val (unitsHp, unitsRgb, unitsColorName, experience) = invSnapshot.holderStats
+        val unitsHpText = unitsHp.map { if (it.hp == null && it.maxHp == null) "None" else "${it.hp} / ${it.maxHp}" }
+        val experiencePointsText =
+            if (experience.nextLevelRequiredPoints != null)
+                "${experience.points} / ${experience.nextLevelRequiredPoints}"
+            else "MAX"
+        val experienceText = experiencePointsText + ", LEVEL ${experience.level}"
+
         val statsText = """
             Stats:
             
-            HP=$unitsHp
+            HP = $unitsHpText
             
-            RGB=$unitsRgb
+            RGB = $unitsRgb
             
-            Colors=$unitsColorNames
+            Colors = $unitsColorName
+            
+            EXP = $experienceText
         """.trimIndent()
         g.drawTextCustom(statsText, statsMargin, invOffsetY)
         // TODO: display info per each unit properly

@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.gameloaders
 
-import ru.hse.sd.rgb.gamelogic.engines.items.Inventory
+import ru.hse.sd.rgb.gamelogic.engines.experience.Experience
+import ru.hse.sd.rgb.gamelogic.engines.items.InventoryPersistence
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.HeroPersistence
 import ru.hse.sd.rgb.utils.structures.GridShift
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -20,8 +21,9 @@ data class HeroInitParams(
         unitsInitParams.map {
             HeroPersistence.HpUnitPersistence(it.relativeShift, it.color, it.maxHp, it.maxHp)
         },
-        Inventory(inventoryDescription.invGridW, inventoryDescription.invGridH).extractPersistence(),
-        singleDirMovePeriodLimit
+        InventoryPersistence(inventoryDescription.invGridW, inventoryDescription.invGridH),
+        singleDirMovePeriodLimit,
+        Experience(0, 0)
     )
 }
 

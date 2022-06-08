@@ -27,8 +27,11 @@ class Sharpy(
 
     companion object {
         const val DIRECT_ATTACK_MOVE_PERIOD_COEFFICIENT: Double = 0.25
+
         const val MAX_HP_TO_INSTANT_HEAL_AMOUNT_COEFFICIENT = 0.2
         const val ON_DIE_ITEM_DROP_PROBABILITY = 0.1
+
+        const val ON_DIE_EXPERIENCE_POINTS = 10
     }
 
     override val viewEntity = object : ViewEntity() {
@@ -75,4 +78,8 @@ class Sharpy(
         }
         .build()
     override val behaviourEntity = BehaviourEntity()
+
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int = ON_DIE_EXPERIENCE_POINTS
+    }
 }

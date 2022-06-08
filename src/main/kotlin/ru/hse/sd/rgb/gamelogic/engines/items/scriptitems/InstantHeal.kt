@@ -1,9 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.engines.items.scriptitems
 
 import ru.hse.sd.rgb.controller
-import ru.hse.sd.rgb.gamelogic.engines.items.BasicItemEntity
-import ru.hse.sd.rgb.gamelogic.engines.items.ItemPersistence
-import ru.hse.sd.rgb.gamelogic.engines.items.NonReusableItem
+import ru.hse.sd.rgb.gamelogic.engines.items.*
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.structures.Cell
@@ -11,6 +9,8 @@ import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 class InstantHealItem(holder: GameEntity, private val healAmount: Int) : NonReusableItem(holder) {
 
@@ -50,4 +50,10 @@ class InstantHealEntity(cell: Cell, private val healAmount: Int, respawned: Bool
     }
 
     override fun getNewItemUnconditionally(picker: GameEntity) = InstantHealItem(picker, healAmount)
+}
+
+@Serializable
+@SerialName("instant_heal")
+class InstantHealEntityCreator(private val healAmount: Int) : ItemEntityCreator {
+    override fun createAt(cell: Cell): ItemEntity = InstantHealEntity(cell, healAmount)
 }

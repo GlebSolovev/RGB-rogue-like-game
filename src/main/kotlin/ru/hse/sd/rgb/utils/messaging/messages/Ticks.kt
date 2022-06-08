@@ -16,3 +16,5 @@ class CloneTick : Tick()
 class BurnTick : Tick()
 
 class ExpireTick : Tick()
+
+class DoUpdateInventoryViewTick : Tick()

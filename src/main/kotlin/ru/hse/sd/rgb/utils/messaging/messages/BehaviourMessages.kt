@@ -1,5 +1,6 @@
 package ru.hse.sd.rgb.utils.messaging.messages
 
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.structures.Direction
@@ -21,3 +22,7 @@ class UserDrop : Message()
 
 // cosmetic messages
 data class SetEffectColor(val enabled: Boolean, val color: RGB) : SaveInNotStartedAndReplayInOngoingMessage()
+
+// message from ExperienceEngine to subscribers
+data class ExperienceLevelUpdate(val entity: GameEntity, val newLevel: Int) :
+    SaveInNotStartedAndReplayInOngoingMessage()

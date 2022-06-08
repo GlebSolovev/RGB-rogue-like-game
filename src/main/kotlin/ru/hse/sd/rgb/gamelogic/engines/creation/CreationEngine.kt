@@ -1,5 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.engines.creation
 
+import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
@@ -42,6 +43,9 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
 
     // entity must not react on new events after calling with method
     suspend fun die(entity: GameEntity) {
+        val experiencePoints = entity.experienceEntity.onDieExperiencePoints
+        if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
+
         val dieRoutine: suspend () -> Unit = {
             entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
             physics.remove(entity)

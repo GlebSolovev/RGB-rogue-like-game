@@ -1,10 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.engines.items.scriptitems
 
 import ru.hse.sd.rgb.controller
-import ru.hse.sd.rgb.gamelogic.engines.items.BasicItemEntity
-import ru.hse.sd.rgb.gamelogic.engines.items.Item
-import ru.hse.sd.rgb.gamelogic.engines.items.ItemEntity
-import ru.hse.sd.rgb.gamelogic.engines.items.ReusableItem
+import ru.hse.sd.rgb.gamelogic.engines.items.*
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
@@ -14,6 +11,8 @@ import ru.hse.sd.rgb.utils.structures.invert
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 class ColorInverterItem(holder: GameEntity, isEquipped: Boolean = false) : ReusableItem(holder, isEquipped) {
 
@@ -59,4 +58,10 @@ class ColorInverterEntity(cell: Cell, respawned: Boolean = false) :
     }
 
     override fun getNewItemUnconditionally(picker: GameEntity): Item = ColorInverterItem(picker)
+}
+
+@Serializable
+@SerialName("color_inverter")
+class ColorInverterEntityCreator : ItemEntityCreator {
+    override fun createAt(cell: Cell): ItemEntity = ColorInverterEntity(cell)
 }

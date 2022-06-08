@@ -62,6 +62,10 @@ class Icicle(
         .build()
     override val behaviourEntity = SingleBehaviourEntity(icicleBaseBehaviour)
 
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
+
     override val lifecycle = BehaviourBuilder.lifecycle(this)
         .add { icicleBaseBehaviour }
         .build()

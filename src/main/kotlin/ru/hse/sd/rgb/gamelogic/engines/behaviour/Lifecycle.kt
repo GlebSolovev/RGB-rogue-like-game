@@ -75,12 +75,7 @@ class Lifecycle(
                     }
                 }
             }
-            LifecycleState.DEAD -> {
-                when (message) {
-                    is LifeStarted -> unreachable
-                    else -> ignore
-                }
-            }
+            LifecycleState.DEAD -> ignore
         }
     }
 }

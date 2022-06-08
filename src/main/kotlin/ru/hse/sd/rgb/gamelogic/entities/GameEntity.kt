@@ -148,10 +148,15 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         ): Behaviour = singleBehaviour
     }
 
+    abstract inner class ExperienceEntity {
+        abstract val onDieExperiencePoints: Int?
+    }
+
     abstract val viewEntity: ViewEntity
     abstract val physicalEntity: PhysicalEntity
     abstract val fightEntity: FightEntity
     abstract val behaviourEntity: BehaviourEntity
+    abstract val experienceEntity: ExperienceEntity
 
     val units: MutableSet<GameUnit> = Collections.newSetFromMap(ConcurrentHashMap())
 //     TODO: maybe make private and not concurrent
@@ -167,8 +172,8 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
         )
     }
 
-    open fun onLifeStart() {}
-    open fun onLifeEnd() {}
+    open suspend fun onLifeStart() {}
+    open suspend fun onLifeEnd() {}
 
     abstract val lifecycle: Lifecycle
 

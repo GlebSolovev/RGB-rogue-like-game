@@ -1,9 +1,9 @@
 levelFactory:
   baseFactoryType: FIERY
   customBgColor: 0 0 0
-  customSharpySpawnCount: 30
-  customSharpyHp: 1000
-  customGlitchSpawnCount: 10
+  customSharpySpawnCount: 1
+  customSharpyHp: 10
+  customGlitchSpawnCount: 1
 
 mazeRepresentation: [
   "...................................................",

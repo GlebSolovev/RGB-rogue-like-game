@@ -2,7 +2,9 @@ package ru.hse.sd.rgb.gamelogic.engines.items
 
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gameloaders.InventoryDescription
+import ru.hse.sd.rgb.gamelogic.engines.experience.DetailedExperience
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.utils.structures.*
 import java.awt.Color
 
@@ -15,15 +17,24 @@ data class InventorySwingAppearance(
     val equippedItemHighlightAlpha: Int
 )
 
+data class UnitHp(val hp: Int?, val maxHp: Int?)
+data class InventoryHolderStats(
+    val unitsHp: List<UnitHp>,
+    val unitsRgb: List<RGB>,
+    val unitsColorName: List<String>,
+    val experience: DetailedExperience
+)
+
 data class InventoryViewSnapshot(
     val itemsGrid: Grid2D<Item.ViewItem?>,
     val selectedCell: Cell,
-
-    val swingAppearance: InventorySwingAppearance
+    val swingAppearance: InventorySwingAppearance,
+    val holderStats: InventoryHolderStats
 )
 
 // doesn't need to be thread-safe, only its holder entity operates with it
 class Inventory(
+    private val holder: GameEntity,
     private val items: Grid2D<Item?>,
     private var selectedCell: Cell = Cell(0, 0),
 ) {
@@ -31,18 +42,24 @@ class Inventory(
         val DEFAULT_SWING_APPEARANCE = InventorySwingAppearance(100, Color.WHITE, Color.YELLOW, 0.9, 200, 128)
     }
 
-    constructor(w: Int, h: Int) : this(Grid2D(w, h) { _, _ -> null })
-
     private val w = items.w
     private val h = items.h
 
     inner class ViewInventory {
         private val swingAppearance = DEFAULT_SWING_APPEARANCE
 
-        fun takeViewSnapshot() = InventoryViewSnapshot(
+        suspend fun takeViewSnapshot() = InventoryViewSnapshot(
             items.map { it?.viewItem },
             selectedCell,
-            swingAppearance
+            swingAppearance,
+            InventoryHolderStats(
+                holder.units.map {
+                    if (it is HpGameUnit) UnitHp(it.hp, it.maxHp) else UnitHp(null, null)
+                },
+                holder.units.map { it.gameColor },
+                holder.units.map { controller.fighting.getBaseColorName(it) },
+                controller.experience.getDetailedExperience(holder)!!
+            )
         )
     }
 
@@ -101,7 +118,10 @@ class InventoryPersistence(
     private val itemsPersistence: Grid2D<ItemPersistence?>,
     private val selectedCell: Cell,
 ) {
+    constructor(w: Int, h: Int) : this(Grid2D(w, h) { _, _ -> null }, Cell(0, 0))
+
     fun convertToInventory(holder: GameEntity) = Inventory(
+        holder,
         itemsPersistence.map { it?.convertToItem(holder) },
         selectedCell
     )

@@ -51,6 +51,10 @@ class LaserPart(
         }.build()
     override val behaviourEntity = SingleBehaviourEntity(laserPartDefaultBehaviour)
 
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
+
     private inner class LaserPartDefaultBehaviour : NoneBehaviour(this) {
 
         private val continueTicker = Ticker(PROPAGATION_PERIOD_MILLIS, this@LaserPart, ContinueTick())

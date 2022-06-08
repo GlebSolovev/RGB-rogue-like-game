@@ -17,6 +17,7 @@ abstract class State {
         is UserSelect -> handleUserSelect()
         is UserDrop -> handleUserDrop()
         is SetEffectColor -> handleSetEffectColor(message)
+        is ExperienceLevelUpdate -> handleExperienceLevelUpdate(message)
         is ColorTick -> handleColorTick(message)
         is MoveTick -> handleMoveTick()
         is RepaintTick -> handleRepaintTick()
@@ -26,6 +27,7 @@ abstract class State {
         is CloneTick -> handleCloneTick()
         is BurnTick -> handleBurnTick()
         is ExpireTick -> handleExpireTick()
+        is DoUpdateInventoryViewTick -> handleDoUpdateInventoryViewTick()
         else -> unreachable("State doesn't have method for this message")
     }
 
@@ -40,6 +42,7 @@ abstract class State {
     open suspend fun handleUserDrop(): State = messageNotSupported
 
     open suspend fun handleSetEffectColor(message: SetEffectColor): State = messageNotSupported
+    open suspend fun handleExperienceLevelUpdate(message: ExperienceLevelUpdate): State = messageNotSupported
 
     open suspend fun handleColorTick(tick: ColorTick): State = messageNotSupported
 
@@ -51,8 +54,7 @@ abstract class State {
     open suspend fun handleCloneTick(): State = messageNotSupported
     open suspend fun handleBurnTick(): State = messageNotSupported
     open suspend fun handleExpireTick(): State = messageNotSupported
-
-    // TODO: message to change Behaviour, service, stop ticker
+    open suspend fun handleDoUpdateInventoryViewTick(): State = messageNotSupported
 
     private val messageNotSupported: Nothing
         get() = throw IllegalStateException("message not supported")

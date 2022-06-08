@@ -47,7 +47,7 @@ abstract class ItemEntity(cell: Cell, color: RGB, private val respawned: Boolean
 
     private var lifeStartTimeMillis: Long? = null
 
-    override fun onLifeStart() {
+    override suspend fun onLifeStart() {
         lifeStartTimeMillis = System.currentTimeMillis()
     }
 
@@ -56,8 +56,10 @@ abstract class ItemEntity(cell: Cell, color: RGB, private val respawned: Boolean
     // null if not ready to be picked up
     // MUST BE THREAD-SAFE!
     fun getNewItem(picker: GameEntity): Item? {
-        if (lifeStartTimeMillis == null ||
-            (respawned && System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS)
+        if (respawned && (
+            lifeStartTimeMillis == null ||
+                System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS
+            )
         ) return null
         return getNewItemUnconditionally(picker)
     }
@@ -78,5 +80,13 @@ abstract class BasicItemEntity(cell: Cell, color: RGB, respawned: Boolean) : Ite
     private val itemBaseBehaviour = NoneBehaviour(this)
     final override val behaviourEntity = SingleBehaviourEntity(itemBaseBehaviour)
 
+    final override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
+
     final override val lifecycle = BehaviourBuilder.lifecycle(this, itemBaseBehaviour).build()
+}
+
+interface ItemEntityCreator {
+    fun createAt(cell: Cell): ItemEntity
 }

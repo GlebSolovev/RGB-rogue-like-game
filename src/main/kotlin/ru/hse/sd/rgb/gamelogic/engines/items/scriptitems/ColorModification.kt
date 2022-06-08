@@ -1,9 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.engines.items.scriptitems
 
 import ru.hse.sd.rgb.controller
-import ru.hse.sd.rgb.gamelogic.engines.items.BasicItemEntity
-import ru.hse.sd.rgb.gamelogic.engines.items.ItemPersistence
-import ru.hse.sd.rgb.gamelogic.engines.items.NonReusableItem
+import ru.hse.sd.rgb.gamelogic.engines.items.*
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.messaging.messages.EntityUpdated
@@ -13,6 +11,8 @@ import ru.hse.sd.rgb.utils.structures.RGBDelta
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 class ColorModificationItem(
     holder: GameEntity,
@@ -64,4 +64,10 @@ class ColorModificationEntity(cell: Cell, private val rgbDelta: RGBDelta, respaw
     }
 
     override fun getNewItemUnconditionally(picker: GameEntity) = ColorModificationItem(picker, rgbDelta)
+}
+
+@Serializable
+@SerialName("color_modification")
+class ColorModificationEntityCreator(private val rgbDelta: RGBDelta) : ItemEntityCreator {
+    override fun createAt(cell: Cell): ItemEntity = ColorModificationEntity(cell, rgbDelta)
 }

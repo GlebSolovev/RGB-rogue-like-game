@@ -45,6 +45,10 @@ class LevelPortal(
     // TODO
     override val behaviourEntity: BehaviourEntity = BehaviourEntity()
 
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints: Int? = null
+    }
+
     // TODO
     override val lifecycle = BehaviourBuilder.lifecycle(
         this,

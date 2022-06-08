@@ -3,6 +3,8 @@ package ru.hse.sd.rgb.gameloaders
 import ru.hse.sd.rgb.gameloaders.factories.LevelContentFactory
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourEngine
 import ru.hse.sd.rgb.gamelogic.engines.creation.CreationEngine
+import ru.hse.sd.rgb.gamelogic.engines.experience.ExperienceEngine
+import ru.hse.sd.rgb.gamelogic.engines.experience.ExperienceLevelDescription
 import ru.hse.sd.rgb.gamelogic.engines.fight.BaseColorStats
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.items.ItemsEngine
@@ -39,7 +41,8 @@ data class Engines(
     val fighting: FightEngine,
     val creation: CreationEngine,
     val behaviourEngine: BehaviourEngine,
-    val itemsEngine: ItemsEngine
+    val itemsEngine: ItemsEngine,
+    val experience: ExperienceEngine
 )
 
 data class LevelBasicParams(
@@ -62,22 +65,29 @@ interface ColorLoader {
     fun loadColors(): BaseColorParams
 }
 
+interface ExperienceLevelsLoader {
+    fun loadHeroExperienceLevels(): List<ExperienceLevelDescription>
+}
+
 class GameLoader(
     private val levelLoader: LevelLoader,
-    private val colorLoader: ColorLoader
+    private val colorLoader: ColorLoader,
+    private val experienceLevelsLoader: ExperienceLevelsLoader
 ) {
 
     fun loadEngines(): Engines {
         val (w, h) = levelLoader.loadBasicParams()
         val (baseColorList, interactionMatrix) = colorLoader.loadColors()
+        val heroExperienceLevels = experienceLevelsLoader.loadHeroExperienceLevels()
 
         val physics = PhysicsEngine(w, h)
         val fighting = FightEngine(baseColorList, interactionMatrix)
         val creation = CreationEngine(physics, fighting)
         val behaviour = BehaviourEngine()
         val itemsEngine = ItemsEngine()
+        val experience = ExperienceEngine(heroExperienceLevels)
 
-        return Engines(physics, fighting, creation, behaviour, itemsEngine)
+        return Engines(physics, fighting, creation, behaviour, itemsEngine, experience)
     }
 
     fun populateHero(heroPersistence: HeroPersistence): Hero = levelLoader.populateHero(heroPersistence)
