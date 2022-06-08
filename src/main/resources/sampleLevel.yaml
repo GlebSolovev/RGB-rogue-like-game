@@ -41,4 +41,4 @@ customEntities:
 levelPortalDescription:
   cell: 13 7
   nextLevelDescriptionFilename: "src/main/resources/sampleLevel2.yaml"
-  heroExperienceLevelToEnableOn: 2
+  heroExperienceLevelToEnableOn: 1

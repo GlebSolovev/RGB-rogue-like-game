@@ -31,8 +31,11 @@ class LevelPortal(
 
     override val viewEntity = object : ViewEntity() {
         override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
-            // TODO: star-5 or concentric-spinning-squares
-            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.CIRCLE, null)
+            override val swingAppearance = if (baseBehaviour.isEnabled) {
+                SwingUnitAppearance(SwingUnitShape.ACTIVE_PORTAL, null)
+            } else {
+                SwingUnitAppearance(SwingUnitShape.IDLE_PORTAL, null)
+            }
         }
     }
 
@@ -46,7 +49,6 @@ class LevelPortal(
         override val teamId = controller.fighting.newTeamId()
     }
 
-    // TODO
     override val behaviourEntity: BehaviourEntity = BehaviourEntity()
 
     override val experienceEntity = object : ExperienceEntity() {
@@ -61,29 +63,33 @@ class LevelPortal(
         controller.experience.unsubscribeFromExperienceLevelUpdate(this, controller.hero)
     }
 
-    // TODO
-    override val lifecycle = BehaviourBuilder.lifecycle(
-        this,
-        object : NoneBehaviour(this) {
+    private inner class LevelPortalBaseBehaviour : NoneBehaviour(this) {
 
-            private var isEnabled = false
+        var isEnabled = false
+            private set
 
-            override suspend fun handleMessage(message: Message) {
-                when (message) {
-                    is ExperienceLevelUpdate -> {
-                        if (message.newLevel >= heroExperienceLevelToEnableOn && !isEnabled) {
-                            isEnabled = true
-                            controller.fighting.changeRGB(units.first(), ENABLED_PORTAL_COLOR)
-                            controller.view.receive(EntityUpdated(this@LevelPortal))
-                        }
+        override suspend fun handleMessage(message: Message) {
+            when (message) {
+                is ExperienceLevelUpdate -> {
+                    if (message.newLevel >= heroExperienceLevelToEnableOn && !isEnabled) {
+                        isEnabled = true
+                        controller.fighting.changeRGB(units.first(), ENABLED_PORTAL_COLOR)
+                        controller.view.receive(EntityUpdated(this@LevelPortal))
                     }
-                    is CollidedWith -> {
-                        if (isEnabled && message.otherUnit.parent is Hero) {
-                            controller.hero.receive(HeroNextLevel(nextLevelDescriptionFilename))
-                        }
+                }
+                is CollidedWith -> {
+                    if (isEnabled && message.otherUnit.parent is Hero) {
+                        controller.hero.receive(HeroNextLevel(nextLevelDescriptionFilename))
                     }
                 }
             }
         }
+    }
+
+    private val baseBehaviour = LevelPortalBaseBehaviour()
+
+    override val lifecycle = BehaviourBuilder.lifecycle(
+        this,
+        baseBehaviour
     ).build()
 }

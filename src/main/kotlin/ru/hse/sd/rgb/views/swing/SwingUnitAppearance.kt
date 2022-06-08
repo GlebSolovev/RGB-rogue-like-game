@@ -9,13 +9,8 @@ import ru.hse.sd.rgb.utils.structures.RGB
 import java.awt.Polygon
 import java.awt.Rectangle
 import java.awt.Shape
-import java.awt.geom.Arc2D
-import java.awt.geom.Ellipse2D
-import java.awt.geom.Path2D
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
+import java.awt.geom.*
+import kotlin.math.*
 
 data class SwingUnitAppearance(
     val shape: SwingUnitShape,
@@ -116,20 +111,20 @@ enum class SwingUnitShape {
     PLUS {
         override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape {
             val unit = scaledTileSize / 3
-            //     1  2
-            // 11  12 3  4
-            // 10  9  6  5
-            //     8  7
-            val xs = intArrayOf(
-                spX + unit, spX + 2 * unit, spX + 2 * unit, spX + 3 * unit,
-                spX + 3 * unit, spX + 2 * unit, spX + 2 * unit, spX + unit,
-                spX + unit, spX, spX, spX + unit
-            )
-            val ys = intArrayOf(
-                spY, spY, spY + unit, spY + unit,
-                spY + 2 * unit, spY + 2 * unit, spY + 3 * unit, spY + 3 * unit,
-                spY + 2 * unit, spY + 2 * unit, spY + unit, spY + unit
-            )
+            // .  1  2  .
+            // 11 12 3  4
+            // 10 9  6  5
+            // .  8  7  .
+            val xs = listOf(
+                1, 2, 2, 3,
+                3, 2, 2, 1,
+                1, 0, 0, 1
+            ).map { spX + it * unit }.toIntArray()
+            val ys = listOf(
+                0, 0, 1, 1,
+                2, 2, 3, 3,
+                2, 2, 1, 1,
+            ).map { spY + it * unit }.toIntArray()
             return Polygon(xs, ys, 12)
         }
     },
@@ -178,11 +173,80 @@ enum class SwingUnitShape {
     },
     CROSS {
         override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape {
-            // TODO: implement CROSS instead of PLUS
-            return PLUS.convertToSwingShape(spX, spY, scaledTileSize)
+            // 1  16 .  14 13
+            // 2  .  15 .  12
+            // .  3  .  11 .
+            // 4  .  7  .  10
+            // 5  6  .  8  9
+            val unit = scaledTileSize / 4
+            val breathing = sin(System.currentTimeMillis() / 200.0) * 0.2
+            val xs = listOf(
+                0.0, 0.0, 1.0 + breathing, 0.0,
+                0.0, 1.0 - breathing, 2.0, 3.0 + breathing,
+                4.0, 4.0, 3.0 - breathing, 4.0,
+                4.0, 3.0 + breathing, 2.0, 1.0 - breathing
+            ).map { (spX + it * unit).toInt() }.toIntArray()
+            val ys = listOf(
+                0.0, 1.0 - breathing, 2.0, 3.0 + breathing,
+                4.0, 4.0, 3.0 - breathing, 4.0,
+                4.0, 3.0 + breathing, 2.0, 1.0 - breathing,
+                0.0, 0.0, 1.0 + breathing, 0.0
+            ).map { (spY + it * unit).toInt() }.toIntArray()
+            return Polygon(xs, ys, 16)
+        }
+    },
+    IDLE_PORTAL {
+        override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape {
+            val path = Path2D.Double()
+            for (square in concentricSquares(spX, spY, scaledTileSize)) path.append(square, false)
+            return path
+        }
+    },
+    ACTIVE_PORTAL {
+        override fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape {
+            val squares = concentricSquares(spX, spY, scaledTileSize)
+            val centerX = spX + scaledTileSize / 2.0
+            val centerY = spY + scaledTileSize / 2.0
+            val rotatedSquares = squares.mapIndexed { i, s ->
+                if (i == 0) {
+                    s
+                } else {
+                    val angle = (System.currentTimeMillis() / 300.0 * (1.0 + i * 0.2))
+                    val transform = AffineTransform().apply {
+                        translate(centerX, centerY)
+                        rotate(angle)
+                        translate(-centerX, -centerY)
+                    }
+                    s.createTransformedArea(transform)
+                }
+            }
+            return rotatedSquares.reduce { a1, a2 -> a1.apply { add(a2) } }
         }
     }
     ;
+
+    protected fun hollowSquare(x: Int, y: Int, size: Int, thickness: Int = 1): Area {
+        val outer = Rectangle(x, y, size, size)
+        val inner = Rectangle(x + thickness, y + thickness, size - 2 * thickness, size - 2 * thickness)
+        return Area(outer).apply { subtract(Area(inner)) }
+    }
+
+    // TODO: are not perfectly centered for reasons unknown
+    protected fun concentricSquares(
+        spX: Int,
+        spY: Int,
+        scaledTileSize: Int,
+        count: Int = 5,
+        scaleFactor: Double = 1.0 / sqrt(2.0)
+    ): List<Area> {
+        return List(count) {
+            val currentScale = scaleFactor.pow(it)
+            val currentSize = (scaledTileSize * currentScale).toInt()
+            val x = spX + (scaledTileSize - currentSize) / 2
+            val y = spY + (scaledTileSize - currentSize) / 2
+            hollowSquare(x, y, currentSize)
+        }
+    }
 
     // sp = start position
     abstract fun convertToSwingShape(spX: Int, spY: Int, scaledTileSize: Int): Shape
