@@ -176,6 +176,12 @@ class FightEngine(
         }
     }
 
+    suspend fun changeMaxHp(unit: HpGameUnit, amount: Int) {
+        withLockedUnits(setOf(unit)) {
+            unit.maxHp += amount
+        }
+    }
+
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
         if (!unit.parent.fightEntity.isUnitActive(unit)) return
         withLockedUnits(setOf(unit)) {

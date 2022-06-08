@@ -19,7 +19,7 @@ class IncreaseMaxHpAction(private val onPercent: Double) : ExperienceLevelAction
     override suspend fun activate(onEntity: GameEntity) {
         for (unit in onEntity.units) {
             if (unit is HpGameUnit) {
-                unit.maxHp += (unit.maxHp * (onPercent / 100.0)).toInt()
+                controller.fighting.changeMaxHp(unit, (unit.maxHp * (onPercent / 100.0)).toInt())
                 controller.fighting.attackDirectly(unit, -unit.maxHp)
             }
         }
