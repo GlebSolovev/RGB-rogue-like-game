@@ -44,3 +44,5 @@ data class InventoryUpdated(val invSnapshot: InventoryViewSnapshot) : Message() 
 }
 
 class InventoryClosed : Message()
+
+class QuitView : Message()

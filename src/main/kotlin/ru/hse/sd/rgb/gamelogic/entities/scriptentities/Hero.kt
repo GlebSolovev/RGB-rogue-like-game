@@ -216,7 +216,6 @@ class Hero(
             override suspend fun handleHpChanged(message: HpChanged): State {
                 if (message.isFatal) {
                     controller.creation.die(this@Hero)
-                    controller.receive(FinishControllerMessage(false))
                 }
                 return this
             }
@@ -234,7 +233,25 @@ class Hero(
                 return this
             }
 
-            override suspend fun handleDying(): State = this
+            @Suppress("MagicNumber")
+            override suspend fun handleDying(): State {
+                val unitList = units.toList()
+                val first = unitList.first()
+                val unitsPersistence = unitList.map {
+                    it as HpGameUnit
+                    HeroPersistence.HpUnitPersistence(first.cell - it.cell, it.gameColor, 1, 1)
+                }
+                val fakePersistence = HeroPersistence(
+                    unitsPersistence,
+                    inventory.extractPersistence(),
+                    50, // TODO: for some reason only works when hardcoded
+                    controller.experience.getExperience(this@Hero)!!
+                )
+                controller.receive(
+                    ControllerNextLevel(controller.loseLevelDescriptionFilename, fakePersistence)
+                )
+                return this
+            }
 
             override suspend fun handleUserMoved(message: UserMoved): State {
                 val curMoveTime = System.currentTimeMillis()

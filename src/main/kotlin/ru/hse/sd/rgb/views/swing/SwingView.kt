@@ -16,6 +16,7 @@ import javax.swing.JPanel
 import java.awt.*
 import java.awt.event.*
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.system.exitProcess
 
 class SwingView(repaintPeriodMillis: Long) : View() {
 
@@ -132,6 +133,9 @@ class SwingView(repaintPeriodMillis: Long) : View() {
                 drawables.clear()
                 playingData = null
             }
+            is QuitView -> {
+                exitProcess(0) // TODO: find a better way to stop Swing
+            }
             else -> unreachable(m)
         }
     }
@@ -193,6 +197,9 @@ class SwingView(repaintPeriodMillis: Long) : View() {
             is GameViewStopped -> SwingLoadingState().also {
                 drawables.clear()
             }
+            is QuitView -> {
+                exitProcess(0)
+            }
             else -> unreachable(m)
         }
     }
@@ -219,6 +226,9 @@ class SwingView(repaintPeriodMillis: Long) : View() {
             }
             is UserQuit -> this.also {
                 quitListeners.forEach { it.receive(m) }
+            }
+            is QuitView -> {
+                exitProcess(0)
             }
             else -> this
         }

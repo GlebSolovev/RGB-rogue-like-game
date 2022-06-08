@@ -8,10 +8,14 @@ import ru.hse.sd.rgb.gamelogic.Controller
 import ru.hse.sd.rgb.gamelogic.engines.experience.Experience
 import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Sharpy
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.Direction
+import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
 import ru.hse.sd.rgb.views.DrawablesMap
 import ru.hse.sd.rgb.views.View
@@ -22,9 +26,8 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
-class IntegrationTests {
+class IntegrationTest {
 
     private val filesFolder = "src/test/resources/integration"
 
@@ -43,21 +46,21 @@ class IntegrationTests {
         delay(1000) // initial loading takes unknown time
 
         // useful for debugging
-//        fun hehe() {
-//            val tmp = mockView.drawables
-//            val rep = Grid2D(10, 4) { _, _ -> '.' }
-//            for ((e, snap) in tmp) {
-//                for (a in snap) {
-//                    rep[a.cell] = when (e) {
-//                        is Wall -> '#'
-//                        is Hero -> 'H'
-//                        is Sharpy -> 'S'
-//                        else -> '.'
-//                    }
-//                }
-//            }
-//            println(rep)
-//        }
+        fun hehe() {
+            val tmp = mockView.drawables
+            val rep = Grid2D(50, 30) { _, _ -> '.' }
+            for ((e, snap) in tmp) {
+                for (a in snap) {
+                    rep[a.cell] = when (e) {
+                        is Wall -> '#'
+                        is Hero -> 'H'
+                        is Sharpy -> 'S'
+                        else -> '.'
+                    }
+                }
+            }
+            println(rep)
+        }
 
         suspend fun cycleThroughLevel1() {
             repeat(10) { mockView.simulateUserMove(Direction.RIGHT) }
@@ -92,8 +95,10 @@ class IntegrationTests {
         }
         // hero killed by sharpy on 2nd level
 
-        assertTrue {
-            (controller.hero.units.first() as HpGameUnit).hp <= 0
+        assertEquals(1, (controller.hero.units.first() as HpGameUnit).hp)
+        assertEquals(1, (controller.hero.units.first() as HpGameUnit).maxHp)
+        repeat(250) { // TODO: see bug in Hero fakePersistence
+            mockView.simulateUserMove(Direction.RIGHT)
         }
         assertFalse { controllerJob.isActive }
     }

@@ -48,13 +48,20 @@ fun onException() {
     exitProcess(ON_EXCEPTION_EXIT_CODE)
 }
 
+@Suppress("LongParameterList")
 class Controller(
     initialLevelLoader: LevelLoader,
     private val colorLoader: ColorLoader, // TODO: changing base colors between levels is absurd, but can be added
     private val experienceLevelsLoader: ExperienceLevelsLoader,
     heroLoader: HeroLoader,
-    val view: View
+    val view: View,
+    val winLevelDescriptionFilename: String = "src/main/resources/ending/levelWin.yaml",
+    val loseLevelDescriptionFilename: String = "src/main/resources/ending/levelLose.yaml"
 ) : Messagable() {
+
+    companion object {
+        private const val QUIT_LEVEL_FILENAME_ALIAS = "quit"
+    }
 
     private var state: ControllerState by AtomicReference<ControllerState>(
         GameInitState(
@@ -100,7 +107,10 @@ class Controller(
             is UserQuit -> {
                 quit()
             }
-            else -> unreachable
+            else -> {
+                println(m)
+                unreachable
+            }
         }
 
         private suspend fun startGame(): GamePlayingState {
@@ -139,9 +149,14 @@ class Controller(
                 val heroPersistence = m.heroPersistence
                 stopGame()
                 view.receive(GameViewStopped())
-                val nextLevelLoader = FileLevelLoader(m.nextLevelDescriptionFilename)
-                receive(DoLoadLevel())
-                GameInitState(nextLevelLoader, colorLoader, experienceLevelsLoader, heroPersistence)
+                val nextLevelFilename = m.nextLevelDescriptionFilename
+                if (nextLevelFilename != QUIT_LEVEL_FILENAME_ALIAS) {
+                    val nextLevelLoader = FileLevelLoader(nextLevelFilename)
+                    receive(DoLoadLevel())
+                    GameInitState(nextLevelLoader, colorLoader, experienceLevelsLoader, heroPersistence)
+                } else {
+                    quit()
+                }
             }
             else -> unreachable
         }
@@ -155,6 +170,8 @@ class Controller(
 
     private fun quit(): Nothing {
         stopGame()
+        // view is responsible for stopping itself
+        view.receive(QuitView())
         throw CancellationException()
     }
 

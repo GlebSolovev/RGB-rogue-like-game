@@ -10,6 +10,8 @@ import ru.hse.sd.rgb.gamelogic.Controller
 import ru.hse.sd.rgb.gamelogic.onException
 import ru.hse.sd.rgb.utils.messaging.messages.StartControllerMessage
 import ru.hse.sd.rgb.views.swing.SwingView
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 // TODO: CLI argument
@@ -30,10 +32,13 @@ var controller = Controller(
 
 fun main() = runBlocking {
     controller.receive(StartControllerMessage())
-    try {
-        controller.messagingRoutine()
-    } catch (t: Throwable) {
-        t.printStackTrace()
-        onException()
-    }
+    launch {
+        try {
+            controller.messagingRoutine()
+        } catch (_: CancellationException) {
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            onException()
+        }
+    }.join()
 }
