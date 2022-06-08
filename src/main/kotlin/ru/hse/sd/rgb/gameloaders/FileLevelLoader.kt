@@ -53,7 +53,8 @@ class SharpyDescription(
 @Serializable
 data class LevelPortalDescription(
     val cell: Cell,
-    val nextLevelDescriptionFilename: String
+    val nextLevelDescriptionFilename: String,
+    val heroExperienceLevelToEnableOn: Int
 )
 
 @Serializable
@@ -105,7 +106,11 @@ class FileLevelLoader(filename: String, private val random: Random = Random) : L
         )
         if (levelPortalDescription != null) {
             allEntities.add(
-                LevelPortal(levelPortalDescription.cell, levelPortalDescription.nextLevelDescriptionFilename)
+                LevelPortal(
+                    levelPortalDescription.cell,
+                    levelPortalDescription.nextLevelDescriptionFilename,
+                    levelPortalDescription.heroExperienceLevelToEnableOn
+                )
             )
         }
         return LevelDescription(

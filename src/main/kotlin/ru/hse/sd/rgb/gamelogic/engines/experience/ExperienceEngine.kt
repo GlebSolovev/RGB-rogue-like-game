@@ -38,16 +38,18 @@ class ExperienceEngine(heroExperienceLevels: List<ExperienceLevelDescription>) {
     private val subscriptionsToLevelUpdateOf = ConcurrentHashMap<GameEntity, MutableSet<GameEntity>>()
 
     suspend fun registerEntity(entity: GameEntity, experience: Experience = Experience(0, 0)) {
-        val mutex = Mutex()
-        mutex.withLock {
+        withLockedEntity(entity) {
             if (!experienceLevels.containsKey(entity::class))
                 throw IllegalArgumentException("no experience levels script for ${entity::class}")
             if (experience.points < 0 || experience.level !in 0 until experienceLevels[entity::class]!!.size)
                 throw IllegalArgumentException("illegal experience")
 
-            entityMutexes.put(entity, mutex)?.let { error("double entity register") }
             currentExperience[entity] = CurrentExperience(experience)
-            subscriptionsToLevelUpdateOf[entity] = mutableSetOf()
+            val subscribers = subscriptionsToLevelUpdateOf.getOrPut(entity) { mutableSetOf() }
+
+            for (subscriber in subscribers) {
+                subscriber.receive(ExperienceLevelUpdate(entity, experience.level))
+            }
         }
     }
 
@@ -64,19 +66,20 @@ class ExperienceEngine(heroExperienceLevels: List<ExperienceLevelDescription>) {
             currentExperience[entity]!!.points += points
 
             val entityExperienceLevels = experienceLevels[entity::class]!!
-            val currentExperience = currentExperience[entity]!!
+            val entityCurrentExperience = currentExperience[entity]!!
 
-            while (currentExperience.level < entityExperienceLevels.size - 1 &&
-                entityExperienceLevels[currentExperience.level + 1].requiredPoints <= currentExperience.points
+            while (entityCurrentExperience.level < entityExperienceLevels.size - 1 &&
+                entityExperienceLevels[entityCurrentExperience.level + 1]
+                    .requiredPoints <= entityCurrentExperience.points
             ) {
-                currentExperience.level += 1
-                val newLevelDescription = entityExperienceLevels[currentExperience.level]
+                entityCurrentExperience.level += 1
+                val newLevelDescription = entityExperienceLevels[entityCurrentExperience.level]
 
-                currentExperience.points -= newLevelDescription.requiredPoints
+                entityCurrentExperience.points -= newLevelDescription.requiredPoints
                 newLevelDescription.actions.forEach { it.activate(entity) }
 
                 for (subscriber in subscriptionsToLevelUpdateOf[entity]!!) {
-                    subscriber.receive(ExperienceLevelUpdate(entity, currentExperience.level))
+                    subscriber.receive(ExperienceLevelUpdate(entity, entityCurrentExperience.level))
                 }
             }
         }
@@ -103,8 +106,11 @@ class ExperienceEngine(heroExperienceLevels: List<ExperienceLevelDescription>) {
 
     suspend fun subscribeToExperienceLevelUpdate(subscriber: GameEntity, toEntity: GameEntity) {
         withLockedEntity(toEntity) {
-            subscriptionsToLevelUpdateOf[toEntity]!!.add(subscriber)
-                .let { if (!it) throw IllegalArgumentException("forbid to subscribe already subscribed entity") }
+            val subscribers = subscriptionsToLevelUpdateOf.getOrPut(toEntity) { mutableSetOf() }
+            subscribers.add(subscriber)
+
+            val toEntityCurrentLevel = currentExperience[toEntity]?.level ?: return@withLockedEntity
+            subscriber.receive(ExperienceLevelUpdate(toEntity, toEntityCurrentLevel))
         }
     }
 
@@ -116,7 +122,7 @@ class ExperienceEngine(heroExperienceLevels: List<ExperienceLevelDescription>) {
     }
 
     private suspend inline fun <R> withLockedEntity(entity: GameEntity, crossinline block: suspend () -> R): R? {
-        val mutex = entityMutexes.getOrElse(entity) { throw IllegalArgumentException("unregistered entity") }
+        val mutex = entityMutexes.getOrPut(entity) { Mutex() }
         mutex.withLock {
             if (!entityMutexes.containsKey(entity)) return null
             return block()
