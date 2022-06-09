@@ -180,6 +180,7 @@ class IntegrationTest {
         repeat(200) { // TODO: (see previous test)
             mockView.simulateUserMove(Direction.RIGHT) // get to quit portal
         }
+        delay(100)
         assertFalse { controllerJob.isActive }
     }
 }

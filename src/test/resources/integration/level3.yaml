@@ -1,7 +1,7 @@
 levelFactory:
   baseFactoryType: FIERY
 
-  customGlitchSpawnCount: 10
+  customGlitchSpawnCount: 0
   customSharpySpawnCount: 0
 
   customColorModificationSpawnCount: 1
