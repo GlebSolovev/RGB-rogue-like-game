@@ -71,6 +71,7 @@ class IntegrationTest {
 
         repeat(2) {
             cycleThroughLevel1()
+            delay(100) // avoids this: toggle inv -> next level -> toggle inv, now stuck inside inventory
             mockView.useCurrentItem()
         }
 
