@@ -5,34 +5,47 @@ import ru.hse.sd.rgb.gameloaders.FileExperienceLevelsLoader
 import ru.hse.sd.rgb.gameloaders.FileHeroLoader
 import ru.hse.sd.rgb.gameloaders.FileLevelLoader
 import ru.hse.sd.rgb.gamelogic.Controller
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
 import ru.hse.sd.rgb.gamelogic.engines.experience.Experience
+import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
+import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
+import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
+import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
+import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
-import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
-import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Sharpy
-import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Wall
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.*
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.unreachable
 import ru.hse.sd.rgb.views.DrawablesMap
 import ru.hse.sd.rgb.views.View
+import ru.hse.sd.rgb.views.ViewUnit
+import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
+import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class IntegrationTest {
 
     private val filesFolder = "src/test/resources/integration"
 
     @Test
-    fun test(): Unit = runBlocking {
+    fun testBasic(): Unit = runBlocking {
         val mockView = MockView()
         controller = Controller(
             FileLevelLoader("$filesFolder/level1.yaml"),
@@ -44,23 +57,6 @@ class IntegrationTest {
         controller.receive(StartControllerMessage())
         val controllerJob = launch { controller.messagingRoutine() }
         delay(1000) // initial loading takes unknown time
-
-        // useful for debugging
-        fun hehe() {
-            val tmp = mockView.drawables
-            val rep = Grid2D(50, 30) { _, _ -> '.' }
-            for ((e, snap) in tmp) {
-                for (a in snap) {
-                    rep[a.cell] = when (e) {
-                        is Wall -> '#'
-                        is Hero -> 'H'
-                        is Sharpy -> 'S'
-                        else -> '.'
-                    }
-                }
-            }
-            println(rep)
-        }
 
         suspend fun cycleThroughLevel1() {
             repeat(10) { mockView.simulateUserMove(Direction.RIGHT) }
@@ -103,6 +99,89 @@ class IntegrationTest {
         }
         assertFalse { controllerJob.isActive }
     }
+
+    @Test
+    fun testColors(): Unit = runBlocking {
+        val mockView = MockView()
+        controller = Controller(
+            FileLevelLoader("$filesFolder/level3.yaml"),
+            FileColorLoader("$filesFolder/colors.yaml"),
+            FileExperienceLevelsLoader("$filesFolder/experience.yaml"),
+            FileHeroLoader("$filesFolder/heroTough.yaml"),
+            mockView
+        )
+        controller.receive(StartControllerMessage())
+        val controllerJob = launch { controller.messagingRoutine() }
+        delay(1000)
+
+        // useful for debugging
+        fun hehe() {
+            val tmp = mockView.drawables
+            val rep = Grid2D(50, 30) { _, _ -> '.' }
+            for ((e, snap) in tmp) {
+                for (a in snap) {
+                    rep[a.cell] = when (e) {
+                        is Wall -> '#'
+                        is Hero -> 'H'
+                        is Sharpy -> 'S'
+                        is Glitch -> 'G'
+                        is TestEntity -> 'T'
+                        is Fireball -> 'f'
+                        is WavePart -> 'w'
+                        is LaserPart -> 'l'
+                        is ConfuseBall -> 'c'
+                        else -> '.'
+                    }
+                }
+            }
+            println(rep)
+            println("Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}")
+        }
+
+        suspend fun spawnTestEntity(cell: Cell, color: RGB) =
+            controller.creation.tryAddToWorld(TestEntity(cell, color, 99999))
+//            controller.creation.tryAddToWorld(Glitch(cell, 5, 100, 12345678))
+
+        fun GameEntity.testColor(color: RGB) = units.first().gameColor == color
+        val expectedEntitiesPredicates = mutableMapOf<(GameEntity) -> Boolean, Boolean>()
+        for (c in 0..11) {
+            val rgb = RGB(c, c, c)
+            val cell = Cell(c + 1, c + 1)
+            assertTrue { spawnTestEntity(cell, rgb) }
+            val p: (GameEntity) -> Boolean = {
+                it.testColor(rgb) && when (c) {
+                    in 0..1 -> true
+                    in 2..4 -> it is Fireball
+                    in 5..7 -> it is WavePart
+                    8 -> it is LaserPart
+                    9 -> true
+                    10 -> it is ConfuseBall
+                    11 -> it is Icicle // only spawns with IcicleBomb
+                    else -> unreachable
+                }
+            }
+            expectedEntitiesPredicates[p] = false
+        }
+
+        withTimeoutOrNull(10000) {
+            while (true) {
+                val drawables = mockView.drawables
+                for (e in drawables.keys) {
+                    for (p in expectedEntitiesPredicates.keys) {
+                        if (p(e)) expectedEntitiesPredicates[p] = true
+                    }
+                }
+                delay(1) // cancellation point
+            }
+        }
+
+        assertTrue { expectedEntitiesPredicates.values.all { it } }
+
+        repeat(200) { // TODO: (see previous test)
+            mockView.simulateUserMove(Direction.RIGHT) // get to quit portal
+        }
+        assertFalse { controllerJob.isActive }
+    }
 }
 
 private class MockView : View() {
@@ -120,6 +199,9 @@ private class MockView : View() {
                 }
                 is EntityRemoved -> {
                     drawables.remove(m.gameEntity)
+                }
+                is GameViewStopped -> {
+                    drawables.clear()
                 }
                 else -> ignore
             }
@@ -154,4 +236,29 @@ private class MockView : View() {
     }
 
     override val state: AtomicReference<ViewState> = AtomicReference(MockViewState())
+}
+
+class TestEntity(cell: Cell, color: RGB, hp: Int) : GameEntity(setOf(ColorCellHp(color, cell, hp))) {
+    override val viewEntity = object : ViewEntity() {
+        override fun convertUnit(unit: GameUnit) = object : ViewUnit(unit) {
+            override val swingAppearance = SwingUnitAppearance(SwingUnitShape.CIRCLE, null)
+        }
+    }
+    override val physicalEntity = object : PhysicalEntity() {
+        override val isSolid = false
+        override fun getUnitDirection(unit: GameUnit, dir: Direction) = dir
+    }
+    override val fightEntity = object : FightEntity() {
+        override val teamId = controller.fighting.newTeamId()
+        override fun isUnitActive(unit: GameUnit) = true
+    }
+    override val experienceEntity = object : ExperienceEntity() {
+        override val onDieExperiencePoints = 5
+    }
+    override val behaviourEntity = BehaviourEntity()
+    override val lifecycle = BehaviourBuilder.lifecycle(this)
+        .addBlocks {
+            add { EnableColorUpdate(entity, childBlock, ControlParams(AttackType.HERO_TARGET, HealType.NO_HEAL)) }
+        }
+        .build()
 }

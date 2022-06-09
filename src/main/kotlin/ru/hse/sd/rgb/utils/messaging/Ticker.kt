@@ -9,11 +9,11 @@ import java.util.concurrent.atomic.AtomicReference
 
 open class Tick : Message()
 
-class Ticker(
+open class Ticker(
     periodMillis: Long,
-    private val target: Messagable,
+    protected val target: Messagable,
     val tick: Tick,
-    private val scope: CoroutineScope = tickerCoroutineScope,
+    protected val scope: CoroutineScope = tickerCoroutineScope,
 ) {
     private lateinit var coroutineJob: Job
     var isTicking: Boolean by AtomicReference(false)
@@ -21,7 +21,7 @@ class Ticker(
     var periodMillis: Long by AtomicReference(periodMillis)
     var periodCoefficient: Double by AtomicReference(1.0)
 
-    fun start() {
+    open fun start() {
         if (isTicking) return
         coroutineJob = scope.launch {
             tickingRoutine()
@@ -34,10 +34,10 @@ class Ticker(
         if (!isTicking) return
         coroutineJob.cancel()
         isTicking = false
-        tickers[target]!!.remove(this)
+        tickers[target]?.remove(this)
     }
 
-    private suspend fun CoroutineScope.tickingRoutine() {
+    protected open suspend fun CoroutineScope.tickingRoutine() {
         while (isActive) {
             // TODO: recalculate delay on periodMillis update
             delay((periodMillis * periodCoefficient).toLong())
@@ -65,5 +65,22 @@ class Ticker(
             tickerCoroutineScope.cancel()
             tickerCoroutineScope = CoroutineScope(Dispatchers.Default)
         }
+    }
+}
+
+class OneTimeTicker(periodMillis: Long, target: Messagable, tick: Tick) : Ticker(periodMillis, target, tick) {
+    private var flag by AtomicReference(false)
+
+    override fun start() {
+        if (!flag) {
+            flag = true
+            super.start()
+        }
+    }
+
+    override suspend fun CoroutineScope.tickingRoutine() {
+        delay((periodMillis * periodCoefficient).toLong())
+        target.receive(tick)
+        stop()
     }
 }

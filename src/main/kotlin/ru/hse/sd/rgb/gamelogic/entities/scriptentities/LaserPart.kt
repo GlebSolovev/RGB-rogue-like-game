@@ -9,6 +9,7 @@ import ru.hse.sd.rgb.gamelogic.entities.ColorCellNoHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.utils.messaging.Message
+import ru.hse.sd.rgb.utils.messaging.OneTimeTicker
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.*
 import ru.hse.sd.rgb.utils.structures.Direction
@@ -57,8 +58,8 @@ class LaserPart(
 
     private inner class LaserPartDefaultBehaviour : NoneBehaviour(this) {
 
-        private val continueTicker = Ticker(PROPAGATION_PERIOD_MILLIS, this@LaserPart, ContinueTick())
-        private val dieTicker = Ticker(persistMillis, this@LaserPart, DieTick())
+        private val continueTicker = OneTimeTicker(PROPAGATION_PERIOD_MILLIS, this@LaserPart, ContinueTick())
+        private val dieTicker = OneTimeTicker(persistMillis, this@LaserPart, DieTick())
         private var didContinue = false
         private var didDie = false
 
