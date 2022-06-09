@@ -10,6 +10,7 @@ import ru.hse.sd.rgb.utils.messaging.messages.Dying
 import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
 import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
@@ -54,5 +55,9 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
         }
         entity.receive(Dying()) // trigger onDie behaviours
         entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
+    }
+
+    suspend fun cancelAllAndJoin() {
+        for(job in entityCoroutines.values) job.cancelAndJoin()
     }
 }

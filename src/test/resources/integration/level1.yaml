@@ -27,7 +27,7 @@ heroSpawnCell: 1 1
 customEntities:
   - !<sharpy>
     cell: 8 2
-    color: 1 1 1
+    color: 0 0 0
     hp: 2
     movePeriodMillis: 99999999
     seeingDepth: 1

@@ -63,6 +63,15 @@ class Controller(
         private const val QUIT_LEVEL_FILENAME_ALIAS = "quit"
     }
 
+    val stateRepresentation: ControllerStateRepresentation
+        get() = when (state) {
+            is GameInitState -> ControllerStateRepresentation.INIT
+            is GamePlayingState -> ControllerStateRepresentation.PLAYING
+            else -> unreachable
+        }
+
+    var currentLevelFilename: String? by AtomicReference<String?>(null)
+
     private var state: ControllerState by AtomicReference<ControllerState>(
         GameInitState(
             initialLevelLoader,
@@ -71,6 +80,10 @@ class Controller(
             heroLoader.loadHeroInitParams().convertToInitialHeroPersistence()
         )
     )
+
+    enum class ControllerStateRepresentation {
+        INIT, PLAYING
+    }
 
     override suspend fun handleMessage(m: Message) {
         state = state.next(m)
@@ -92,6 +105,10 @@ class Controller(
         experienceLevelsLoader: ExperienceLevelsLoader,
         private val heroPersistence: HeroPersistence,
     ) : ControllerState() {
+        init {
+            currentLevelFilename = (levelLoader as? FileLevelLoader)?.filename
+        }
+
         val gameLoader = GameLoader(levelLoader, colorLoader, experienceLevelsLoader)
 
         override lateinit var hero: Hero
@@ -162,13 +179,14 @@ class Controller(
         }
     }
 
-    private fun stopGame() {
-        gameCoroutineScope.cancel()
+    private suspend fun stopGame() {
+        creation.cancelAllAndJoin()
+//        gameCoroutineScope.cancel()
         gameCoroutineScope = createGameCoroutineScope()
         Ticker.stopDefaultScope()
     }
 
-    private fun quit(): Nothing {
+    private suspend fun quit(): Nothing {
         stopGame()
         // view is responsible for stopping itself
         view.receive(QuitView())

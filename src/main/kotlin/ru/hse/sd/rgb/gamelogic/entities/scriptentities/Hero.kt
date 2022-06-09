@@ -27,6 +27,7 @@ import ru.hse.sd.rgb.utils.structures.*
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
+import kotlin.properties.Delegates
 
 data class HeroPersistence(
     val unitsPersistence: List<HpUnitPersistence>,
@@ -60,7 +61,9 @@ class Hero(
         const val INVENTORY_VIEW_UPDATE_PERIOD_MILLIS = 10L
     }
 
-    private var singleDirMovePeriodLimit = heroPersistence.singleDirMovePeriodLimit
+    private var singleDirMovePeriodLimit by Delegates.observable(heroPersistence.singleDirMovePeriodLimit) { _, old, new ->
+        println("observing $old -> $new")
+    }
 
     override val viewEntity: ViewEntity = HeroViewEntity()
 
@@ -241,10 +244,11 @@ class Hero(
                     it as HpGameUnit
                     HeroPersistence.HpUnitPersistence(first.cell - it.cell, it.gameColor, 1, 1)
                 }
+                // actual persistence has negative hp, which is not a valid state
                 val fakePersistence = HeroPersistence(
                     unitsPersistence,
                     inventory.extractPersistence(),
-                    50, // TODO: for some reason only works when hardcoded
+                    singleDirMovePeriodLimit.also { println("fake period: $it") },
                     controller.experience.getExperience(this@Hero)!!
                 )
                 controller.receive(

@@ -30,10 +30,7 @@ import ru.hse.sd.rgb.views.View
 import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -49,41 +46,42 @@ class IntegrationTest {
         val mockView = MockView()
         controller = Controller(
             FileLevelLoader("$filesFolder/level1.yaml"),
-            FileColorLoader("$filesFolder/colors.yaml"),
+            FileColorLoader("$filesFolder/colorsBasic.yaml"),
             FileExperienceLevelsLoader("$filesFolder/experience.yaml"),
             FileHeroLoader("$filesFolder/hero.yaml"),
             mockView
         )
         controller.receive(StartControllerMessage())
         val controllerJob = launch { controller.messagingRoutine() }
-        delay(1000) // initial loading takes unknown time
 
-        suspend fun cycleThroughLevel1() {
+        withTimeout(2000) {
+            controller.awaitLoadedLevel("$filesFolder/level1.yaml")
+        }
+
+        suspend fun almostCycleThroughLevel1() {
             repeat(10) { mockView.simulateUserMove(Direction.RIGHT) }
             mockView.simulateUserMove(Direction.DOWN)
             repeat(10) { mockView.simulateUserMove(Direction.LEFT) }
-            mockView.simulateUserMove(Direction.UP)
         }
 
         repeat(2) {
-            cycleThroughLevel1()
+            almostCycleThroughLevel1()
+            mockView.simulateUserMove(Direction.UP)
             delay(100) // avoids this: toggle inv -> next level -> toggle inv, now stuck inside inventory
             mockView.useCurrentItem()
         }
 
-        // sharpy killed, both items picked and used, already on next level
-        assertEquals(
-            Experience(0, 1),
-            controller.experience.getExperience(controller.hero)
-        )
-        assertEquals(
-            20,
-            (controller.hero.units.first() as HpGameUnit).hp
-        )
-        assertEquals(
-            RGB(1, 1, 1),
-            controller.hero.units.first().gameColor
-        )
+        // sharpy killed, both items picked and used
+        assertEquals(Experience(0, 1), controller.experience.getExperience(controller.hero))
+        assertEquals(20, (controller.hero.units.first() as HpGameUnit).hp)
+        assertEquals(RGB(1, 1, 1), controller.hero.units.first().gameColor)
+
+        // go to next level
+        mockView.simulateUserMove(Direction.UP)
+
+        withTimeout(1000) {
+            controller.awaitLoadedLevel("$filesFolder/level2.yaml")
+        }
 
         repeat(20) {
             mockView.simulateUserMove(Direction.RIGHT) // move in order for sharpy to always attack
@@ -97,6 +95,7 @@ class IntegrationTest {
         repeat(250) { // TODO: see bug in Hero fakePersistence
             mockView.simulateUserMove(Direction.RIGHT)
         }
+        delay(100) // make sure coroutines stop
         assertFalse { controllerJob.isActive }
     }
 
@@ -112,7 +111,10 @@ class IntegrationTest {
         )
         controller.receive(StartControllerMessage())
         val controllerJob = launch { controller.messagingRoutine() }
-        delay(1000)
+
+        withTimeout(2000) {
+            controller.awaitLoadedLevel("$filesFolder/level3.yaml")
+        }
 
         // useful for debugging
         fun hehe() {
@@ -175,6 +177,9 @@ class IntegrationTest {
             }
         }
 
+        // hero should be dead by now
+        println("hey wait")
+
         assertTrue { expectedEntitiesPredicates.values.all { it } }
 
         repeat(200) { // TODO: (see previous test)
@@ -182,6 +187,22 @@ class IntegrationTest {
         }
         delay(100)
         assertFalse { controllerJob.isActive }
+    }
+
+    private suspend fun Controller.awaitPlaying() {
+        while (stateRepresentation != Controller.ControllerStateRepresentation.PLAYING) {
+            delay(100)
+        }
+        // when controller is in PLAYING state, hero might have not processed its LifeStarted message yet
+        delay(100)
+    }
+
+    private suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
+        while (currentLevelFilename != expectedLevelFilename &&
+            stateRepresentation == Controller.ControllerStateRepresentation.PLAYING) {
+            delay(100)
+        }
+        delay(100)
     }
 }
 

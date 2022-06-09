@@ -66,7 +66,7 @@ data class FileLevelDescription(
     val levelPortalDescription: LevelPortalDescription? = null,
 )
 
-class FileLevelLoader(filename: String, private val random: Random = Random) : LevelLoader {
+class FileLevelLoader(val filename: String, private val random: Random = Random) : LevelLoader {
 
     private val levelFactory: LevelContentFactory
     private val maze: Grid2D<Boolean>
