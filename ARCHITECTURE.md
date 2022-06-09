@@ -196,6 +196,7 @@ TODO
 ## View: отображение игры и считывание ввода
 
 ![](diagrams/classes-view.png)
+![](diagrams/state-view.png)
 
 ## Controller: управление состоянием приложения
 
@@ -217,7 +218,7 @@ TODO
 
 ## Предметы: Item, ItemsEngine, Inventory
 
-TODO
+![](diagrams/classes-items.png)
 
 ## Система опыта: ExperienceEngine
 
