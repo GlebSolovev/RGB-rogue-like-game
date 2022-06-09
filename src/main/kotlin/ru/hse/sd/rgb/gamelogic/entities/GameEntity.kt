@@ -62,12 +62,9 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
         abstract fun getUnitDirection(unit: GameUnit, dir: Direction): Direction
 
-        open fun filterIncompatibleUnits(
-            physicalEntity: GameEntity.PhysicalEntity,
-            units: Set<GameUnit>
-        ): Set<GameUnit> {
-            return if ((physicalEntity.isSolid && units.isNotEmpty()) ||
-                units.any { it.parent.physicalEntity.isSolid }
+        open fun filterIncompatibleUnits(units: Set<GameUnit>): Set<GameUnit> {
+            return if (
+                (isSolid && units.isNotEmpty()) || units.any { it.parent.physicalEntity.isSolid }
             ) units else emptySet()
         }
     }

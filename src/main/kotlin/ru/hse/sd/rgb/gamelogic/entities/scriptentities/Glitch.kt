@@ -48,7 +48,7 @@ class Glitch(
     override val physicalEntity = object : PhysicalEntity() {
         override val isSolid = false
         override fun getUnitDirection(unit: GameUnit, dir: Direction): Direction = Direction.NOPE
-        override fun filterIncompatibleUnits(physicalEntity: PhysicalEntity, units: Set<GameUnit>): Set<GameUnit> {
+        override fun filterIncompatibleUnits(units: Set<GameUnit>): Set<GameUnit> {
             return units.filter { it.parent is Glitch }.toSet()
         }
     }

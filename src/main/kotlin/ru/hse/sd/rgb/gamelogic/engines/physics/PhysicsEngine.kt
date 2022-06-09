@@ -48,7 +48,7 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
             }
             val nextCellUnits = worldGrid[nextCell]
 
-            val incompatibleUnits = physicalEntity.filterIncompatibleUnits(physicalEntity, nextCellUnits)
+            val incompatibleUnits = physicalEntity.filterIncompatibleUnits(nextCellUnits)
             if (incompatibleUnits.isNotEmpty()) incompatibleUnitsMap[unit] = incompatibleUnits
         }
         return incompatibleUnitsMap
