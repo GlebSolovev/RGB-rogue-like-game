@@ -5,6 +5,7 @@ import ru.hse.sd.rgb.gameloaders.FileExperienceLevelsLoader
 import ru.hse.sd.rgb.gameloaders.FileHeroLoader
 import ru.hse.sd.rgb.gameloaders.FileLevelLoader
 import ru.hse.sd.rgb.gamelogic.Controller
+import ru.hse.sd.rgb.gamelogic.ciPrintLine
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
 import ru.hse.sd.rgb.gamelogic.engines.experience.Experience
@@ -18,9 +19,11 @@ import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.*
 import ru.hse.sd.rgb.gamelogic.exceptionStackTrace
+import ru.hse.sd.rgb.utils.getValue
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.setValue
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.Grid2D
@@ -45,6 +48,7 @@ class IntegrationTest {
 
     @RepeatedTest(5)
     fun testBasic(): Unit = runBlocking {
+        ciPrintLine = ""
         val mockView = MockView()
         controller = Controller(
             FileLevelLoader("$filesFolder/level1.yaml"),
@@ -63,9 +67,9 @@ class IntegrationTest {
         }
 
         suspend fun almostCycleThroughLevel1() {
-            repeat(10) { mockView.simulateUserMove(Direction.RIGHT) }
+            repeat(25) { mockView.simulateUserMove(Direction.RIGHT) }
             mockView.simulateUserMove(Direction.DOWN)
-            repeat(10) { mockView.simulateUserMove(Direction.LEFT) }
+            repeat(25) { mockView.simulateUserMove(Direction.LEFT) }
         }
 
         almostCycleThroughLevel1()
@@ -107,6 +111,7 @@ class IntegrationTest {
     @RepeatedTest(5)
     fun testColors(): Unit = runBlocking {
         try {
+            ciPrintLine = ""
             val mockView = MockView()
 //            val mockView = SwingView(10)
             controller = Controller(
@@ -214,7 +219,9 @@ class IntegrationTest {
         } catch (e: Throwable) {
             assertEquals("fail", e.stackTraceToString())
         } finally {
-            assertEquals(null, exceptionStackTrace)
+            if (exceptionStackTrace != null) {
+                assertEquals(null, (exceptionStackTrace!! + "\n\n" + ciPrintLine) as String?)
+            }
         }
     }
 

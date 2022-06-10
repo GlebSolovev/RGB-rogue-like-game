@@ -17,16 +17,16 @@ levelFactory:
   customColorInverterSpawnCount: 0
 
 mazeRepresentation: [
-    "..........",
-    "..........",
-    "..........",
-    ".........." ]
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................." ]
 
 heroSpawnCell: 1 1
 
 customEntities:
   - !<sharpy>
-    cell: 8 2
+    cell: 22 2
     color: 0 0 0
     hp: 2
     movePeriodMillis: 99999999

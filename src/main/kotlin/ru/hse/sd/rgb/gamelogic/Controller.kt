@@ -23,6 +23,13 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
+var ciPrintLine by AtomicReference("")
+
+fun ciPrint(s: String) {
+    ciPrintLine += s
+//    println(s)
+}
+
 private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     e.printStackTrace()
     onException(e)
@@ -88,7 +95,9 @@ class Controller(
     }
 
     override suspend fun handleMessage(m: Message) {
+        ciPrint("controller got message $m in state $state")
         state = state.next(m)
+        ciPrint("controller state set to $state")
     }
 
     private abstract class ControllerState {
@@ -178,7 +187,7 @@ class Controller(
         creation.removeAllAndJoin()
         gameCoroutineScope.cancel()
         Ticker.stopDefaultScope()
-
+        ciPrint("controller: game stopped")
         gameCoroutineScope = createGameCoroutineScope()
     }
 

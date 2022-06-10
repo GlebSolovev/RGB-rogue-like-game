@@ -1,6 +1,7 @@
 package ru.hse.sd.rgb.gamelogic.engines.creation
 
 import ru.hse.sd.rgb.controller
+import ru.hse.sd.rgb.gamelogic.ciPrint
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
@@ -48,9 +49,13 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
         if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
 
         val dieRoutine: suspend () -> Unit = {
+            ciPrint("$entity is dying")
             entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
+            ciPrint("$entity is dying: fighting")
             physics.remove(entity)
+            ciPrint("$entity is dying: physics")
             entityCoroutines.remove(entity)!!.cancel()
+            ciPrint("$entity is dying: job")
             Ticker.tryStopTickers(entity)
         }
         entity.receive(Dying()) // trigger onDie behaviours
@@ -59,6 +64,7 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
 
     suspend fun removeAllAndJoin() {
         entityCoroutines.values.forEach { it.cancelAndJoin() }
+        ciPrint("creation joined all")
 //        entityCoroutines.clear() // causes NPE in line 53 (??? after join ???)
     }
 }
