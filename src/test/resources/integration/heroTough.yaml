@@ -7,4 +7,4 @@ unitsInitParams:
       dx: 0
       dy: 0
     color: 0 0 0
-    maxHp: 200
+    maxHp: 100

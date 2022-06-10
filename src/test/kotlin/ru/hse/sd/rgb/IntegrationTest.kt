@@ -178,13 +178,12 @@ class IntegrationTest {
             }
         }
 
-        // hero should be dead by now
-        println("hey wait")
-
-        assertEquals("fail", hehe())
+        withTimeout(10000 ) {
+            controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
+        }
+        // hero is dead by now
 
         assertTrue { expectedEntitiesPredicates.values.all { it } }
-        assertEquals(controller.loseLevelDescriptionFilename, controller.currentLevelFilename)
 
         repeat(200) { // TODO: (see previous test)
             mockView.simulateUserMove(Direction.RIGHT) // get to quit portal
