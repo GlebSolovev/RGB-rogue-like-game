@@ -59,6 +59,6 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
 
     suspend fun removeAllAndJoin() {
         entityCoroutines.values.forEach { it.cancelAndJoin() }
-        entityCoroutines.clear()
+//        entityCoroutines.clear() // causes NPE in line 53 (??? after join ???)
     }
 }
