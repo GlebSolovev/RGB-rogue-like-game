@@ -48,7 +48,7 @@ class IntegrationTest {
 
     @RepeatedTest(5)
     fun testBasic(): Unit = runBlocking {
-        ciPrintLine = ""
+        ciPrintLine.set("")
         val mockView = MockView()
         controller = Controller(
             FileLevelLoader("$filesFolder/level1.yaml"),
@@ -111,7 +111,7 @@ class IntegrationTest {
     @RepeatedTest(5)
     fun testColors(): Unit = runBlocking {
         try {
-            ciPrintLine = ""
+            ciPrintLine.set("")
             val mockView = MockView()
 //            val mockView = SwingView(10)
             controller = Controller(
@@ -220,7 +220,7 @@ class IntegrationTest {
             assertEquals("fail", e.stackTraceToString())
         } finally {
             if (exceptionStackTrace != null) {
-                assertEquals(null, (exceptionStackTrace!! + "\n\n" + ciPrintLine) as String?)
+                assertEquals(null, (exceptionStackTrace!! + "\n\n" + ciPrintLine.get()) as String?)
             }
         }
     }

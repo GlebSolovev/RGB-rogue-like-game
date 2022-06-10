@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference
 var ciPrintLine = AtomicReference("")
 
 fun ciPrint(s: String) {
-    ciPrintLine.accumulateAndGet(s) { a, b -> a + b }
+    ciPrintLine.accumulateAndGet(s) { a, b -> a + b + "\n" }
 //    println(s)
 }
 
@@ -71,6 +71,9 @@ class Controller(
     companion object {
         private const val QUIT_LEVEL_FILENAME_ALIAS = "quit"
     }
+
+    var isInteresting by AtomicReference(false)
+        private set
 
     val stateRepresentation: ControllerStateRepresentation
         get() = when (state) {
@@ -167,6 +170,7 @@ class Controller(
         override suspend fun next(m: Message) = when (m) {
             is UserQuit -> quit()
             is ControllerNextLevel -> {
+                isInteresting = true
                 val heroPersistence = m.heroPersistence
                 stopGame()
                 view.receive(GameViewStopped())

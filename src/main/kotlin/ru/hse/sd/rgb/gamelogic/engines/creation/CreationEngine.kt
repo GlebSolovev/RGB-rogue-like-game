@@ -20,6 +20,9 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     private val entityCoroutines = ConcurrentHashMap<GameEntity, Job>()
 
     suspend fun tryAddToWorld(entity: GameEntity): Boolean {
+        if (controller.isInteresting) {
+            ciPrint("adding new $entity")
+        }
         return if (tryAddWithoutNotify(entity)) {
             entity.receive(LifeStarted())
             true
@@ -49,14 +52,18 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
         if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
 
         val dieRoutine: suspend () -> Unit = {
-            ciPrint("$entity is dying")
-            entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
-            ciPrint("$entity is dying: fighting")
-            physics.remove(entity)
-            ciPrint("$entity is dying: physics")
-            entityCoroutines.remove(entity)!!.cancel()
-            ciPrint("$entity is dying: job")
-            Ticker.tryStopTickers(entity)
+            try {
+                if (controller.isInteresting) {
+                    ciPrint("$entity is dying")
+                }
+                entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
+                physics.remove(entity)
+                entityCoroutines.remove(entity)!!.cancel()
+                Ticker.tryStopTickers(entity)
+            } catch (e: Throwable) {
+                ciPrint("AOAOAOAOAOAOAOA\ncontroller in state ${controller.stateRepresentation}")
+                throw e
+            }
         }
         entity.receive(Dying()) // trigger onDie behaviours
         entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
