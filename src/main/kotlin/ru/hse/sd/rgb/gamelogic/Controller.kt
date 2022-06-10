@@ -26,7 +26,7 @@ import kotlin.system.exitProcess
 
 private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     e.printStackTrace()
-    onException()
+    onException(e)
 }
 
 private fun createGameCoroutineScope() = CoroutineScope(
@@ -44,10 +44,11 @@ const val ON_EXCEPTION_EXIT_CODE = 5
 
 var exceptionStackTrace: String? by AtomicReference(null)
 
-fun onException() {
+fun onException(e: Throwable) {
     gameCoroutineScope.cancel()
     viewCoroutineScope.cancel()
-    exitProcess(ON_EXCEPTION_EXIT_CODE)
+//    exitProcess(ON_EXCEPTION_EXIT_CODE)
+    exceptionStackTrace = e.stackTraceToString()
 }
 
 @Suppress("LongParameterList")

@@ -216,7 +216,7 @@ class IntegrationTest {
     }
 
     private suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
-        println("START AWAIT LAOD")
+        println("START AWAIT LOAD")
         while (currentLevelFilename != expectedLevelFilename ||
             stateRepresentation != Controller.ControllerStateRepresentation.PLAYING
         ) {
