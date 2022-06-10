@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference
 var ciPrintLine by AtomicReference("")
 
 fun ciPrint(s: String) {
-    ciPrintLine += s
+    ciPrintLine += s + "\n"
 //    println(s)
 }
 
