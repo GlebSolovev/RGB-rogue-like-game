@@ -22,7 +22,6 @@ import ru.hse.sd.rgb.views.View
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.system.exitProcess
 
 private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     e.printStackTrace()

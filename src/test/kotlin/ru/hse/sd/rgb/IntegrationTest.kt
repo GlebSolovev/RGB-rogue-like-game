@@ -36,6 +36,7 @@ import org.junit.jupiter.api.RepeatedTest
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class IntegrationTest {
@@ -192,9 +193,11 @@ class IntegrationTest {
             }
 
 //            println(hehe())
-            withTimeout(30000) {
-                controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
-            }
+            assertNotNull(
+                withTimeoutOrNull(30000) {
+                    controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
+                }
+            )
             // hero is dead by now
 
             println("\n\nGREAT RESULT")
