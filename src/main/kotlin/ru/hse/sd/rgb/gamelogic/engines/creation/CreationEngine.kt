@@ -58,6 +58,6 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     }
 
     suspend fun cancelAllAndJoin() {
-        for(job in entityCoroutines.values) job.cancelAndJoin()
+        for ((e, job) in entityCoroutines) job.cancelAndJoin().also { println("stopped $e") }
     }
 }

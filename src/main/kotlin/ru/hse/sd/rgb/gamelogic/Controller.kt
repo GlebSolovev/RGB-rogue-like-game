@@ -180,6 +180,7 @@ class Controller(
     }
 
     private suspend fun stopGame() {
+        println("controller: all stop")
         creation.cancelAllAndJoin()
 //        gameCoroutineScope.cancel()
         gameCoroutineScope = createGameCoroutineScope()
