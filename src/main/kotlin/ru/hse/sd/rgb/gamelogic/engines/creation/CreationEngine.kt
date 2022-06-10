@@ -6,27 +6,37 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.gameCoroutineScope
+import ru.hse.sd.rgb.utils.getValue
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.Dying
 import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
 import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
+import ru.hse.sd.rgb.utils.setValue
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 class CreationEngine(private val physics: PhysicsEngine, private val fightEngine: FightEngine) {
 
     private val entityCoroutines = ConcurrentHashMap<GameEntity, Job>()
+    private var isStopping by AtomicReference(false)
+    private val mutex = Mutex()
 
     suspend fun tryAddToWorld(entity: GameEntity): Boolean {
-        if (controller.isInteresting) {
-            ciPrint("adding new $entity")
+        mutex.withLock {
+            if (isStopping) return false
+            if (controller.isInteresting) {
+                ciPrint("adding new $entity")
+            }
+            return if (tryAddWithoutNotify(entity)) {
+                entity.receive(LifeStarted())
+                true
+            } else false
         }
-        return if (tryAddWithoutNotify(entity)) {
-            entity.receive(LifeStarted())
-            true
-        } else false
     }
 
     private suspend fun tryAddWithoutNotify(entity: GameEntity): Boolean {
@@ -37,6 +47,7 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     }
 
     suspend fun addAllToWorld(entities: Set<GameEntity>, preStartAction: () -> Unit) {
+        if (isStopping) error("cannot add entities using stopped creation engine")
         for (entity in entities) {
             if (!tryAddWithoutNotify(entity)) throw IllegalStateException("invalid entities")
         }
@@ -47,31 +58,37 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     }
 
     // entity must not react on new events after calling with method
+    @Suppress("TooGenericExceptionCaught")
     suspend fun die(entity: GameEntity) {
-        val experiencePoints = entity.experienceEntity.onDieExperiencePoints
-        if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
+        mutex.withLock {
+            val experiencePoints = entity.experienceEntity.onDieExperiencePoints
+            if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
 
-        val dieRoutine: suspend () -> Unit = {
-            try {
-                if (controller.isInteresting) {
-                    ciPrint("$entity is dying")
+            val dieRoutine: suspend () -> Unit = {
+                try {
+                    if (controller.isInteresting) {
+                        ciPrint("$entity is dying")
+                    }
+                    entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
+                    physics.remove(entity)
+                    entityCoroutines.remove(entity)!!.cancel()
+                    Ticker.tryStopTickers(entity)
+                } catch (e: Throwable) {
+                    ciPrint("AOAOAOAOAOAOAOA\ncontroller in state ${controller.stateRepresentation}")
+                    throw e
                 }
-                entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
-                physics.remove(entity)
-                entityCoroutines.remove(entity)!!.cancel()
-                Ticker.tryStopTickers(entity)
-            } catch (e: Throwable) {
-                ciPrint("AOAOAOAOAOAOAOA\ncontroller in state ${controller.stateRepresentation}")
-                throw e
             }
+            entity.receive(Dying()) // trigger onDie behaviours
+            entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
         }
-        entity.receive(Dying()) // trigger onDie behaviours
-        entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
     }
 
     suspend fun removeAllAndJoin() {
-        entityCoroutines.values.forEach { it.cancelAndJoin() }
-        ciPrint("creation joined all")
+        mutex.withLock {
+            isStopping = true
+            entityCoroutines.values.forEach { it.cancelAndJoin() }
+            ciPrint("creation joined all")
 //        entityCoroutines.clear() // causes NPE in line 53 (??? after join ???)
+        }
     }
 }

@@ -185,7 +185,7 @@ class IntegrationTest {
                 expectedEntitiesPredicates[p] = false
             }
 
-            withTimeoutOrNull(10000) {
+            withTimeoutOrNull(20000) {
                 while (true) {
                     val drawables = mockView.drawables
                     for (e in drawables.keys) {
@@ -199,7 +199,7 @@ class IntegrationTest {
 
 //            println(hehe())
             assertNotNull(
-                withTimeoutOrNull(30000) {
+                withTimeoutOrNull(20000) {
                     controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
                 }
             )
