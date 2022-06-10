@@ -117,7 +117,7 @@ class IntegrationTest {
         }
 
         // useful for debugging
-        fun hehe() {
+        fun hehe(): String {
             val tmp = mockView.drawables
             val rep = Grid2D(50, 30) { _, _ -> '.' }
             for ((e, snap) in tmp) {
@@ -136,8 +136,9 @@ class IntegrationTest {
                     }
                 }
             }
-            println(rep)
-            println("Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}")
+            return rep.toString() + "Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}"
+//            println(rep)
+//            println("Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}")
         }
 
         suspend fun spawnTestEntity(cell: Cell, color: RGB) =
@@ -179,6 +180,8 @@ class IntegrationTest {
 
         // hero should be dead by now
         println("hey wait")
+
+        assertEquals("fail", hehe())
 
         assertTrue { expectedEntitiesPredicates.values.all { it } }
         assertEquals(controller.loseLevelDescriptionFilename, controller.currentLevelFilename)
