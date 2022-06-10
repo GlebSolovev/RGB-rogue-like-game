@@ -26,7 +26,7 @@ import kotlin.system.exitProcess
 
 private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     e.printStackTrace()
-    onException(e)
+    onException()
 }
 
 private fun createGameCoroutineScope() = CoroutineScope(
@@ -44,11 +44,10 @@ const val ON_EXCEPTION_EXIT_CODE = 5
 
 var exceptionStackTrace: String? by AtomicReference(null)
 
-fun onException(e: Throwable) {
+fun onException() {
     gameCoroutineScope.cancel()
     viewCoroutineScope.cancel()
-//    exitProcess(ON_EXCEPTION_EXIT_CODE)
-    exceptionStackTrace = e.stackTraceToString()
+    exitProcess(ON_EXCEPTION_EXIT_CODE)
 }
 
 @Suppress("LongParameterList")
@@ -118,15 +117,9 @@ class Controller(
         override lateinit var engines: Engines
 
         override suspend fun next(m: Message) = when (m) {
-            is StartControllerMessage -> {
-                startGame()
-            }
-            is DoLoadLevel -> {
-                loadLevel()
-            }
-            is UserQuit -> {
-                quit()
-            }
+            is StartControllerMessage -> startGame()
+            is DoLoadLevel -> loadLevel()
+            is UserQuit -> quit()
             else -> {
                 println(m)
                 unreachable
@@ -161,10 +154,9 @@ class Controller(
         override val engines: Engines,
         override val hero: Hero
     ) : ControllerState() {
+
         override suspend fun next(m: Message) = when (m) {
-            is FinishControllerMessage, is UserQuit -> { // TODO: finish screen
-                quit()
-            }
+            is UserQuit -> quit()
             is ControllerNextLevel -> {
                 val heroPersistence = m.heroPersistence
                 stopGame()
@@ -183,11 +175,11 @@ class Controller(
     }
 
     private suspend fun stopGame() {
-        println("controller: all stop")
-        creation.cancelAllAndJoin()
-//        gameCoroutineScope.cancel()
-        gameCoroutineScope = createGameCoroutineScope()
+        creation.removeAllAndJoin()
+        gameCoroutineScope.cancel()
         Ticker.stopDefaultScope()
+
+        gameCoroutineScope = createGameCoroutineScope()
     }
 
     private suspend fun quit(): Nothing {

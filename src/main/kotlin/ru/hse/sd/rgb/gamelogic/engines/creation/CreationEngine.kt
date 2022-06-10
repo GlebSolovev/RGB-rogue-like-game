@@ -57,7 +57,8 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
         entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
     }
 
-    suspend fun cancelAllAndJoin() {
-        for ((e, job) in entityCoroutines) job.cancelAndJoin().also { println("stopped $e") }
+    suspend fun removeAllAndJoin() {
+        entityCoroutines.values.forEach { it.cancelAndJoin() }
+        entityCoroutines.clear()
     }
 }

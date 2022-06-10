@@ -60,7 +60,7 @@ class Lifecycle(
                             childBehaviour = child.childBehaviour
                             child.stop()
                         } else {
-                            childBehaviour.traverseSubtree {
+                            childBehaviour.traverseSubtreeForTickers {
                                 val itChild = (it as? MetaBehaviour)?.childBehaviour
                                 if (itChild === message.target) {
                                     it.childBehaviour = itChild.childBehaviour

@@ -38,11 +38,11 @@ sealed class Behaviour(val entity: GameEntity) {
         onStop()
     }
 
-    abstract fun traverseSubtree(onEach: (Behaviour) -> Unit)
+    abstract fun traverseSubtreeForTickers(onEach: (Behaviour) -> Unit)
 
-    fun startSubtree() = traverseSubtree { it.start() }
+    fun startSubtree() = traverseSubtreeForTickers { it.start() }
 
-    fun stopSubtree() = traverseSubtree { it.stop() }
+    fun stopSubtree() = traverseSubtreeForTickers { it.stop() }
 }
 
 abstract class MetaBehaviour(
@@ -50,9 +50,9 @@ abstract class MetaBehaviour(
     var childBehaviour: Behaviour,
 ) : Behaviour(entity) {
 
-    override fun traverseSubtree(onEach: (Behaviour) -> Unit) {
+    override fun traverseSubtreeForTickers(onEach: (Behaviour) -> Unit) {
         onEach(this)
-        childBehaviour.traverseSubtree(onEach)
+        childBehaviour.traverseSubtreeForTickers(onEach)
     }
 
     final override fun tickersGroup(tickClass: KClass<out Tick>) = childBehaviour.tickersGroup(tickClass)

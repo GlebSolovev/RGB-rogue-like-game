@@ -13,7 +13,7 @@ open class NoneBehaviour(entity: GameEntity) : Behaviour(entity) {
 
     override fun traverseTickers(onEach: (Ticker) -> Unit) = ignore
 
-    final override fun traverseSubtree(onEach: (Behaviour) -> Unit) = onEach(this)
+    final override fun traverseSubtreeForTickers(onEach: (Behaviour) -> Unit) = onEach(this)
 
     private val tickers = mutableMapOf<KClass<out Tick>, MutableSet<Ticker>>()
 

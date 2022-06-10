@@ -38,7 +38,7 @@ fun main() = runBlocking {
         } catch (_: CancellationException) {
         } catch (t: Throwable) {
             t.printStackTrace()
-            onException(t)
+            onException()
         }
     }.join()
 }
