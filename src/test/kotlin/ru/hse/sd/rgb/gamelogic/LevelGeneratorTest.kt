@@ -65,7 +65,7 @@ class LevelGeneratorTest {
     private val folder = "src/test/resources"
 
     @Test
-    fun testStressEntities() = repeat(100) {
+    fun testStressEntities() = repeat(300) {
         runBlocking {
             controller = Controller(
                 FileLevelLoader("$folder/emptyLevel.yaml"),
