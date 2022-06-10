@@ -101,95 +101,99 @@ class IntegrationTest {
 
     @Test
     fun testColors(): Unit = runBlocking {
-        val mockView = MockView()
-        controller = Controller(
-            FileLevelLoader("$filesFolder/level3.yaml"),
-            FileColorLoader("$filesFolder/colors.yaml"),
-            FileExperienceLevelsLoader("$filesFolder/experience.yaml"),
-            FileHeroLoader("$filesFolder/heroTough.yaml"),
-            mockView
-        )
-        controller.receive(StartControllerMessage())
-        val controllerJob = launch { controller.messagingRoutine() }
+        try {
+            val mockView = MockView()
+            controller = Controller(
+                FileLevelLoader("$filesFolder/level3.yaml"),
+                FileColorLoader("$filesFolder/colors.yaml"),
+                FileExperienceLevelsLoader("$filesFolder/experience.yaml"),
+                FileHeroLoader("$filesFolder/heroTough.yaml"),
+                mockView
+            )
+            controller.receive(StartControllerMessage())
+            val controllerJob = launch { controller.messagingRoutine() }
 
-        withTimeout(2000) {
-            controller.awaitLoadedLevel("$filesFolder/level3.yaml")
-        }
+            withTimeout(2000) {
+                controller.awaitLoadedLevel("$filesFolder/level3.yaml")
+            }
 
-        // useful for debugging
-        fun hehe(): String {
-            val tmp = mockView.drawables
-            val rep = Grid2D(50, 30) { _, _ -> '.' }
-            for ((e, snap) in tmp) {
-                for (a in snap) {
-                    rep[a.cell] = when (e) {
-                        is Wall -> '#'
-                        is Hero -> 'H'
-                        is Sharpy -> 'S'
-                        is Glitch -> 'G'
-                        is TestEntity -> 'T'
-                        is Fireball -> 'f'
-                        is WavePart -> 'w'
-                        is LaserPart -> 'l'
-                        is ConfuseBall -> 'c'
-                        else -> '.'
+            // useful for debugging
+            fun hehe(): String {
+                val tmp = mockView.drawables
+                val rep = Grid2D(50, 30) { _, _ -> '.' }
+                for ((e, snap) in tmp) {
+                    for (a in snap) {
+                        rep[a.cell] = when (e) {
+                            is Wall -> '#'
+                            is Hero -> 'H'
+                            is Sharpy -> 'S'
+                            is Glitch -> 'G'
+                            is TestEntity -> 'T'
+                            is Fireball -> 'f'
+                            is WavePart -> 'w'
+                            is LaserPart -> 'l'
+                            is ConfuseBall -> 'c'
+                            else -> '.'
+                        }
                     }
                 }
-            }
-            return rep.toString() + "Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}"
+                return rep.toString() + "Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}"
 //            println(rep)
 //            println("Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}")
-        }
+            }
 
-        suspend fun spawnTestEntity(cell: Cell, color: RGB) =
-            controller.creation.tryAddToWorld(TestEntity(cell, color, 99999))
+            suspend fun spawnTestEntity(cell: Cell, color: RGB) =
+                controller.creation.tryAddToWorld(TestEntity(cell, color, 99999))
 //            controller.creation.tryAddToWorld(Glitch(cell, 5, 100, 12345678))
 
-        fun GameEntity.testColor(color: RGB) = units.first().gameColor == color
-        val expectedEntitiesPredicates = mutableMapOf<(GameEntity) -> Boolean, Boolean>()
-        for (c in 0..11) {
-            val rgb = RGB(c, c, c)
-            val cell = Cell(c + 1, c + 1)
-            assertTrue { spawnTestEntity(cell, rgb) }
-            val p: (GameEntity) -> Boolean = {
-                it.testColor(rgb) && when (c) {
-                    in 0..1 -> true
-                    in 2..4 -> it is Fireball
-                    in 5..7 -> it is WavePart
-                    8 -> it is LaserPart
-                    9 -> true
-                    10 -> it is ConfuseBall
-                    11 -> it is Icicle // only spawns with IcicleBomb
-                    else -> unreachable
-                }
-            }
-            expectedEntitiesPredicates[p] = false
-        }
-
-        withTimeoutOrNull(10000) {
-            while (true) {
-                val drawables = mockView.drawables
-                for (e in drawables.keys) {
-                    for (p in expectedEntitiesPredicates.keys) {
-                        if (p(e)) expectedEntitiesPredicates[p] = true
+            fun GameEntity.testColor(color: RGB) = units.first().gameColor == color
+            val expectedEntitiesPredicates = mutableMapOf<(GameEntity) -> Boolean, Boolean>()
+            for (c in 0..11) {
+                val rgb = RGB(c, c, c)
+                val cell = Cell(c + 1, c + 1)
+                assertTrue { spawnTestEntity(cell, rgb) }
+                val p: (GameEntity) -> Boolean = {
+                    it.testColor(rgb) && when (c) {
+                        in 0..1 -> true
+                        in 2..4 -> it is Fireball
+                        in 5..7 -> it is WavePart
+                        8 -> it is LaserPart
+                        9 -> true
+                        10 -> it is ConfuseBall
+                        11 -> it is Icicle // only spawns with IcicleBomb
+                        else -> unreachable
                     }
                 }
-                delay(1) // cancellation point
+                expectedEntitiesPredicates[p] = false
             }
-        }
 
-        withTimeout(10000 ) {
-            controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
-        }
-        // hero is dead by now
+            withTimeoutOrNull(10000) {
+                while (true) {
+                    val drawables = mockView.drawables
+                    for (e in drawables.keys) {
+                        for (p in expectedEntitiesPredicates.keys) {
+                            if (p(e)) expectedEntitiesPredicates[p] = true
+                        }
+                    }
+                    delay(1) // cancellation point
+                }
+            }
 
-        assertTrue { expectedEntitiesPredicates.values.all { it } }
+            withTimeout(10000) {
+                controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
+            }
+            // hero is dead by now
 
-        repeat(200) { // TODO: (see previous test)
-            mockView.simulateUserMove(Direction.RIGHT) // get to quit portal
+            assertTrue { expectedEntitiesPredicates.values.all { it } }
+
+            repeat(200) { // TODO: (see previous test)
+                mockView.simulateUserMove(Direction.RIGHT) // get to quit portal
+            }
+            delay(100)
+            assertFalse { controllerJob.isActive }
+        } catch(e: Throwable) {
+            assertEquals("fail", e.stackTraceToString())
         }
-        delay(100)
-        assertFalse { controllerJob.isActive }
     }
 
     private suspend fun Controller.awaitPlaying() {
