@@ -23,10 +23,10 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
-var ciPrintLine by AtomicReference("")
+var ciPrintLine = AtomicReference("")
 
 fun ciPrint(s: String) {
-    ciPrintLine += s + "\n"
+    ciPrintLine.accumulateAndGet(s) { a, b -> a + b }
 //    println(s)
 }
 
