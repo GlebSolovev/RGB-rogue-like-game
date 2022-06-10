@@ -118,23 +118,30 @@ fun LevelLoader.createLevelEntities(
         entities.add(levelFactory.createWall(Cell(w - 1, y)))
     }
 
-    fun Sequence<Cell>.spawnWrapper(count: Int, action: (Cell) -> GameEntity): Sequence<Cell> {
-        take(count).forEach { entities.add(action(it)) }
-        return drop(count)
-    }
-
-    val occupiedCells = entities.flatMap { entity -> entity.units.map { it.cell } }.toSet()
+    val occupiedCells = entities.flatMap { entity -> entity.units.map { it.cell } }.toMutableSet()
     val emptyCells = Grid2D(w, h) { x, y -> Cell(x, y) }.toSet() subtract occupiedCells
 
-    emptyCells
-        .asSequence()
-        .shuffled(random)
-        .spawnWrapper(levelFactory.glitchSpawnCount) { levelFactory.createGlitch(it) }
-        .spawnWrapper(levelFactory.sharpySpawnCount) { levelFactory.createSharpy(it) }
-        .spawnWrapper(levelFactory.colorModificationSpawnCount) { levelFactory.createColorModification(it) }
-        .spawnWrapper(levelFactory.instantHealSpawnCount) { levelFactory.createInstantHeal(it) }
-        .spawnWrapper(levelFactory.colorInverterSpawnCount) { levelFactory.createColorInverter(it) }
-        .firstOrNull() ?: error("not enough empty cells to spawn all entities") // force lazy sequence operations
+    val shuffled = emptyCells.shuffled(random)
+    var i = 0
+    fun spawnWrapper(count: Int, action: (Cell) -> GameEntity) {
+        shuffled.subList(i, i + count).forEach { cell ->
+            if (cell in occupiedCells) {
+                println("hehe")
+                error("hehe")
+            }
+            val e = action(cell)
+            entities.add(e)
+            occupiedCells.addAll(e.units.map { it.cell })
+        }
+        i += count
+    }
+
+    spawnWrapper(levelFactory.glitchSpawnCount) { levelFactory.createGlitch(it) }
+    spawnWrapper(levelFactory.sharpySpawnCount) { levelFactory.createSharpy(it) }
+    spawnWrapper(levelFactory.colorModificationSpawnCount) { levelFactory.createColorModification(it) }
+    spawnWrapper(levelFactory.instantHealSpawnCount) { levelFactory.createInstantHeal(it) }
+    spawnWrapper(levelFactory.colorInverterSpawnCount) { levelFactory.createColorInverter(it) }
+    if (i >= shuffled.size) error("not enough empty cells for all entities")
 
     return entities
 }

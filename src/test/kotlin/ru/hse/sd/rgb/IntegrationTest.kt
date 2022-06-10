@@ -224,22 +224,22 @@ class IntegrationTest {
             }
         }
     }
+}
 
-    private suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
-        println("START AWAIT LOAD")
-        while (currentLevelFilename != expectedLevelFilename ||
-            stateRepresentation != Controller.ControllerStateRepresentation.PLAYING
-        ) {
-            delay(100)
-        }
+suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
+    println("START AWAIT LOAD")
+    while (currentLevelFilename != expectedLevelFilename ||
+        stateRepresentation != Controller.ControllerStateRepresentation.PLAYING
+    ) {
+        delay(100)
     }
 }
 
-private class MockView : View() {
+class MockView : View() {
     lateinit var lastInvSnapshot: InventoryViewSnapshot
     val drawables = DrawablesMap()
 
-    inner class MockViewState : ViewState() {
+    private inner class MockViewState : ViewState() {
         override fun next(m: Message): ViewState {
             when (m) {
                 is GameViewStarted -> {
