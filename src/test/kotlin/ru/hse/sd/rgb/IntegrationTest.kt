@@ -17,6 +17,7 @@ import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.*
+import ru.hse.sd.rgb.gamelogic.exceptionStackTrace
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
@@ -191,8 +192,10 @@ class IntegrationTest {
             }
             delay(100)
             assertFalse { controllerJob.isActive }
-        } catch(e: Throwable) {
+        } catch (e: Throwable) {
             assertEquals("fail", e.stackTraceToString())
+        } finally {
+            assertEquals(null, exceptionStackTrace)
         }
     }
 
