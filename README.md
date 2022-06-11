@@ -25,9 +25,7 @@ _Software Design HW: rogue-like 2D game "RGB" with tile graphics_
 
 _Protip: двигаться по диагонали можно быстрее..._
 
-**Ссылка на документацию:** TODO
-
-[//]: # (https://glebsolovev.github.io/SD-2022/)
+**[Ссылка на документацию](https://glebsolovev.github.io/RGB-rogue-like-game/)**
 
 ## Состояние разработки
 На данный момент в проекте:
