@@ -1,3 +1,5 @@
+!<custom>
+
 levelFactory:
   baseFactoryType: COLD
   customBgColor: 220 200 200

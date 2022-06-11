@@ -1,9 +1,6 @@
 package ru.hse.sd.rgb
 
-import ru.hse.sd.rgb.gameloaders.FileColorLoader
-import ru.hse.sd.rgb.gameloaders.FileExperienceLevelsLoader
-import ru.hse.sd.rgb.gameloaders.FileHeroLoader
-import ru.hse.sd.rgb.gameloaders.FileLevelLoader
+import ru.hse.sd.rgb.gameloaders.*
 import ru.hse.sd.rgb.gamelogic.Controller
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
@@ -48,7 +45,7 @@ class IntegrationTest {
     fun testBasic(): Unit = runBlocking {
         val mockView = MockView()
         controller = Controller(
-            FileLevelLoader("$filesFolder/level1.yaml"),
+            loadLevelLoader("$filesFolder/level1.yaml"),
             FileColorLoader("$filesFolder/colors.yaml"),
             FileExperienceLevelsLoader("$filesFolder/experience.yaml"),
             FileHeroLoader("$filesFolder/hero.yaml"),
@@ -104,7 +101,7 @@ class IntegrationTest {
     fun testColors(): Unit = runBlocking {
         val mockView = MockView()
         controller = Controller(
-            FileLevelLoader("$filesFolder/level3.yaml"),
+            loadLevelLoader("$filesFolder/level3.yaml"),
             FileColorLoader("$filesFolder/colors.yaml"),
             FileExperienceLevelsLoader("$filesFolder/experience.yaml"),
             FileHeroLoader("$filesFolder/heroTough.yaml"),

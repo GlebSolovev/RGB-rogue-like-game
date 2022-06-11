@@ -151,7 +151,7 @@ class Controller(
                 view.receive(GameViewStopped())
                 val nextLevelFilename = m.nextLevelDescriptionFilename
                 if (nextLevelFilename != QUIT_LEVEL_FILENAME_ALIAS) {
-                    val nextLevelLoader = FileLevelLoader(nextLevelFilename)
+                    val nextLevelLoader = loadLevelLoader(nextLevelFilename)
                     receive(DoLoadLevel())
                     GameInitState(nextLevelLoader, colorLoader, experienceLevelsLoader, heroPersistence)
                 } else {

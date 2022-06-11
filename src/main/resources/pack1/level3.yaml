@@ -1,0 +1,46 @@
+!<custom>
+
+levelFactory:
+  baseFactoryType: FIERY
+  customSharpySpawnCount: 0
+  customGlitchSpawnCount: 0
+  customColorInverterSpawnCount: 0
+  customInstantHealSpawnCount: 5
+  customColorModificationSpawnCount: 0
+
+mazeRepresentation: [
+    ".....................",
+    ".....................",
+    ".....................",
+    ".....................",
+    "..........#..........",
+    "..........#..........",
+    "..........#..........",
+    "..........#..........",
+    "..........#..........",
+    "..........#..........",
+    "..........#..........",
+    ".....................",
+    ".....................",
+    ".....................",
+    "#########...#########",
+    ".....................",
+    ".....................",
+    "....................." ]
+
+heroSpawnCell: 10 16
+
+customEntities:
+  - !<glitch>
+    cell: 5 7
+    hp: 3
+    clonePeriodMillis: 5000
+  - !<glitch>
+    cell: 15 7
+    hp: 3
+    clonePeriodMillis: 5000
+
+levelPortalDescription:
+  cell: 10 3
+  nextLevelDescriptionFilename: "src/main/resources/ending/levelWin.yaml"
+  heroExperienceLevelToEnableOn: 3

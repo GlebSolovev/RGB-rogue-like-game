@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlin.properties.ReadOnlyProperty
 
 @Serializable
-enum class OverloadableFactoryType {
+enum class SerializableFactoryType {
     COLD {
         override val factory = ColdFactory()
     },
@@ -35,7 +35,7 @@ data class InstantHealOutcome(
 @Serializable
 @Suppress("LongParameterList", "CanBeParameter")
 class OverloadableFactory constructor(
-    private val baseFactoryType: OverloadableFactoryType,
+    private val baseFactoryType: SerializableFactoryType,
 
     private val customBgColor: RGB? = null,
     private val customWallColor: RGB? = null,

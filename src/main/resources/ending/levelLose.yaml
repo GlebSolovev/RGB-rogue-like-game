@@ -1,3 +1,5 @@
+!<custom>
+
 levelFactory:
   baseFactoryType: FIERY
   customBgColor: 30 30 30

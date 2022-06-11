@@ -38,6 +38,8 @@ style:
       - 'ru.hse.sd.rgb.gamelogic.engines.fight.*'
       - 'ru.hse.sd.rgb.gamelogic.engines.behaviour.*'
       - 'ru.hse.sd.rgb.gamelogic.engines.items.*'
+      - 'ru.hse.sd.rgb.gamelogic.entities.scriptentities.*'
+      - 'ru.hse.sd.rgb.gameloaders.*'
       - 'java.awt.geom.*'
       - 'kotlin.math.*'
   ForbiddenComment:

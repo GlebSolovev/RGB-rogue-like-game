@@ -2,10 +2,7 @@
 
 package ru.hse.sd.rgb
 
-import ru.hse.sd.rgb.gameloaders.FileColorLoader
-import ru.hse.sd.rgb.gameloaders.FileExperienceLevelsLoader
-import ru.hse.sd.rgb.gameloaders.FileHeroLoader
-import ru.hse.sd.rgb.gameloaders.FileLevelLoader
+import ru.hse.sd.rgb.gameloaders.*
 import ru.hse.sd.rgb.gamelogic.Controller
 import ru.hse.sd.rgb.gamelogic.onException
 import ru.hse.sd.rgb.utils.messaging.messages.StartControllerMessage
@@ -15,15 +12,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 // TODO: CLI argument
-private const val LEVEL_FILENAME: String = "src/main/resources/sampleLevel.yaml"
+private const val LEVEL_FILENAME: String = "src/main/resources/pack1/level1.yaml"
 private const val COLORS_FILENAME: String = "src/main/resources/gameColors.yaml"
 private const val HERO_EXPERIENCE_LEVELS_FILENAME: String = "src/main/resources/heroExperienceLevels.yaml"
 private const val HERO_FILENAME: String = "src/main/resources/sampleHero.yaml"
 
-private val levelLoader = FileLevelLoader(LEVEL_FILENAME)
-
 var controller = Controller(
-    levelLoader,
+    loadLevelLoader(LEVEL_FILENAME),
     FileColorLoader(COLORS_FILENAME),
     FileExperienceLevelsLoader(HERO_EXPERIENCE_LEVELS_FILENAME),
     FileHeroLoader(HERO_FILENAME),

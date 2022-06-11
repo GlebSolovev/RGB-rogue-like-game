@@ -12,10 +12,18 @@ import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.Hero
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.HeroPersistence
+import ru.hse.sd.rgb.gamelogic.entities.scriptentities.LevelPortal
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.unreachable
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.decodeFromStream
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+import java.io.File
 import kotlin.random.Random
 
 data class GameWorldDescription(
@@ -69,6 +77,9 @@ interface ExperienceLevelsLoader {
     fun loadHeroExperienceLevels(): List<ExperienceLevelDescription>
 }
 
+@Serializable
+sealed class FileLevelDescription
+
 class GameLoader(
     private val levelLoader: LevelLoader,
     private val colorLoader: ColorLoader,
@@ -95,12 +106,13 @@ class GameLoader(
     fun loadLevel(): LevelDescription = levelLoader.loadLevelDescription()
 }
 
-@Suppress("unused") // instead of visibility modifier
+@Suppress("unused", "LongParameterList") // extension instead of visibility modifier
 fun LevelLoader.createLevelEntities(
     w: Int,
     h: Int,
     maze: Grid2D<Boolean>,
     levelFactory: LevelContentFactory,
+    nextLevelDescriptionFilename: String?, // generates an open portal in a random cell
     random: Random = Random
 ): Set<GameEntity> {
     val entities = mutableSetOf<GameEntity>()
@@ -136,5 +148,32 @@ fun LevelLoader.createLevelEntities(
         .spawnWrapper(levelFactory.colorInverterSpawnCount) { levelFactory.createColorInverter(it) }
         .firstOrNull() ?: error("not enough empty cells to spawn all entities") // force lazy sequence operations
 
+    if (nextLevelDescriptionFilename != null) {
+        val portalCell = emptyCells.last()
+        // TODO: for a random level required experience is not well defined, but still 0 is suboptimal
+        @Suppress("MagicNumber")
+        entities.add(LevelPortal(portalCell, nextLevelDescriptionFilename, 0))
+    }
+
     return entities
+}
+
+val levelSerializersModule = SerializersModule {
+    polymorphic(GameEntityDescription::class) {
+        subclass(SharpyDescription::class)
+        subclass(GlitchDescription::class)
+    }
+    polymorphic(FileLevelDescription::class) {
+        subclass(FileCustomLevelDescription::class)
+        subclass(FileRandomLevelDescription::class)
+    }
+}
+
+fun loadLevelLoader(filename: String): LevelLoader {
+    val format = Yaml(serializersModule = levelSerializersModule)
+    val desc = format.decodeFromStream<FileLevelDescription>(File(filename).inputStream())
+    return when (desc) {
+        is FileCustomLevelDescription -> FileLevelLoader(desc)
+        is FileRandomLevelDescription -> RandomLevelLoader(desc)
+    }
 }
