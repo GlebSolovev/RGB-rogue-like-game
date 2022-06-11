@@ -16,7 +16,6 @@ import ru.hse.sd.rgb.gamelogic.entities.scriptentities.LevelPortal
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
-import ru.hse.sd.rgb.utils.unreachable
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.decodeFromStream
 import kotlinx.serialization.Serializable
@@ -175,5 +174,6 @@ fun loadLevelLoader(filename: String): LevelLoader {
     return when (desc) {
         is FileCustomLevelDescription -> FileLevelLoader(desc)
         is FileRandomLevelDescription -> RandomLevelLoader(desc)
+        else -> error("this branch is not reachable, dear kotlin compiler, please come to your senses")
     }
 }
