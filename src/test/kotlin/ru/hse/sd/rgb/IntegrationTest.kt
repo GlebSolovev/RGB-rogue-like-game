@@ -13,6 +13,8 @@ import ru.hse.sd.rgb.gamelogic.engines.fight.AttackType
 import ru.hse.sd.rgb.gamelogic.engines.fight.ControlParams
 import ru.hse.sd.rgb.gamelogic.engines.fight.HealType
 import ru.hse.sd.rgb.gamelogic.engines.items.InventoryViewSnapshot
+import ru.hse.sd.rgb.gamelogic.engines.items.scriptitems.ColorModificationEntity
+import ru.hse.sd.rgb.gamelogic.engines.items.scriptitems.InstantHealEntity
 import ru.hse.sd.rgb.gamelogic.entities.ColorCellHp
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
@@ -35,7 +37,6 @@ import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlinx.coroutines.*
-import org.junit.jupiter.api.RepeatedTest
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -46,7 +47,7 @@ class IntegrationTest {
 
     private val filesFolder = "src/test/resources/integration"
 
-    @RepeatedTest(5)
+//    @RepeatedTest(50)
     fun testBasic(): Unit = runBlocking {
         ciPrintLine.set("")
         val mockView = MockView()
@@ -66,18 +67,49 @@ class IntegrationTest {
             println("LOADED MUST BE AWAITED")
         }
 
+        // useful for debugging
+        fun hehe(): String {
+            val tmp = mockView.drawables
+            val rep = Grid2D(50, 30) { _, _ -> '.' }
+            for ((e, snap) in tmp) {
+                for (a in snap) {
+                    rep[a.cell] = when (e) {
+                        is Wall -> '#'
+                        is Hero -> 'H'
+                        is Sharpy -> 'S'
+                        is Glitch -> 'G'
+                        is TestEntity -> 'T'
+                        is Fireball -> 'f'
+                        is WavePart -> 'w'
+                        is LaserPart -> 'l'
+                        is ConfuseBall -> 'c'
+                        is ColorModificationEntity -> 'x'
+                        is InstantHealEntity -> '+'
+                        else -> '.'
+                    }
+                }
+            }
+            return rep.toString() + "Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}, " +
+                "color: ${controller.hero.units.first().gameColor}" +
+                ", inventory: \n${mockView.lastInvSnapshot?.itemsGrid}\n"
+        }
+
         suspend fun almostCycleThroughLevel1() {
             repeat(25) { mockView.simulateUserMove(Direction.RIGHT) }
             mockView.simulateUserMove(Direction.DOWN)
             repeat(25) { mockView.simulateUserMove(Direction.LEFT) }
         }
 
+        println(hehe())
+
         almostCycleThroughLevel1()
         mockView.simulateUserMove(Direction.UP)
+        println(hehe())
         mockView.useCurrentItem()
 
         almostCycleThroughLevel1()
         mockView.useCurrentItem()
+        println(hehe())
 
         // sharpy killed, both items picked and used
         assertEquals(Experience(0, 1), controller.experience.getExperience(controller.hero))
@@ -108,12 +140,11 @@ class IntegrationTest {
     }
 
     @Suppress("LongMethod")
-    @RepeatedTest(5)
+//    @RepeatedTest(5)
     fun testColors(): Unit = runBlocking {
         try {
             ciPrintLine.set("")
             val mockView = MockView()
-//            val mockView = SwingView(10)
             controller = Controller(
                 FileLevelLoader("$filesFolder/level3.yaml"),
                 FileColorLoader("$filesFolder/colors.yaml"),
@@ -127,29 +158,6 @@ class IntegrationTest {
             withTimeout(2000) {
                 println(controller)
                 controller.awaitLoadedLevel("$filesFolder/level3.yaml")
-            }
-
-            // useful for debugging
-            fun hehe(): String {
-                val tmp = mockView.drawables
-                val rep = Grid2D(50, 30) { _, _ -> '.' }
-                for ((e, snap) in tmp) {
-                    for (a in snap) {
-                        rep[a.cell] = when (e) {
-                            is Wall -> '#'
-                            is Hero -> 'H'
-                            is Sharpy -> 'S'
-                            is Glitch -> 'G'
-                            is TestEntity -> 'T'
-                            is Fireball -> 'f'
-                            is WavePart -> 'w'
-                            is LaserPart -> 'l'
-                            is ConfuseBall -> 'c'
-                            else -> '.'
-                        }
-                    }
-                }
-                return rep.toString() + "Hero hp: ${(controller.hero.units.first() as HpGameUnit).hp}"
             }
 
             suspend fun spawnTestEntity(
@@ -197,7 +205,6 @@ class IntegrationTest {
                 }
             }
 
-//            println(hehe())
             assertNotNull(
                 withTimeoutOrNull(10000) {
                     controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
@@ -236,7 +243,7 @@ suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
 }
 
 class MockView : View() {
-    lateinit var lastInvSnapshot: InventoryViewSnapshot
+    var lastInvSnapshot: InventoryViewSnapshot? by AtomicReference(null)
     val drawables = DrawablesMap()
 
     private inner class MockViewState : ViewState() {
@@ -246,6 +253,9 @@ class MockView : View() {
                     println("STARTED ВЬЮХА ПОЧЕМУХА")
                 }
                 is InventoryOpened -> {
+                    lastInvSnapshot = m.invSnapshot
+                }
+                is InventoryUpdated -> {
                     lastInvSnapshot = m.invSnapshot
                 }
                 is EntityUpdated -> {
@@ -282,11 +292,6 @@ class MockView : View() {
         simulateUserToggleInv()
         simulateUserSelect()
         simulateUserToggleInv()
-    }
-
-    suspend fun simulateUserDrop() {
-        controller.hero.receive(UserDrop())
-        delay(10)
     }
 
     override val state: AtomicReference<ViewState> = AtomicReference(MockViewState())
