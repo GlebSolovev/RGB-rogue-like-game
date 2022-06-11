@@ -7,6 +7,18 @@ import ru.hse.sd.rgb.utils.structures.*
 import kotlinx.coroutines.sync.Mutex
 import kotlin.random.Random
 
+/**
+ * Class for calculating and performing physical operations with entities.
+ *
+ * All entities exist on a 2D grid of their units, which represents a single level.
+ *
+ * The supported operations are performing movements, detecting collisions, checking
+ * if paths are obstructed and so on.
+ *
+ * @param w Width of level.
+ * @param h Height of level.
+ * @constructor Creates a PhysicsEngine with no entities on the grid.
+ */
 class PhysicsEngine(private val w: Int, private val h: Int) {
 
     companion object {
@@ -59,7 +71,29 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         myUnit.parent.receive(CollidedWith(myUnit, otherUnit))
     }
 
-    // sends CollidedWith to all next cells units
+    /**
+     * Tries to move an existing [GameEntity] in the specified [Direction] by one [Cell].
+     *
+     * The [entity] is allowed to move if and only if after such move all its units would end up:
+     *  1) in bounds of the grid
+     *  2) on cells that don't already contain any incompatible cells as defined by
+     *  entity's [GameEntity.PhysicalEntity].
+     *
+     *  If both conditions are satisfied, all of [entity]'s units are moved. It is guaranteed that
+     *  during the move all cells involved will not be changed in any way.
+     *
+     *  In any case, [entity] will also receive a [CollidedWith] message for each its unit that
+     *  collided with another unit (that is, a unit which either ended up or would have ended up
+     *  on a cell, where there are units of another [GameEntity]). There will be a message for
+     *  each pair of collided units. Another entity will receive a similar [CollidedWith] message
+     *  as well.
+     *
+     *  @param entity The entity to move. Must have been added to this PhysicsEngine grid
+     *  beforehand, otherwise behaviour is undefined.
+     *  @param dir Direction to move the entity in.
+     *
+     *  @return true if the entity was moved, false otherwise.
+     */
     suspend fun tryMove(
         entity: GameEntity,
         dir: Direction
@@ -97,7 +131,20 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         }
     }
 
-    // if true, sends CollidedWith to all units
+    /**
+     * Tries to add the [entity] to this PhysicsEngine grid.
+     *
+     * The entity is allowed to be added if and only if none of its units would have
+     * ended up on an incompatible cell as defined by [GameEntity.PhysicalEntity].
+     *
+     * If the entity is added, it will receive a [CollidedWith] message for each unit
+     * that ended up on a cell that contains units of other entities. There will be a
+     * message for each pair of units. Other entities will receive a similar [CollidedWith]
+     * message as well.
+     *
+     * @param entity The entity to add.
+     * @return true if the entity was added, false otherwise.
+     */
     suspend fun tryPopulate(entity: GameEntity): Boolean {
         val units = entity.units
         val cellsWithUnits = units.associateWith { it.cell }
@@ -115,6 +162,12 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         }
     }
 
+    /**
+     * Removes the [entity] from this PhysicsEngine grid.
+     *
+     * This method always succeeds and returns nothing. If the entity was not added
+     * to this PhysicsEngine before, behaviour is undefined.
+     */
     suspend fun remove(entity: GameEntity) {
         val units = entity.units
         val cells = units.map { it.cell }.toSet()
@@ -124,6 +177,17 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
     }
 
     // won't hit entity instantly
+    /**
+     * Generate a random cell in bounds of this grid which is not occupied by [entity].
+     *
+     * This method can be used by an entity to use a random target for an attack and
+     * not attack itself.
+     *
+     * @throws IllegalStateException If too many attempts were used.
+     *
+     * @param entity The entity which cells are excluded.
+     * @param random Random number generator. Optional.
+     */
     fun generateRandomTarget(entity: GameEntity, random: Random = Random): Cell {
         val entityCells = entity.units.map { it.cell }.toSet()
         repeat(RANDOM_TARGET_ATTEMPTS) {
@@ -133,6 +197,28 @@ class PhysicsEngine(private val w: Int, private val h: Int) {
         throw IllegalStateException("$RANDOM_TARGET_ATTEMPTS attempts exceeded")
     }
 
+    /**
+     * Checks if all cells on [path] are available.
+     *
+     * This method will iterate through all cells of the [path] in normal order
+     * and then run [unitIsOk] predicate for each unit found on that cell. If any
+     * of these runs fail, the path is considered not available.
+     *
+     * Additionally, [unitIsTarget] is run for each unit on the path. If this predicate
+     * is satisfied, the iteration stops and the path is considered available.
+     *
+     * If the iteration goes on for [depth] steps and all [unitIsOk] are satisfied to that
+     * point, the iteration stops and the path is considered available.
+     *
+     * @param path The path to test.
+     * @param startCell The cell to start iterating [path] from.
+     * @param depth The maximum number of steps to be taken along the [path].
+     * @param unitIsOk The predicate that decides whether a unit can appear on an
+     * available path.
+     * @param unitIsTarget The predicate that decides whether iteration can be stopped
+     * upon encountering a unit.
+     * @return true if [path] is considered available, false otherwise.
+     */
     suspend fun checkPathAvailability(
         path: Paths2D.PathStrategy,
         startCell: Cell,

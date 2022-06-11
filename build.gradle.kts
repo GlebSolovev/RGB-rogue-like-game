@@ -12,7 +12,7 @@ plugins {
 
     id("io.gitlab.arturbosch.detekt") version "1.19.0"
 
-    id("org.jetbrains.dokka") version "1.6.10"
+    id("org.jetbrains.dokka") version "1.6.20"
 
     id("com.adarshr.test-logger") version "3.1.0"
 
@@ -26,7 +26,7 @@ buildscript {
     // This is to be able to configure the HTML Dokka plugin (custom styles, etc.)
     // Note: this can't be put in buildSrc unfortunately
     dependencies {
-        classpath("org.jetbrains.dokka:dokka-base:1.6.10")
+        classpath("org.jetbrains.dokka:dokka-base:1.6.20")
     }
 }
 
@@ -79,7 +79,7 @@ detekt {
 tasks.dokkaHtml.configure {
     dokkaSourceSets {
         pluginConfiguration<DokkaBase, DokkaBaseConfiguration> {
-            customAssets = listOf(file("todo-logo.png"))
+            customAssets = listOf(file("rgb-logo.png"))
             customStyleSheets = listOf(file("config/dokka/logo-styles.css"))
         }
     }
