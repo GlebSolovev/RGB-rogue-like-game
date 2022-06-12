@@ -22,11 +22,10 @@ import ru.hse.sd.rgb.views.View
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.system.exitProcess
 
 private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     e.printStackTrace()
-    onException()
+    onException(e)
 }
 
 private fun createGameCoroutineScope() = CoroutineScope(
@@ -44,10 +43,11 @@ const val ON_EXCEPTION_EXIT_CODE = 5
 
 var exceptionStackTrace: String? by AtomicReference(null)
 
-fun onException() {
+fun onException(e: Throwable) {
     gameCoroutineScope.cancel()
     viewCoroutineScope.cancel()
-    exitProcess(ON_EXCEPTION_EXIT_CODE)
+//    exitProcess(ON_EXCEPTION_EXIT_CODE)
+    exceptionStackTrace = e.stackTraceToString()
 }
 
 @Suppress("LongParameterList")
@@ -120,10 +120,7 @@ class Controller(
             is StartControllerMessage -> startGame()
             is DoLoadLevel -> loadLevel()
             is UserQuit -> quit()
-            else -> {
-                println(m)
-                unreachable
-            }
+            else -> unreachable
         }
 
         private suspend fun startGame(): GamePlayingState {
@@ -178,7 +175,6 @@ class Controller(
         creation.removeAllAndJoin()
         gameCoroutineScope.cancel()
         Ticker.stopDefaultScope()
-
         gameCoroutineScope = createGameCoroutineScope()
     }
 

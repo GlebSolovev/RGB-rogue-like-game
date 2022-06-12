@@ -15,9 +15,11 @@ import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.*
 import ru.hse.sd.rgb.gamelogic.exceptionStackTrace
+import ru.hse.sd.rgb.utils.getValue
 import ru.hse.sd.rgb.utils.ignore
 import ru.hse.sd.rgb.utils.messaging.Message
 import ru.hse.sd.rgb.utils.messaging.messages.*
+import ru.hse.sd.rgb.utils.setValue
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Direction
 import ru.hse.sd.rgb.utils.structures.RGB
@@ -32,6 +34,7 @@ import org.junit.jupiter.api.RepeatedTest
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class IntegrationTest {
@@ -56,9 +59,9 @@ class IntegrationTest {
         }
 
         suspend fun almostCycleThroughLevel1() {
-            repeat(10) { mockView.simulateUserMove(Direction.RIGHT) }
+            repeat(25) { mockView.simulateUserMove(Direction.RIGHT) }
             mockView.simulateUserMove(Direction.DOWN)
-            repeat(10) { mockView.simulateUserMove(Direction.LEFT) }
+            repeat(25) { mockView.simulateUserMove(Direction.LEFT) }
         }
 
         almostCycleThroughLevel1()
@@ -147,7 +150,7 @@ class IntegrationTest {
                 expectedEntitiesPredicates[p] = false
             }
 
-            withTimeoutOrNull(10000) {
+            withTimeoutOrNull(30000) {
                 while (true) {
                     val drawables = mockView.drawables
                     for (e in drawables.keys) {
@@ -159,9 +162,11 @@ class IntegrationTest {
                 }
             }
 
-            withTimeout(30000) {
-                controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
-            }
+            assertNotNull(
+                withTimeoutOrNull(10000) {
+                    controller.awaitLoadedLevel(controller.loseLevelDescriptionFilename)
+                }
+            )
             // hero is dead by now
 
             assertTrue { expectedEntitiesPredicates.values.all { it } }
@@ -174,27 +179,32 @@ class IntegrationTest {
         } catch (e: Throwable) {
             assertEquals("fail", e.stackTraceToString())
         } finally {
-            assertEquals(null, exceptionStackTrace)
-        }
-    }
-
-    private suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
-        while (currentLevelFilename != expectedLevelFilename ||
-            stateRepresentation != Controller.ControllerStateRepresentation.PLAYING
-        ) {
-            delay(100)
+            if (exceptionStackTrace != null) {
+                assertEquals(null, (exceptionStackTrace!!) as String?)
+            }
         }
     }
 }
 
-private class MockView : View() {
-    lateinit var lastInvSnapshot: InventoryViewSnapshot
+suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
+    while (currentLevelFilename != expectedLevelFilename ||
+        stateRepresentation != Controller.ControllerStateRepresentation.PLAYING
+    ) {
+        delay(100)
+    }
+}
+
+class MockView : View() {
+    var lastInvSnapshot: InventoryViewSnapshot? by AtomicReference(null)
     val drawables = DrawablesMap()
 
-    inner class MockViewState : ViewState() {
+    private inner class MockViewState : ViewState() {
         override fun next(m: Message): ViewState {
             when (m) {
                 is InventoryOpened -> {
+                    lastInvSnapshot = m.invSnapshot
+                }
+                is InventoryUpdated -> {
                     lastInvSnapshot = m.invSnapshot
                 }
                 is EntityUpdated -> {
