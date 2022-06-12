@@ -55,7 +55,7 @@ class Hero(
 
     companion object {
         const val DEFAULT_VIEW_ENTITY_SWING_SCALE_FACTOR = 1.0
-        const val ADDITIONAL_FROZEN_SLOW_DOWN_COEFFICIENT = 0.5
+        const val ADDITIONAL_FROZEN_SLOW_DOWN_COEFFICIENT = 1.0
 
         const val INVENTORY_VIEW_UPDATE_PERIOD_MILLIS = 10L
     }
@@ -240,13 +240,15 @@ class Hero(
                 val unitsPersistence = unitList.map {
                     it as HpGameUnit
                     HeroPersistence.HpUnitPersistence(first.cell - it.cell, it.gameColor, 1, 1)
-                }
+                } // actual persistence has negative hp, which is not a valid state
+
                 val fakePersistence = HeroPersistence(
                     unitsPersistence,
                     inventory.extractPersistence(),
-                    50, // TODO: for some reason only works when hardcoded
+                    heroPersistence.singleDirMovePeriodLimit,
                     controller.experience.getExperience(this@Hero)!!
                 )
+
                 controller.receive(
                     ControllerNextLevel(controller.loseLevelDescriptionFilename, fakePersistence)
                 )
