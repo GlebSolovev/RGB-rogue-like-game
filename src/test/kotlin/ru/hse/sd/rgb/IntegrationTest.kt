@@ -5,7 +5,6 @@ import ru.hse.sd.rgb.gameloaders.FileExperienceLevelsLoader
 import ru.hse.sd.rgb.gameloaders.FileHeroLoader
 import ru.hse.sd.rgb.gameloaders.FileLevelLoader
 import ru.hse.sd.rgb.gamelogic.Controller
-import ru.hse.sd.rgb.gamelogic.ciPrintLine
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.BehaviourBuilder
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.buildingblocks.EnableColorUpdate
 import ru.hse.sd.rgb.gamelogic.engines.experience.Experience
@@ -37,6 +36,7 @@ import ru.hse.sd.rgb.views.ViewUnit
 import ru.hse.sd.rgb.views.swing.SwingUnitAppearance
 import ru.hse.sd.rgb.views.swing.SwingUnitShape
 import kotlinx.coroutines.*
+import org.junit.jupiter.api.RepeatedTest
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -47,9 +47,8 @@ class IntegrationTest {
 
     private val filesFolder = "src/test/resources/integration"
 
-//    @RepeatedTest(50)
+    @RepeatedTest(5)
     fun testBasic(): Unit = runBlocking {
-        ciPrintLine.set("")
         val mockView = MockView()
         controller = Controller(
             FileLevelLoader("$filesFolder/level1.yaml"),
@@ -58,13 +57,11 @@ class IntegrationTest {
             FileHeroLoader("$filesFolder/hero.yaml"),
             mockView
         )
-        println("CONTROLLER WILL RECEIVE START")
         controller.receive(StartControllerMessage())
         val controllerJob = launch { controller.messagingRoutine() }
 
         withTimeout(2000) {
             controller.awaitLoadedLevel("$filesFolder/level1.yaml")
-            println("LOADED MUST BE AWAITED")
         }
 
         // useful for debugging
@@ -100,16 +97,12 @@ class IntegrationTest {
             repeat(25) { mockView.simulateUserMove(Direction.LEFT) }
         }
 
-        println(hehe())
-
         almostCycleThroughLevel1()
         mockView.simulateUserMove(Direction.UP)
-        println(hehe())
         mockView.useCurrentItem()
 
         almostCycleThroughLevel1()
         mockView.useCurrentItem()
-        println(hehe())
 
         // sharpy killed, both items picked and used
         assertEquals(Experience(0, 1), controller.experience.getExperience(controller.hero))
@@ -140,10 +133,9 @@ class IntegrationTest {
     }
 
     @Suppress("LongMethod")
-//    @RepeatedTest(5)
+    @RepeatedTest(5)
     fun testColors(): Unit = runBlocking {
         try {
-            ciPrintLine.set("")
             val mockView = MockView()
             controller = Controller(
                 FileLevelLoader("$filesFolder/level3.yaml"),
@@ -156,7 +148,6 @@ class IntegrationTest {
             val controllerJob = launch { controller.messagingRoutine() }
 
             withTimeout(2000) {
-                println(controller)
                 controller.awaitLoadedLevel("$filesFolder/level3.yaml")
             }
 
@@ -165,7 +156,6 @@ class IntegrationTest {
                 color: RGB,
                 attackType: AttackType = AttackType.HERO_TARGET
             ): Boolean {
-                println("SPAWN $cell $color ${controller.creation}")
                 return controller.creation.tryAddToWorld(TestEntity(cell, color, 99999, attackType))
             }
 
@@ -212,10 +202,6 @@ class IntegrationTest {
             )
             // hero is dead by now
 
-            println("\n\nGREAT RESULT")
-            for ((i, v) in expectedEntitiesPredicates.values.withIndex()) {
-                println("[$i]: $v")
-            }
             assertTrue { expectedEntitiesPredicates.values.all { it } }
 
             repeat(200) { // TODO: (see previous test)
@@ -227,14 +213,13 @@ class IntegrationTest {
             assertEquals("fail", e.stackTraceToString())
         } finally {
             if (exceptionStackTrace != null) {
-                assertEquals(null, (exceptionStackTrace!! + "\n\n" + ciPrintLine.get()) as String?)
+                assertEquals(null, (exceptionStackTrace!!) as String?)
             }
         }
     }
 }
 
 suspend fun Controller.awaitLoadedLevel(expectedLevelFilename: String) {
-    println("START AWAIT LOAD")
     while (currentLevelFilename != expectedLevelFilename ||
         stateRepresentation != Controller.ControllerStateRepresentation.PLAYING
     ) {
@@ -249,9 +234,6 @@ class MockView : View() {
     private inner class MockViewState : ViewState() {
         override fun next(m: Message): ViewState {
             when (m) {
-                is GameViewStarted -> {
-                    println("STARTED ВЬЮХА ПОЧЕМУХА")
-                }
                 is InventoryOpened -> {
                     lastInvSnapshot = m.invSnapshot
                 }

@@ -23,13 +23,6 @@ import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 
-var ciPrintLine = AtomicReference("")
-
-fun ciPrint(s: String) {
-    ciPrintLine.accumulateAndGet(s) { a, b -> a + b + "\n" }
-//    println(s)
-}
-
 private val exceptionHandler = CoroutineExceptionHandler { _, e ->
     e.printStackTrace()
     onException(e)
@@ -72,9 +65,6 @@ class Controller(
         private const val QUIT_LEVEL_FILENAME_ALIAS = "quit"
     }
 
-    var isInteresting by AtomicReference(false)
-        private set
-
     val stateRepresentation: ControllerStateRepresentation
         get() = when (state) {
             is GameInitState -> ControllerStateRepresentation.INIT
@@ -98,9 +88,7 @@ class Controller(
     }
 
     override suspend fun handleMessage(m: Message) {
-        ciPrint("controller got message $m in state $state")
         state = state.next(m)
-        ciPrint("controller state set to $state")
     }
 
     private abstract class ControllerState {
@@ -132,10 +120,7 @@ class Controller(
             is StartControllerMessage -> startGame()
             is DoLoadLevel -> loadLevel()
             is UserQuit -> quit()
-            else -> {
-                println(m)
-                unreachable
-            }
+            else -> unreachable
         }
 
         private suspend fun startGame(): GamePlayingState {
@@ -170,7 +155,6 @@ class Controller(
         override suspend fun next(m: Message) = when (m) {
             is UserQuit -> quit()
             is ControllerNextLevel -> {
-                isInteresting = true
                 val heroPersistence = m.heroPersistence
                 stopGame()
                 view.receive(GameViewStopped())
@@ -191,7 +175,6 @@ class Controller(
         creation.removeAllAndJoin()
         gameCoroutineScope.cancel()
         Ticker.stopDefaultScope()
-        ciPrint("controller: game stopped")
         gameCoroutineScope = createGameCoroutineScope()
     }
 

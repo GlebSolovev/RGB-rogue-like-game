@@ -1,7 +1,6 @@
 package ru.hse.sd.rgb.gamelogic.engines.creation
 
 import ru.hse.sd.rgb.controller
-import ru.hse.sd.rgb.gamelogic.ciPrint
 import ru.hse.sd.rgb.gamelogic.engines.fight.FightEngine
 import ru.hse.sd.rgb.gamelogic.engines.physics.PhysicsEngine
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
@@ -29,9 +28,6 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     suspend fun tryAddToWorld(entity: GameEntity): Boolean {
         mutex.withLock {
             if (isStopping) return false
-            if (controller.isInteresting) {
-                ciPrint("adding new $entity")
-            }
             return if (tryAddWithoutNotify(entity)) {
                 entity.receive(LifeStarted())
                 true
@@ -58,25 +54,16 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
     }
 
     // entity must not react on new events after calling with method
-    @Suppress("TooGenericExceptionCaught")
     suspend fun die(entity: GameEntity) {
         mutex.withLock {
             val experiencePoints = entity.experienceEntity.onDieExperiencePoints
             if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
 
             val dieRoutine: suspend () -> Unit = {
-                try {
-                    if (controller.isInteresting) {
-                        ciPrint("$entity is dying")
-                    }
-                    entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
-                    physics.remove(entity)
-                    entityCoroutines.remove(entity)!!.cancel()
-                    Ticker.tryStopTickers(entity)
-                } catch (e: Throwable) {
-                    ciPrint("AOAOAOAOAOAOAOA\ncontroller in state ${controller.stateRepresentation}")
-                    throw e
-                }
+                entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
+                physics.remove(entity)
+                entityCoroutines.remove(entity)!!.cancel()
+                Ticker.tryStopTickers(entity)
             }
             entity.receive(Dying()) // trigger onDie behaviours
             entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
@@ -87,7 +74,6 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
         mutex.withLock {
             isStopping = true
             entityCoroutines.values.forEach { it.cancelAndJoin() }
-            ciPrint("creation joined all")
 //        entityCoroutines.clear() // causes NPE in line 53 (??? after join ???)
         }
     }

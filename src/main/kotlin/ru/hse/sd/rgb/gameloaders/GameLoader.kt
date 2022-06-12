@@ -125,10 +125,6 @@ fun LevelLoader.createLevelEntities(
     var i = 0
     fun spawnWrapper(count: Int, action: (Cell) -> GameEntity) {
         shuffled.subList(i, i + count).forEach { cell ->
-            if (cell in occupiedCells) {
-                println("hehe")
-                error("hehe")
-            }
             val e = action(cell)
             entities.add(e)
             occupiedCells.addAll(e.units.map { it.cell })
