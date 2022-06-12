@@ -10,10 +10,8 @@ import ru.hse.sd.rgb.utils.WrongConfigError
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
-import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.io.File
 import kotlin.random.Random
 
 @Serializable
@@ -102,10 +100,8 @@ class FileLevelLoader(
 
     override fun loadLevelDescription(): LevelDescription {
         hero ?: error("loadHero() has not been called yet")
-        allEntities.addAll(createLevelEntities(maze.w, maze.h, maze, levelFactory, null, random))
-        allEntities.addAll(
-            customEntitiesDescriptions.map { it.createEntity() }
-        )
+        addLevelEntities(allEntities, maze.w, maze.h, maze, levelFactory, null, random)
+        allEntities.addAll(customEntitiesDescriptions.map { it.createEntity() })
         if (levelPortalDescription != null) {
             allEntities.add(
                 LevelPortal(

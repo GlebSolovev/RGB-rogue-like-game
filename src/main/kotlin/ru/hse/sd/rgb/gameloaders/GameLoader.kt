@@ -105,8 +105,10 @@ class GameLoader(
     fun loadLevel(): LevelDescription = levelLoader.loadLevelDescription()
 }
 
-@Suppress("unused", "LongParameterList") // extension instead of visibility modifier
-fun LevelLoader.createLevelEntities(
+@Suppress("unused", "LongParameterList")
+// extension instead of visibility modifier
+fun LevelLoader.addLevelEntities(
+    entities: MutableSet<GameEntity>,
     w: Int,
     h: Int,
     maze: Grid2D<Boolean>,
@@ -114,8 +116,6 @@ fun LevelLoader.createLevelEntities(
     nextLevelDescriptionFilename: String?, // generates an open portal in a random cell
     random: Random = Random
 ): Set<GameEntity> {
-    val entities = mutableSetOf<GameEntity>()
-
     for (x in 1 until w - 1) for (y in 1 until h - 1) if (maze[x, y]) entities.add(
         levelFactory.createWall(Cell(x, y))
     )

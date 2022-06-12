@@ -128,13 +128,13 @@ class IntegrationTest {
 
             fun GameEntity.testColor(color: RGB) = units.first().gameColor == color
             val expectedEntitiesPredicates = mutableMapOf<(GameEntity) -> Boolean, Boolean>()
-            for (c in 0..11) {
+            for (c in 0..10) { // TODO: test icicles
                 val rgb = RGB(c, c, c)
                 val cell = Cell(c + 1, c + 1)
-                if (c == 11)
-                    assertTrue { spawnTestEntity(cell, rgb) }
-                else
-                    assertTrue { spawnTestEntity(cell, rgb, AttackType.RANDOM_TARGET) }
+//                if (c == 11) {
+//                    assertTrue { spawnTestEntity(cell, rgb, AttackType.RANDOM_TARGET) }
+//                } else
+                assertTrue { spawnTestEntity(cell, rgb, AttackType.HERO_TARGET) }
                 val p: (GameEntity) -> Boolean = {
                     it.testColor(rgb) && when (c) {
                         in 0..1 -> true
@@ -143,7 +143,7 @@ class IntegrationTest {
                         8 -> it is LaserPart
                         9 -> true
                         10 -> it is ConfuseBall
-                        11 -> it is Icicle // only spawns with IcicleBomb
+//                        11 -> it is Icicle // only spawns with IcicleBomb
                         else -> unreachable
                     }
                 }
@@ -158,6 +158,7 @@ class IntegrationTest {
                             if (p(e)) expectedEntitiesPredicates[p] = true
                         }
                     }
+                    if (expectedEntitiesPredicates.values.all { it }) return@withTimeoutOrNull
                     delay(1) // cancellation point
                 }
             }

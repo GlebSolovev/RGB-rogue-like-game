@@ -68,7 +68,7 @@ class RandomLevelLoader private constructor(
         val (w, h) = basicParams ?: throw IllegalStateException("loadBasicParams() has not been called yet")
         val maze = maze ?: throw IllegalStateException("loadHero() has not been called yet")
 
-        entities.addAll(createLevelEntities(w, h, maze, levelFactory, nextLevelDescriptionFilename, random))
+        addLevelEntities(entities, w, h, maze, levelFactory, nextLevelDescriptionFilename, random)
 
         return LevelDescription(
             GameWorldDescription(w, h, entities, levelFactory.bgColor),

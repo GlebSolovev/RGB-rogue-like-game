@@ -55,7 +55,9 @@ abstract class State {
     open suspend fun handleContinueTick(): State = messageNotSupported
     open suspend fun handleWatcherTick(): State = messageNotSupported
     open suspend fun handleCloneTick(): State = messageNotSupported
-    open suspend fun handleBurnTick(): State = messageNotSupported
+    open suspend fun handleBurnTick(): State =
+        this.also { println("BurnTick suppressed!") } // messageNotSupported TODO: MEGAKOSTYL
+
     open suspend fun handleExpireTick(): State = messageNotSupported
     open suspend fun handleDoUpdateInventoryViewTick(): State = messageNotSupported
 

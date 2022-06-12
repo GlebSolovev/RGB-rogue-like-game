@@ -5,7 +5,7 @@ import ru.hse.sd.rgb.awaitLoadedLevel
 import ru.hse.sd.rgb.controller
 import ru.hse.sd.rgb.gameloaders.*
 import ru.hse.sd.rgb.gameloaders.factories.OverloadableFactory
-import ru.hse.sd.rgb.gameloaders.factories.OverloadableFactoryType
+import ru.hse.sd.rgb.gameloaders.factories.SerializableFactoryType
 import ru.hse.sd.rgb.gameloaders.generators.generateMaze
 import ru.hse.sd.rgb.gamelogic.engines.experience.Experience
 import ru.hse.sd.rgb.gamelogic.engines.items.InventoryPersistence
@@ -68,7 +68,7 @@ class LevelGeneratorTest {
     fun testStressEntities() = repeat(100) {
         runBlocking {
             controller = Controller(
-                FileLevelLoader("$folder/emptyLevel.yaml"),
+                loadLevelLoader("$folder/emptyLevel.yaml"),
                 FileColorLoader("$folder/integration/colorsBasic.yaml"),
                 FileExperienceLevelsLoader("$folder/integration/experience.yaml"),
                 FileHeroLoader("$folder/integration/hero.yaml"),
@@ -96,7 +96,7 @@ class LevelGeneratorTest {
                 chamberMinSize = minPathSize
                 this.passageSize = passageSize
                 factory = OverloadableFactory(
-                    OverloadableFactoryType.FIERY,
+                    SerializableFactoryType.FIERY,
                     customGlitchSpawnCount = 10,
                     customSharpySpawnCount = 10,
                     customColorInverterSpawnCount = 10,
