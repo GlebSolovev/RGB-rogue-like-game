@@ -42,6 +42,8 @@ var gameCoroutineScope = createGameCoroutineScope()
 
 const val ON_EXCEPTION_EXIT_CODE = 5
 
+var exceptionStackTrace: String? by AtomicReference(null)
+
 fun onException() {
     gameCoroutineScope.cancel()
     viewCoroutineScope.cancel()
@@ -63,6 +65,15 @@ class Controller(
         private const val QUIT_LEVEL_FILENAME_ALIAS = "quit"
     }
 
+    val stateRepresentation: ControllerStateRepresentation
+        get() = when (state) {
+            is GameInitState -> ControllerStateRepresentation.INIT
+            is GamePlayingState -> ControllerStateRepresentation.PLAYING
+            else -> unreachable
+        }
+
+    var currentLevelFilename: String? by AtomicReference<String?>(null)
+
     private var state: ControllerState by AtomicReference<ControllerState>(
         GameInitState(
             initialLevelLoader,
@@ -71,6 +82,10 @@ class Controller(
             heroLoader.loadHeroInitParams().convertToInitialHeroPersistence()
         )
     )
+
+    enum class ControllerStateRepresentation {
+        INIT, PLAYING
+    }
 
     override suspend fun handleMessage(m: Message) {
         state = state.next(m)
@@ -92,6 +107,10 @@ class Controller(
         experienceLevelsLoader: ExperienceLevelsLoader,
         private val heroPersistence: HeroPersistence,
     ) : ControllerState() {
+        init {
+            currentLevelFilename = (levelLoader as? FileLevelLoader)?.filename
+        }
+
         val gameLoader = GameLoader(levelLoader, colorLoader, experienceLevelsLoader)
 
         override lateinit var hero: Hero
@@ -135,6 +154,7 @@ class Controller(
         override val engines: Engines,
         override val hero: Hero
     ) : ControllerState() {
+
         override suspend fun next(m: Message) = when (m) {
             is UserQuit -> quit()
             is ControllerNextLevel -> {

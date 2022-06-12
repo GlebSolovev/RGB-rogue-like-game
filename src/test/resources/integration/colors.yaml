@@ -11,11 +11,11 @@ baseColors:
 
   - name: "FIRE RED"
     rgb: 2 2 2
-    updatePeriodMillis: 10
+    updatePeriodMillis: 100
     updateEffects:
       - !<fireball>
         count: 1
-        movePeriodMillis: 5
+        movePeriodMillis: 50
         isControllable: true
         burningAttackPeriodMillis: 20
         burningAttack: 1
@@ -23,11 +23,11 @@ baseColors:
 
   - name: "FLAME RED"
     rgb: 3 3 3
-    updatePeriodMillis: 10
+    updatePeriodMillis: 100
     updateEffects:
       - !<fireball>
         count: 3
-        movePeriodMillis: 5
+        movePeriodMillis: 50
         isControllable: true
         burningAttackPeriodMillis: 15
         burningAttack: 1
@@ -35,11 +35,11 @@ baseColors:
 
   - name: "HELL RED"
     rgb: 4 4 4
-    updatePeriodMillis: 10
+    updatePeriodMillis: 100
     updateEffects:
       - !<fireball>
         count: 66
-        movePeriodMillis: 5
+        movePeriodMillis: 50
         isControllable: true
         burningAttackPeriodMillis: 10
         burningAttack: 2
@@ -51,60 +51,60 @@ baseColors:
 
   - name: "SEA BLUE"
     rgb: 5 5 5
-    updatePeriodMillis: 20
+    updatePeriodMillis: 200
     updateEffects:
       - !<wave>
         width: 3
-        movePeriodMillis: 20
+        movePeriodMillis: 200
         isControllable: false
 
   - name: "OCEAN BLUE"
     rgb: 6 6 6
-    updatePeriodMillis: 20
+    updatePeriodMillis: 200
     updateEffects:
       - !<wave>
         width: 5
-        movePeriodMillis: 15
+        movePeriodMillis: 150
         isControllable: true
 
   - name: "CARIBBEAN BLUE"
     rgb: 7 7 7
-    updatePeriodMillis: 20
+    updatePeriodMillis: 200
     updateEffects:
       - !<wave>
         width: 9
-        movePeriodMillis: 10
+        movePeriodMillis: 100
         isControllable: true
 
   - name: "PLASMA VIOLET"
     rgb: 8 8 8
-    updatePeriodMillis: 20
+    updatePeriodMillis: 200
     updateEffects:
       - !<laser>
-        persistMillis: 30
+        persistMillis: 300
 
   - name: "FOREST GREEN"
     rgb: 9 9 9
-    updatePeriodMillis: 50
+    updatePeriodMillis: 500
     updateEffects:
       - !<heal>
         isControllable: true
 
   - name: "WONDER PURPLE"
     rgb: 10 10 10
-    updatePeriodMillis: 40
+    updatePeriodMillis: 400
     updateEffects:
       - !<confuse>
-        movePeriodMillis: 15
+        movePeriodMillis: 150
         confuseDurationMillis: 30
 
   - name: "FREEZING ICE"
     rgb: 11 11 11
-    updatePeriodMillis: 30
+    updatePeriodMillis: 300
     updateEffects:
       - !<icicles_bomb>
         count: 1
-        movePeriodMillis: 25
+        movePeriodMillis: 250
         isControllable: true
         iciclesCount: 4
         slowDownCoefficient: 0.5

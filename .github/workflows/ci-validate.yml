@@ -51,12 +51,12 @@ jobs:
 
       - name: Execute gradle test (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
-        run: xvfb-run ./gradlew test --stacktrace
+        run: xvfb-run ./gradlew test
         shell: bash
 
       - name: Execute gradle test (not Ubuntu)
         if: matrix.os != 'ubuntu-latest'
-        run: ./gradlew test --stacktrace
+        run: ./gradlew test
         shell: bash
 
       - name: Execute gradle lint (Ubuntu)

@@ -10,8 +10,10 @@ import ru.hse.sd.rgb.utils.WrongConfigError
 import ru.hse.sd.rgb.utils.structures.Cell
 import ru.hse.sd.rgb.utils.structures.Grid2D
 import ru.hse.sd.rgb.utils.structures.RGB
+import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.io.File
 import kotlin.random.Random
 
 @Serializable
@@ -64,7 +66,11 @@ data class FileCustomLevelDescription(
     val levelPortalDescription: LevelPortalDescription? = null,
 ) : FileLevelDescription()
 
-class FileLevelLoader(desc: FileCustomLevelDescription, private val random: Random = Random) : LevelLoader {
+class FileLevelLoader(
+    val filename: String,
+    description: FileCustomLevelDescription,
+    private val random: Random = Random
+) : LevelLoader {
 
     private val levelFactory: LevelContentFactory
     private val maze: Grid2D<Boolean>
@@ -78,11 +84,11 @@ class FileLevelLoader(desc: FileCustomLevelDescription, private val random: Rand
     private val allEntities = mutableSetOf<GameEntity>()
 
     init {
-        levelFactory = desc.levelFactory
-        maze = parseMaze(desc.mazeRepresentation)
-        heroSpawnCell = desc.heroSpawnCell
-        customEntitiesDescriptions = desc.customEntities
-        levelPortalDescription = desc.levelPortalDescription
+        levelFactory = description.levelFactory
+        maze = parseMaze(description.mazeRepresentation)
+        heroSpawnCell = description.heroSpawnCell
+        customEntitiesDescriptions = description.customEntities
+        levelPortalDescription = description.levelPortalDescription
     }
 
     override fun loadBasicParams() = LevelBasicParams(maze.w, maze.h)

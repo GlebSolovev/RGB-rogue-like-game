@@ -172,7 +172,7 @@ fun loadLevelLoader(filename: String): LevelLoader {
     val format = Yaml(serializersModule = levelSerializersModule)
     val desc = format.decodeFromStream<FileLevelDescription>(File(filename).inputStream())
     return when (desc) {
-        is FileCustomLevelDescription -> FileLevelLoader(desc)
+        is FileCustomLevelDescription -> FileLevelLoader(filename, desc)
         is FileRandomLevelDescription -> RandomLevelLoader(desc)
     }
 }
