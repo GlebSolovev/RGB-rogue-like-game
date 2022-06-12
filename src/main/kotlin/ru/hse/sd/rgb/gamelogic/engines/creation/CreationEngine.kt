@@ -11,6 +11,7 @@ import ru.hse.sd.rgb.utils.messaging.messages.Dying
 import ru.hse.sd.rgb.utils.messaging.messages.LifeEnded
 import ru.hse.sd.rgb.utils.messaging.messages.LifeStarted
 import ru.hse.sd.rgb.utils.setValue
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
@@ -49,20 +50,22 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
      * @return true if [entity] was successfully added to game world, false otherwise.
      */
     suspend fun tryAddToWorld(entity: GameEntity): Boolean {
-        mutex.withLock {
-            if (isStopping) return false
-            return if (tryAddWithoutNotify(entity)) {
-                entity.receive(LifeStarted())
-                true
-            } else false
-        }
+        return if (tryAddWithoutNotify(entity)) {
+            entity.receive(LifeStarted())
+            true
+        } else false
     }
 
     private suspend fun tryAddWithoutNotify(entity: GameEntity): Boolean {
-        if (!physics.tryPopulate(entity)) return false
-        entity.units.forEach { unit -> fightEngine.registerUnit(unit) }
-        entityCoroutines[entity] = gameCoroutineScope.launch { entity.messagingRoutine() }
-        return true
+        mutex.withLock {
+            if (isStopping) return false
+
+            if (!physics.tryPopulate(entity)) return false
+            entity.units.forEach { unit -> fightEngine.registerUnit(unit) }
+            entityCoroutines[entity] =
+                gameCoroutineScope.launch(CoroutineName("coro $entity")) { entity.messagingRoutine() }
+            return true
+        }
     }
 
     /**
@@ -108,20 +111,18 @@ class CreationEngine(private val physics: PhysicsEngine, private val fightEngine
      * @param entity The entity to be removed from game world.
      */
     suspend fun die(entity: GameEntity) {
-        mutex.withLock {
-            // TODO: hero shouldn't receive experience for entities that died on their own
-            val experiencePoints = entity.experienceEntity.onDieExperiencePoints
-            if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
+        // TODO: hero shouldn't receive experience for entities that died on their own
+        val experiencePoints = entity.experienceEntity.onDieExperiencePoints
+        if (experiencePoints != null) controller.experience.gainExperience(controller.hero, experiencePoints)
 
-            val dieRoutine: suspend () -> Unit = {
-                entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
-                physics.remove(entity)
-                entityCoroutines.remove(entity)!!.cancel()
-                Ticker.tryStopTickers(entity)
-            }
-            entity.receive(Dying()) // trigger onDie behaviours
-            entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
+        val dieRoutine: suspend () -> Unit = {
+            entity.units.forEach { unit -> fightEngine.unregisterUnit(unit) }
+            physics.remove(entity)
+            entityCoroutines.remove(entity)!!.cancel()
+            Ticker.tryStopTickers(entity)
         }
+        entity.receive(Dying()) // trigger onDie behaviours
+        entity.receive(LifeEnded(dieRoutine)) // finish lifecycle
     }
 
     /**
