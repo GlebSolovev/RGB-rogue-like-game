@@ -98,15 +98,9 @@ class Controller(
         override lateinit var engines: Engines
 
         override suspend fun next(m: Message) = when (m) {
-            is StartControllerMessage -> {
-                startGame()
-            }
-            is DoLoadLevel -> {
-                loadLevel()
-            }
-            is UserQuit -> {
-                quit()
-            }
+            is StartControllerMessage -> startGame()
+            is DoLoadLevel -> loadLevel()
+            is UserQuit -> quit()
             else -> {
                 println(m)
                 unreachable
@@ -142,9 +136,7 @@ class Controller(
         override val hero: Hero
     ) : ControllerState() {
         override suspend fun next(m: Message) = when (m) {
-            is FinishControllerMessage, is UserQuit -> { // TODO: finish screen
-                quit()
-            }
+            is UserQuit -> quit()
             is ControllerNextLevel -> {
                 val heroPersistence = m.heroPersistence
                 stopGame()
@@ -162,13 +154,15 @@ class Controller(
         }
     }
 
-    private fun stopGame() {
+    private suspend fun stopGame() {
+        creation.removeAllAndJoin()
         gameCoroutineScope.cancel()
-        gameCoroutineScope = createGameCoroutineScope()
         Ticker.stopDefaultScope()
+
+        gameCoroutineScope = createGameCoroutineScope()
     }
 
-    private fun quit(): Nothing {
+    private suspend fun quit(): Nothing {
         stopGame()
         // view is responsible for stopping itself
         view.receive(QuitView())

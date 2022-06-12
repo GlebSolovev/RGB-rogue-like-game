@@ -9,7 +9,6 @@ import ru.hse.sd.rgb.utils.messaging.Message
 
 // for Controller
 class StartControllerMessage : Message()
-data class FinishControllerMessage(val isWin: Boolean) : Message()
 class UserQuit : Message()
 class DoLoadLevel : Message()
 data class ControllerNextLevel(
