@@ -27,11 +27,7 @@ class UponSeeingBehaviour(
 
     override fun traverseTickers(onEach: (Ticker) -> Unit) {
         onEach(watcherTicker)
-    }
-
-    override fun traverseSubtree(onEach: (Behaviour) -> Unit) {
-        onEach(this)
-        currentBehaviour.traverseSubtree(onEach)
+        currentBehaviour.traverseTickers(onEach)
     }
 
     override fun onStart() {

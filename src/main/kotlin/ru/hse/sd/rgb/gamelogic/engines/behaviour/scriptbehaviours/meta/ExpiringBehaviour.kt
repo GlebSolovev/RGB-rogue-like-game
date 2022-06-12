@@ -23,11 +23,7 @@ class ExpiringBehaviour(
 
     override fun traverseTickers(onEach: (Ticker) -> Unit) {
         onEach(expiryTicker)
-    }
-
-    override fun traverseSubtree(onEach: (Behaviour) -> Unit) {
-        onEach(this)
-        temporaryBehaviour.traverseSubtree(onEach)
+        temporaryBehaviour.traverseTickers(onEach)
     }
 
     override fun onStart() {
