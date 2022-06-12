@@ -84,10 +84,10 @@ class Glitch(
     }
 
     override val behaviourEntity = object : BehaviourEntity() {
-        override fun createDirectAttackHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long): Behaviour =
+        override fun createDirectAttackHeroBehaviour(childBehaviour: Behaviour, movePeriodMillis: Long): Behaviour =
             glitchBaseBehaviour
 
-        override fun createDirectFleeFromHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long): Behaviour =
+        override fun createDirectFleeFromHeroBehaviour(childBehaviour: Behaviour, movePeriodMillis: Long): Behaviour =
             glitchBaseBehaviour
 
         override fun createUponSeeingBehaviour(

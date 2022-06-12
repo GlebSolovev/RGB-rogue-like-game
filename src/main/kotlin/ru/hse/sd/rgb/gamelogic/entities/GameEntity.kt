@@ -76,14 +76,14 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
     open inner class BehaviourEntity {
         open fun createDirectAttackHeroBehaviour(
-            baseBehaviour: Behaviour,
+            childBehaviour: Behaviour,
             movePeriodMillis: Long,
-        ): Behaviour = DirectAttackHeroBehaviour(baseBehaviour, movePeriodMillis)
+        ): Behaviour = DirectAttackHeroBehaviour(childBehaviour, movePeriodMillis)
 
         open fun createDirectFleeFromHeroBehaviour(
-            baseBehaviour: Behaviour,
+            childBehaviour: Behaviour,
             movePeriodMillis: Long,
-        ): Behaviour = DirectFleeFromHeroBehaviour(baseBehaviour, movePeriodMillis)
+        ): Behaviour = DirectFleeFromHeroBehaviour(childBehaviour, movePeriodMillis)
 
         open fun createUponSeeingBehaviour(
             childBehaviour: Behaviour,
@@ -117,10 +117,10 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
     }
 
     open inner class SingleBehaviourEntity(private val singleBehaviour: Behaviour) : BehaviourEntity() {
-        override fun createDirectAttackHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long) =
+        override fun createDirectAttackHeroBehaviour(childBehaviour: Behaviour, movePeriodMillis: Long) =
             singleBehaviour
 
-        override fun createDirectFleeFromHeroBehaviour(baseBehaviour: Behaviour, movePeriodMillis: Long) =
+        override fun createDirectFleeFromHeroBehaviour(childBehaviour: Behaviour, movePeriodMillis: Long) =
             singleBehaviour
 
         override fun createUponSeeingBehaviour(
