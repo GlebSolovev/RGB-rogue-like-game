@@ -1,9 +1,9 @@
 package ru.hse.sd.rgb.gamelogic.engines.behaviour
 
+import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.*
 import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.ExpiringBehaviour
 import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.messaging.messages.ApplyBehaviourMessage
-import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.*
 
 /**
  * Class for applying [MetaBehaviour]s to [GameEntity]-s.
@@ -15,6 +15,7 @@ import ru.hse.sd.rgb.gamelogic.engines.behaviour.scriptbehaviours.meta.*
  * Another feature this class provides is implicitly wrapping some behaviours into an
  * [ExpiringBehaviour], which allows applying temporary behaviours.
  */
+@Suppress("unused")
 class BehaviourEngine {
 
     /**

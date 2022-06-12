@@ -12,7 +12,7 @@ plugins {
 
     id("io.gitlab.arturbosch.detekt") version "1.19.0"
 
-    id("org.jetbrains.dokka") version "1.6.20"
+    id("org.jetbrains.dokka") version "1.6.10" // dokkaHtml not working, but OUTPUT_SIZE in build if version >= 1.6.20
 
     id("com.adarshr.test-logger") version "3.1.0"
 
@@ -26,7 +26,8 @@ buildscript {
     // This is to be able to configure the HTML Dokka plugin (custom styles, etc.)
     // Note: this can't be put in buildSrc unfortunately
     dependencies {
-        classpath("org.jetbrains.dokka:dokka-base:1.6.20")
+//        classpath("org.jetbrains.dokka:dokka-base:1.6.21")
+        classpath("org.jetbrains.dokka:dokka-base:1.6.10")
     }
 }
 
@@ -40,11 +41,12 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
-    implementation("com.charleskorn.kaml:kaml:0.44.0")
+    implementation("com.charleskorn.kaml:kaml:0.45.0")
 
     testImplementation(kotlin("test"))
 
-    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.6.20")
+//    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.6.21")
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.6.10")
 }
 
 tasks.test {

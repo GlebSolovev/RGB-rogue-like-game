@@ -1,9 +1,9 @@
 package ru.hse.sd.rgb.gamelogic.engines.fight
 
+import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.gamelogic.entities.GameUnit
 import ru.hse.sd.rgb.gamelogic.entities.GameUnitId
 import ru.hse.sd.rgb.gamelogic.entities.HpGameUnit
-import ru.hse.sd.rgb.gamelogic.entities.GameEntity
 import ru.hse.sd.rgb.utils.messaging.Ticker
 import ru.hse.sd.rgb.utils.messaging.messages.ColorTick
 import ru.hse.sd.rgb.utils.messaging.messages.HpChanged

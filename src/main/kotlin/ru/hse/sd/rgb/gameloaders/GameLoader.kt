@@ -174,6 +174,5 @@ fun loadLevelLoader(filename: String): LevelLoader {
     return when (desc) {
         is FileCustomLevelDescription -> FileLevelLoader(desc)
         is FileRandomLevelDescription -> RandomLevelLoader(desc)
-        else -> error("this branch is not reachable, dear kotlin compiler, please come to your senses")
     }
 }
