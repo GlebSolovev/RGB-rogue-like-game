@@ -1,7 +1,7 @@
 inventoryDescription:
   invGridW: 3
   invGridH: 3
-singleDirMovePeriodLimit: 50
+singleDirMovePeriodLimitMillis: 50
 unitsInitParams:
   - relativeShift:
       dx: 0

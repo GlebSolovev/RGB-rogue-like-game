@@ -68,6 +68,8 @@ class ExperienceEngine(heroExperienceLevels: List<ExperienceLevelDescription>) {
 
     suspend fun gainExperience(entity: GameEntity, points: Int) {
         withLockedEntity(entity) {
+            // TODO: deal with gainExperience for dead entity
+            if (!currentExperience.containsKey(entity)) return@withLockedEntity
             currentExperience[entity]!!.points += points
 
             val entityExperienceLevels = experienceLevels[entity::class]!!

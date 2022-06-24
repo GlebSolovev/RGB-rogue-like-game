@@ -56,14 +56,17 @@ abstract class ItemEntity(cell: Cell, color: RGB, private val respawned: Boolean
     // null if not ready to be picked up
     // MUST BE THREAD-SAFE!
     fun getNewItem(picker: GameEntity): Item? {
-        val spawnedJustNow = lifeStartTimeMillis == null
-        val dropTimeoutInProcess = System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS
-        val cannotBePicked = spawnedJustNow || dropTimeoutInProcess
-        if (respawned && cannotBePicked) {
+        if (respawned && cannotBePickedBecauseOfTimeout) {
             return null
         }
         return getNewItemUnconditionally(picker)
     }
+
+    private val cannotBePickedBecauseOfTimeout: Boolean
+        get() = run {
+            val spawnedJustNow = lifeStartTimeMillis == null
+            spawnedJustNow || System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS
+        }
 }
 
 abstract class BasicItemEntity(cell: Cell, color: RGB, respawned: Boolean) : ItemEntity(cell, color, respawned) {
