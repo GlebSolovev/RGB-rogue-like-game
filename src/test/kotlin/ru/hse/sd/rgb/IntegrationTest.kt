@@ -170,7 +170,9 @@ class IntegrationTest {
             )
             // hero is dead by now
 
-            assertTrue { expectedEntitiesPredicates.values.all { it } }
+            weakAssertTrue("all effects are supposed to be detected") {
+                expectedEntitiesPredicates.values.all { it }
+            }
 
             repeat(200) { // TODO: (see previous test)
                 mockView.simulateUserMove(Direction.RIGHT) // get to quit portal
@@ -184,6 +186,12 @@ class IntegrationTest {
                 assertEquals(null, (exceptionStackTrace!!) as String?)
             }
         }
+    }
+
+    @Suppress("SameParameterValue")
+    private fun weakAssertTrue(message: String = "", block: () -> Boolean) {
+        val result = block()
+        if (!result) println("Weak assert failed: $message")
     }
 }
 
