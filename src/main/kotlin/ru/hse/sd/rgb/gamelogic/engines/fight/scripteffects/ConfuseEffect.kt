@@ -27,7 +27,7 @@ class ConfuseEffect(
             movePeriodMillis,
             confuseDurationMillis,
             targetCell,
-            unit.parent.fightEntity.teamId
+            unit.parentTeamId
         )
         controller.creation.tryAddToWorld(confuseBall)
     }

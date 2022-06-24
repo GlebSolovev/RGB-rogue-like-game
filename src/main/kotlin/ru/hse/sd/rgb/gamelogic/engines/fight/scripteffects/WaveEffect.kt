@@ -59,7 +59,7 @@ class WaveEffect(
                 ColorCellNoHp(unit.gameColor, calcTarget(t)),
                 movePeriodMillis,
                 dir,
-                unit.parent.fightEntity.teamId
+                unit.parentTeamId
             )
         )
 

@@ -37,7 +37,7 @@ class FireballEffect(
                 burningAttackPeriodMillis,
                 burningAttack,
                 burningDurationMillis,
-                unit.parent.fightEntity.teamId
+                unit.parentTeamId
             )
             controller.creation.tryAddToWorld(fireball)
         }

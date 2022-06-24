@@ -46,11 +46,10 @@ class BurningBehaviour(
                 val currentMillis = System.currentTimeMillis()
                 if (currentMillis - lastSpreadBurningMillis >= SPREAD_BURNING_PERIOD_LIMIT_MILLIS) {
                     controller.behaviourEngine.applyBurningBehaviour(
-                        message.otherUnit.parent,
+                        message.otherEntity,
                         attackPeriodMillis,
                         attack,
-                        if (initialDurationMillis == null) null
-                        else (initialDurationMillis * SPREAD_BURNING_DURATION_COEFFICIENT).toLong()
+                        initialDurationMillis?.let { (it * SPREAD_BURNING_DURATION_COEFFICIENT).toLong() }
                     )
                     lastSpreadBurningMillis = currentMillis
                 }

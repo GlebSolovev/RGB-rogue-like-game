@@ -30,7 +30,7 @@ class LaserEffect(
                 ColorCellNoHp(unit.gameColor, unit.cell),
                 persistMillis,
                 dir,
-                unit.parent.fightEntity.teamId
+                unit.parentTeamId
             )
         )
     }

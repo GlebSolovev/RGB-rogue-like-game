@@ -16,7 +16,7 @@ class FreezeEnemyOnCollision(
 
     override suspend fun handleMessage(message: Message) {
         if (message is CollidedWith) {
-            val other = message.otherUnit.parent
+            val other = message.otherEntity
             if (entity.fightEntity.teamId != other.fightEntity.teamId) {
                 controller.behaviourEngine.applyFrozenBehaviour(other, slowDownCoefficient, durationMillis)
             }

@@ -25,12 +25,17 @@ class ExperienceEngine(heroExperienceLevels: List<ExperienceLevelDescription>) {
     private val experienceLevels = ConcurrentHashMap<KClass<out GameEntity>, List<ExperienceLevelDescription>>()
 
     init {
-        for (level in heroExperienceLevels) {
+        validateExperienceLevels(heroExperienceLevels)
+
+        val levelDescription = ExperienceLevelDescription(0, listOf(NoAction()))
+        experienceLevels[Hero::class] = listOf(levelDescription) + heroExperienceLevels
+    }
+
+    private fun validateExperienceLevels(experienceLevels: List<ExperienceLevelDescription>) {
+        for (level in experienceLevels) {
             if (level.requiredPoints <= 0)
                 throw IllegalArgumentException("levels' required points must be positive")
         }
-
-        experienceLevels[Hero::class] = listOf(ExperienceLevelDescription(0, listOf(NoAction()))) + heroExperienceLevels
     }
 
     private val entityMutexes = ConcurrentHashMap<GameEntity, Mutex>()

@@ -93,7 +93,7 @@ class FightEngine(
         override fun unsafeAttack(from: GameUnit, to: GameUnit) {
             if (to !is HpGameUnit) return
             val atk = computeAttack(from, to)
-            val sameTeam = from.parent.fightEntity.teamId == to.parent.fightEntity.teamId
+            val sameTeam = from.parentTeamId == to.parentTeamId
             if (atk > 0 && sameTeam) return // don't attack teammates
             if (atk < 0 && !sameTeam) return // don't heal enemies
             unsafeAttackDirectly(to, atk)
@@ -292,7 +292,7 @@ class FightEngine(
      * @param controlParams The parameters for controlling activated effects.
      */
     suspend fun update(unit: GameUnit, controlParams: ControlParams) {
-        if (!unit.parent.fightEntity.isUnitActive(unit)) return
+        if (!unit.isActive) return
         withLockedUnits(setOf(unit)) {
             val initialBaseColorId = unit.cachedBaseColorId
             for (updateEffect in initialBaseColorId.stats.updateEffects) {

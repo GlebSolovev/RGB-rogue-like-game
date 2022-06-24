@@ -31,14 +31,14 @@ fun generateMaze(
     return grid
 }
 
-private data class Chamber(val lb: Cell, val ru: Cell) {
+private data class Chamber(val leftBottom: Cell, val rightTop: Cell) {
     init {
-        assert(lb.x <= ru.x && lb.y <= ru.y)
+        assert(leftBottom.x <= rightTop.x && leftBottom.y <= rightTop.y)
     }
 }
 
 private fun splitChamber(
-    c: Chamber,
+    chamber: Chamber,
     grid: Grid2D<Boolean>,
     minSize: Int,
     passageSize: Int,
@@ -46,50 +46,54 @@ private fun splitChamber(
 ) {
 
     fun trySplitHorizontally(): Pair<Chamber, Chamber>? {
-        val dy = c.ru.y - c.lb.y + 1
+        val dy = chamber.rightTop.y - chamber.leftBottom.y + 1
         val variance = dy - minSize * 2
         if (variance <= 0) return null // TODO: fight duplicated code fragment
         val ry = random.nextInt(variance)
-        val yWall = c.lb.y + minSize + ry
+        val yWall = chamber.leftBottom.y + minSize + ry
 
-        val dx = c.ru.x - c.lb.x + 1
+        val dx = chamber.rightTop.x - chamber.leftBottom.x + 1
         val xHole = if (dx <= passageSize) {
-            c.lb.x..c.ru.x
+            chamber.leftBottom.x..chamber.rightTop.x
         } else {
-            val xStart = random.nextInt(c.lb.x, c.ru.x - passageSize + 1)
+            val xStart = random.nextInt(chamber.leftBottom.x, chamber.rightTop.x - passageSize + 1)
             xStart until xStart + passageSize
         }
 
-        for (x in c.lb.x..c.ru.x) grid[x, yWall] = true
-        for (x in xHole) grid[x, yWall] = false
+        for (x in chamber.leftBottom.x..chamber.rightTop.x) {
+            grid[x, yWall] = true
+        }
+        for (x in xHole) {
+            grid[x, yWall] = false
+        }
 
         return Pair(
-            Chamber(c.lb, Cell(c.ru.x, yWall - 1)),
-            Chamber(Cell(c.lb.x, yWall + 1), c.ru)
+            Chamber(chamber.leftBottom, Cell(chamber.rightTop.x, yWall - 1)),
+            Chamber(Cell(chamber.leftBottom.x, yWall + 1), chamber.rightTop)
         )
     }
 
     fun trySplitVertically(): Pair<Chamber, Chamber>? {
-        val dx = c.ru.x - c.lb.x
+        val dx = chamber.rightTop.x - chamber.leftBottom.x
         val variance = dx - minSize * 2 + 1
         if (variance <= 0) return null
         val rx = random.nextInt(variance)
-        val xHole = c.lb.x + minSize + rx
+        val xHole = chamber.leftBottom.x + minSize + rx
 
-        val dy = c.ru.y - c.lb.y + 1
+        val dy = chamber.rightTop.y - chamber.leftBottom.y + 1
         val yHole = if (dy <= passageSize) {
-            c.lb.y..c.ru.y
+            chamber.leftBottom.y..chamber.rightTop.y
         } else {
-            val yStart = random.nextInt(c.lb.y, c.ru.y - passageSize + 1)
+            val yStart = random.nextInt(chamber.leftBottom.y, chamber.rightTop.y - passageSize + 1)
             yStart until yStart + passageSize
         }
 
-        for (y in c.lb.y..c.ru.y) grid[xHole, y] = true
+        for (y in chamber.leftBottom.y..chamber.rightTop.y) grid[xHole, y] = true
         for (y in yHole) grid[xHole, y] = false
 
         return Pair(
-            Chamber(c.lb, Cell(xHole - 1, c.ru.y)),
-            Chamber(Cell(xHole + 1, c.lb.y), c.ru)
+            Chamber(chamber.leftBottom, Cell(xHole - 1, chamber.rightTop.y)),
+            Chamber(Cell(xHole + 1, chamber.leftBottom.y), chamber.rightTop)
         )
     }
 

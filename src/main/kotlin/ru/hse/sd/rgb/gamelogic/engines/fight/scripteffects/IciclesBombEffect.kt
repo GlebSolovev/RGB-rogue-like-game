@@ -37,7 +37,7 @@ class IciclesBombEffect(
                 iciclesCount,
                 slowDownCoefficient,
                 frozenDurationMillis,
-                unit.parent.fightEntity.teamId
+                unit.parentTeamId
             )
             controller.creation.tryAddToWorld(iciclesBomb)
         }

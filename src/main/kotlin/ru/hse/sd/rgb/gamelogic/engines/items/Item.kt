@@ -56,11 +56,12 @@ abstract class ItemEntity(cell: Cell, color: RGB, private val respawned: Boolean
     // null if not ready to be picked up
     // MUST BE THREAD-SAFE!
     fun getNewItem(picker: GameEntity): Item? {
-        if (respawned && (
-            lifeStartTimeMillis == null ||
-                System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS
-            )
-        ) return null
+        val spawnedJustNow = lifeStartTimeMillis == null
+        val dropTimeoutInProcess = System.currentTimeMillis() - lifeStartTimeMillis!! < Item.DROP_TIMEOUT_MILLIS
+        val cannotBePicked = spawnedJustNow || dropTimeoutInProcess
+        if (respawned && cannotBePicked) {
+            return null
+        }
         return getNewItemUnconditionally(picker)
     }
 }

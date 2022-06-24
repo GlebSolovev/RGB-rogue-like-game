@@ -31,7 +31,7 @@ import ru.hse.sd.rgb.views.swing.SwingUnitShape
 data class HeroPersistence(
     val unitsPersistence: List<HpUnitPersistence>,
     val inventoryPersistence: InventoryPersistence,
-    val singleDirMovePeriodLimit: Long,
+    val singleDirMovePeriodLimitMillis: Long,
     val experience: Experience
 ) {
     data class HpUnitPersistence(
@@ -60,7 +60,7 @@ class Hero(
         const val INVENTORY_VIEW_UPDATE_PERIOD_MILLIS = 10L
     }
 
-    private var singleDirMovePeriodLimit = heroPersistence.singleDirMovePeriodLimit
+    private var singleDirMovePeriodLimit = heroPersistence.singleDirMovePeriodLimitMillis
 
     override val viewEntity: ViewEntity = HeroViewEntity()
 
@@ -221,7 +221,7 @@ class Hero(
             }
 
             override suspend fun handleCollidedWith(message: CollidedWith): State {
-                val collidedWithEntity = message.otherUnit.parent
+                val collidedWithEntity = message.otherEntity
                 if (collidedWithEntity is ItemEntity) {
                     if (inventory.isNotFull()) {
                         val item = controller.itemsEngine.tryPick(this@Hero, collidedWithEntity) ?: return this
@@ -245,7 +245,7 @@ class Hero(
                 val fakePersistence = HeroPersistence(
                     unitsPersistence,
                     inventory.extractPersistence(),
-                    heroPersistence.singleDirMovePeriodLimit,
+                    heroPersistence.singleDirMovePeriodLimitMillis,
                     controller.experience.getExperience(this@Hero)!!
                 )
 

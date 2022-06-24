@@ -12,7 +12,7 @@ class AnnihilateItems(entity: GameEntity, childBlock: BehaviourBuildingBlock?) :
 
     override suspend fun handleMessage(message: Message) {
         if (message is CollidedWith) {
-            val other = message.otherUnit.parent
+            val other = message.otherEntity
             if (other is ItemEntity) {
                 controller.itemsEngine.tryPick(entity, other)
             }

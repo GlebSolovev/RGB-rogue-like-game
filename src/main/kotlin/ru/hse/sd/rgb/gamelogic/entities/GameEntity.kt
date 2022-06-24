@@ -64,7 +64,7 @@ abstract class GameEntity(colorCells: Set<ColorCell>) : Messagable() {
 
         open fun filterIncompatibleUnits(units: Set<GameUnit>): Set<GameUnit> {
             return if (
-                (isSolid && units.isNotEmpty()) || units.any { it.parent.physicalEntity.isSolid }
+                (isSolid && units.isNotEmpty()) || units.any { it.parentIsSolid }
             ) units else emptySet()
         }
     }

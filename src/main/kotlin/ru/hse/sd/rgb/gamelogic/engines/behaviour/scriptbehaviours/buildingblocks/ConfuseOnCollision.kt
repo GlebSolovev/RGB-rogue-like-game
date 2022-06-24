@@ -12,8 +12,8 @@ class ConfuseOnCollision(
     private val confuseDurationMillis: Long
 ) : BehaviourBuildingBlock(entity, childBlock) {
     override suspend fun handleMessage(message: Message) {
-        if (message is CollidedWith && message.otherUnit.parent.fightEntity.teamId != entity.fightEntity.teamId) {
-            val target = message.otherUnit.parent
+        if (message is CollidedWith && message.otherUnit.parentTeamId != entity.fightEntity.teamId) {
+            val target = message.otherEntity
             controller.behaviourEngine.applyConfusedBehaviour(target, confuseDurationMillis)
         }
         childBlock?.handleMessage(message)

@@ -78,7 +78,7 @@ class LevelPortal(
                     }
                 }
                 is CollidedWith -> {
-                    if (isEnabled && message.otherUnit.parent is Hero) {
+                    if (isEnabled && message.otherEntity is Hero) {
                         controller.hero.receive(HeroNextLevel(nextLevelDescriptionFilename))
                     }
                 }

@@ -5,6 +5,7 @@ import ru.hse.sd.rgb.gamelogic.engines.items.InventoryPersistence
 import ru.hse.sd.rgb.gamelogic.entities.scriptentities.HeroPersistence
 import ru.hse.sd.rgb.utils.structures.GridShift
 import ru.hse.sd.rgb.utils.structures.RGB
+import ru.hse.sd.rgb.utils.structures.generateRandomColor
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.decodeFromStream
 import kotlinx.serialization.Serializable
@@ -15,14 +16,14 @@ import kotlin.random.Random
 data class HeroInitParams(
     val unitsInitParams: List<HpUnitInitParams>,
     val inventoryDescription: InventoryDescription,
-    val singleDirMovePeriodLimit: Long,
+    val singleDirMovePeriodLimitMillis: Long,
 ) {
     fun convertToInitialHeroPersistence(): HeroPersistence = HeroPersistence(
         unitsInitParams.map {
             HeroPersistence.HpUnitPersistence(it.relativeShift, it.color, it.maxHp, it.maxHp)
         },
         InventoryPersistence(inventoryDescription.invGridW, inventoryDescription.invGridH),
-        singleDirMovePeriodLimit,
+        singleDirMovePeriodLimitMillis,
         Experience(0, 0)
     )
 }
@@ -47,11 +48,17 @@ class RandomHeroLoader(private val random: Random = Random) : HeroLoader {
     override fun loadHeroInitParams() = HeroInitParams(
         listOf(
             run {
-                val (r, g, b) = List(3) { random.nextInt(0, 255) }
-                HpUnitInitParams(GridShift(0, 0), RGB(r, g, b), random.nextInt(7, 15))
+                val relativeShift = GridShift(0, 0)
+                val color = generateRandomColor(random)
+                val maxHp = random.nextInt(7, 15)
+                HpUnitInitParams(relativeShift, color, maxHp)
             }
         ),
-        InventoryDescription(random.nextInt(1, 4), random.nextInt(1, 4)),
-        50L
+        run {
+            val invGridWidth = random.nextInt(1, 4)
+            val invGridHeight = random.nextInt(1, 4)
+            InventoryDescription(invGridWidth, invGridHeight)
+        },
+        singleDirMovePeriodLimitMillis = 50L
     )
 }

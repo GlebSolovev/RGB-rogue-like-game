@@ -24,6 +24,12 @@ sealed class GameUnit(
     override fun equals(other: Any?) = this === other || id == (other as? GameUnit)?.id
 
     override fun hashCode(): Int = id.hashCode()
+
+    val parentTeamId get() = parent.fightEntity.teamId
+
+    val isActive get() = parent.fightEntity.isUnitActive(this)
+
+    val parentIsSolid get() = parent.physicalEntity.isSolid
 }
 
 class NoHpGameUnit(

@@ -10,7 +10,10 @@ import ru.hse.sd.rgb.utils.structures.RGB
 
 // game logic messages
 data class HpChanged(val myUnit: GameUnit, val isFatal: Boolean) : SaveInNotStartedAndReplayInOngoingMessage()
-data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : SaveInNotStartedAndReplayInOngoingMessage()
+data class CollidedWith(val myUnit: GameUnit, val otherUnit: GameUnit) : SaveInNotStartedAndReplayInOngoingMessage() {
+    val otherEntity get() = otherUnit.parent
+}
+
 class DoMove : Message()
 class Dying : SaveInNotStartedAndReplayInOngoingMessage() // message behaviours about dying
 

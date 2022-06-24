@@ -11,7 +11,7 @@ class DieOnCollisionWithOtherTeam(entity: GameEntity, childBlock: BehaviourBuild
 
     override suspend fun handleMessage(message: Message) {
         if (message is CollidedWith) {
-            if (message.otherUnit.parent.fightEntity.teamId != entity.fightEntity.teamId) {
+            if (message.otherUnit.parentTeamId != entity.fightEntity.teamId) {
                 controller.creation.die(entity)
             }
         }
