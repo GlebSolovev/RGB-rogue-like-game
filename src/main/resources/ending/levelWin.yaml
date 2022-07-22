@@ -1,0 +1,34 @@
+!<custom>
+
+levelFactory:
+  baseFactoryType: COLD
+  customBgColor: 220 200 200
+
+  customGlitchSpawnCount: 0
+  customSharpySpawnCount: 0
+
+  customColorModificationSpawnCount: 0
+  customInstantHealSpawnCount: 0
+  customColorInverterSpawnCount: 0
+
+mazeRepresentation: [
+    "..........................................",
+    "..........................................",
+    "..#...#..##..#...#...#...#.###.#...#...#..",
+    "...#.#..#..#.#...#...#...#..#..##..#...#..",
+    "....#...#..#.#...#...#...#..#..#.#.#...#..",
+    "....#...#..#.#...#...#.#.#..#..#..##......",
+    "....#....##...###.....#.#..###.#...#...#..",
+    "..........................................",
+    "..........................................",
+    "..........................................",
+    ".........................................." ]
+
+heroSpawnCell: 4 8
+
+customEntities: []
+
+levelPortalDescription:
+  cell: 37 8
+  nextLevelDescriptionFilename: "quit"
+  heroExperienceLevelToEnableOn: 0

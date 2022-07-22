@@ -1,0 +1,64 @@
+!<custom>
+
+levelFactory:
+  baseFactoryType: COLD
+#  customBgColor: 50 0 0
+  customSharpySpawnCount: 2
+  customGlitchSpawnCount: 0
+
+mazeRepresentation: [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    ".......#############.......",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    ".............#.............",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."]
+
+heroSpawnCell: 7 7
+
+# TODO: use YAML anchors (problem: polymorphic tags necessary)
+customEntities:
+  - !<sharpy>
+    cell: 20 7
+    color: 100 200 100
+    hp: 5
+    movePeriodMillis: 1000
+    seeingDepth: 10
+  - !<sharpy>
+    cell: 7 20
+    color: 100 200 100
+    hp: 5
+    movePeriodMillis: 1000
+    seeingDepth: 10
+  - !<sharpy>
+    cell: 20 20
+    color: 100 200 100
+    hp: 5
+    movePeriodMillis: 1000
+    seeingDepth: 10
+
+levelPortalDescription:
+  cell: 1 1
+  nextLevelDescriptionFilename: "src/main/resources/sampleLevel.yaml"
+  heroExperienceLevelToEnableOn: 3

@@ -1,0 +1,33 @@
+!<custom>
+
+levelFactory:
+  baseFactoryType: FIERY
+
+  customGlitchSpawnCount: 0
+  customSharpySpawnCount: 0
+
+  customColorModificationSpawnCount: 1
+  customInstantHealSpawnCount: 1
+  customColorInverterSpawnCount: 1
+
+mazeRepresentation: [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................" ]
+
+heroSpawnCell: 5 9
+
+customEntities: []

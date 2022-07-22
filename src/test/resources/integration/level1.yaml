@@ -1,0 +1,40 @@
+!<custom>
+
+levelFactory:
+  baseFactoryType: FIERY
+
+  customGlitchSpawnCount: 0
+  customSharpySpawnCount: 0
+
+  customColorModificationSpawnCount: 1
+  customColorModificationOutcomes:
+    - weight: 1
+      result: 1 1 1
+
+  customInstantHealSpawnCount: 1
+  customInstantHealOutcomes:
+    - weight: 1
+      result: 1
+
+  customColorInverterSpawnCount: 0
+
+mazeRepresentation: [
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................." ]
+
+heroSpawnCell: 1 1
+
+customEntities:
+  - !<sharpy>
+    cell: 22 2
+    color: 0 0 0
+    hp: 2
+    movePeriodMillis: 99999999
+    seeingDepth: 1
+
+levelPortalDescription:
+  cell: 1 1
+  nextLevelDescriptionFilename: "src/test/resources/integration/level2.yaml"
+  heroExperienceLevelToEnableOn: 1

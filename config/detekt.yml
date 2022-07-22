@@ -1,0 +1,50 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: true
+
+processors:
+  active: true
+  exclude:
+    - 'DetektProgressListener'
+
+console-reports:
+  active: true
+
+complexity:
+  ComplexMethod:
+    threshold: 40
+  NestedBlockDepth:
+    threshold: 5
+  LongMethod:
+    threshold: 65
+
+style:
+  ReturnCount:
+    max: 5
+  WildcardImport:
+    excludeImports:
+      - 'java.io.*'
+      - 'java.util.*'
+      - 'kotlin.test.*'
+      - 'kotlinx.coroutines.*'
+      - 'ru.hse.sd.rgb.utils.messaging.messages.*'
+      - 'ru.hse.sd.rgb.utils.messaging.*'
+      - 'ru.hse.sd.rgb.utils.structures.*'
+      - 'ru.hse.sd.rgb.utils.*'
+      - 'ru.hse.sd.rgb.gamelogic.engines.fight.*'
+      - 'ru.hse.sd.rgb.gamelogic.engines.behaviour.*'
+      - 'ru.hse.sd.rgb.gamelogic.engines.items.*'
+      - 'ru.hse.sd.rgb.gamelogic.entities.scriptentities.*'
+      - 'ru.hse.sd.rgb.gameloaders.*'
+      - 'java.awt.geom.*'
+      - 'kotlin.math.*'
+  ForbiddenComment:
+    allowedPatterns: 'TODO'
+  MagicNumber:
+    ignoreEnums: true
+  UnnecessaryAbstractClass:
+    active: false

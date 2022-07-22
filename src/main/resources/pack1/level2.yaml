@@ -1,0 +1,8 @@
+!<random>
+
+width: 40
+height: 40
+chamberMinSize: 5
+passageSize: 5
+levelFactoryType: FIERY
+nextLevelDescriptionFilename: "src/main/resources/pack1/level3.yaml"

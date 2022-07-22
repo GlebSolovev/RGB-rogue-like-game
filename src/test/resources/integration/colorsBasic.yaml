@@ -1,0 +1,18 @@
+baseColors:
+  - name: "weak"
+    rgb: 0 0 0
+    updatePeriodMillis: ~
+    updateEffects: [ ]
+
+  - name: "strong"
+    rgb: 1 1 1
+    updatePeriodMillis: ~
+    updateEffects: [ ]
+
+# matrix layout:
+#   from
+# t  . .
+# o  . .
+interactionMatrixRepresentation: [
+  "1 20",
+  "1 1"]

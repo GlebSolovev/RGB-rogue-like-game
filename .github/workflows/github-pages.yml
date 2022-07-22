@@ -1,0 +1,35 @@
+name: Publish-Dokka-documentation
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+  workflow_dispatch: # allow to run this workflow manually
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out project to runner
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'gradle'
+          check-latest: true
+
+      - name: Build documentation
+        run: |
+          chmod +x gradlew
+          ./gradlew dokkaHtml
+
+      - name: Publish documentation
+        uses: JamesIves/github-pages-deploy-action@v4.2.3
+        with:
+          branch: gh-pages
+          folder: ./build/dokka/html

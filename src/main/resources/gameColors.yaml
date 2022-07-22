@@ -1,0 +1,130 @@
+baseColors:
+  - name: "SHARP STONE"
+    rgb: 50 50 50
+    updatePeriodMillis: ~
+    updateEffects: [ ]
+
+  - name: "NEWBIE GRAY"
+    rgb: 100 100 100
+    updatePeriodMillis: ~
+    updateEffects: [ ]
+
+  - name: "FIRE RED"
+    rgb: 150 0 0
+    updatePeriodMillis: 1000
+    updateEffects:
+      - !<fireball>
+        count: 1
+        movePeriodMillis: 50
+        isControllable: true
+        burningAttackPeriodMillis: 2000
+        burningAttack: 1
+        burningDurationMillis: 2500
+
+  - name: "FLAME RED"
+    rgb: 220 0 0
+    updatePeriodMillis: 1000
+    updateEffects:
+      - !<fireball>
+        count: 3
+        movePeriodMillis: 50
+        isControllable: true
+        burningAttackPeriodMillis: 1500
+        burningAttack: 1
+        burningDurationMillis: 5000
+
+  - name: "HELL RED"
+    rgb: 255 0 0
+    updatePeriodMillis: 1000
+    updateEffects:
+      - !<fireball>
+        count: 66
+        movePeriodMillis: 50
+        isControllable: true
+        burningAttackPeriodMillis: 1000
+        burningAttack: 2
+        burningDurationMillis: 4000
+
+      - !<red_smolder>
+        attack: 1
+        decreaseRed: 5
+
+  - name: "SEA BLUE"
+    rgb: 0 100 170
+    updatePeriodMillis: 2000
+    updateEffects:
+      - !<wave>
+        width: 3
+        movePeriodMillis: 200
+        isControllable: false
+
+  - name: "OCEAN BLUE"
+    rgb: 0 100 200
+    updatePeriodMillis: 2000
+    updateEffects:
+      - !<wave>
+        width: 5
+        movePeriodMillis: 150
+        isControllable: true
+
+  - name: "CARIBBEAN BLUE"
+    rgb: 20 220 230
+    updatePeriodMillis: 500
+    updateEffects:
+      - !<wave>
+        width: 9
+        movePeriodMillis: 100
+        isControllable: true
+
+  - name: "PLASMA VIOLET"
+    rgb: 140 0 200
+    updatePeriodMillis: 2500
+    updateEffects:
+      - !<laser>
+        persistMillis: 300
+
+  - name: "FOREST GREEN"
+    rgb: 0 170 0
+    updatePeriodMillis: 5000
+    updateEffects:
+      - !<heal>
+        isControllable: true
+
+  - name: "WONDER PURPLE"
+    rgb: 200 60 200
+    updatePeriodMillis: 4000
+    updateEffects:
+      - !<confuse>
+        movePeriodMillis: 150
+        confuseDurationMillis: 3000
+
+  - name: "FREEZING ICE"
+    rgb: 220 240 250
+    updatePeriodMillis: 3000
+    updateEffects:
+      - !<icicles_bomb>
+        count: 1
+        movePeriodMillis: 250
+        isControllable: true
+        iciclesCount: 4
+        slowDownCoefficient: 0.5
+        frozenDurationMillis: 4000
+
+# matrix layout:
+#   from
+# t  . .
+# o  . .
+interactionMatrixRepresentation: [
+ # 0   1   2   3   4   5   6   7   8   9   10  11",FROM / TO:
+  "5   1   2   3   6   3   4   5   7   -1  1   3",   # 0 = SHARP STONE
+  "5   1   2   3   6   3   4   5   7   -1  1   3",   # 1 = NEWBIE GRAY
+  "1   1   1   2   6   8   9   15  1   -1  1   5",   # 2 = FIRE RED
+  "1   1   1   2   6   8   9   15  1   -1  1   5",   # 3 = FLAME RED
+  "6   6   6   6   6   6   6   6   6   6   6   6",   # 4 = HELL RED
+  "1   1   11  11  6   1   1   1   2   -1  1   8",   # 5 = SEA BLUE
+  "1   1   10  10  6   1   1   1   2   -1  1   8",   # 6 = OCEAN BLUE
+  "1   1   5   6   6   1   1   1   2   -3  1   8",   # 7 = CARIBBEAN BLUE
+  "1   1   1   3   6   2   3   5   0   -1  1   2",   # 8 = PLASMA VIOLET
+  "4   1   5   6   6   1   1   1   4   -1  1   3",   # 9 = FOREST GREEN
+  "2   1   2   3   6   2   2   2   2   -1  1   2",   # 10 = WONDER PURPLE
+  "2   1   6   8   6   1   1   1   5   -3  1   3"]  # 11 = FREEZING ICE

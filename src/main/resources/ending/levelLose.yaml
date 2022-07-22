@@ -1,0 +1,34 @@
+!<custom>
+
+levelFactory:
+  baseFactoryType: FIERY
+  customBgColor: 30 30 30
+
+  customGlitchSpawnCount: 0
+  customSharpySpawnCount: 0
+
+  customColorModificationSpawnCount: 0
+  customInstantHealSpawnCount: 0
+  customColorInverterSpawnCount: 0
+
+mazeRepresentation: [
+    "...............................................",
+    "...............................................",
+    "..#...#..##..#...#...###..###.###.###.......#..",
+    "...#.#..#..#.#...#...#..#..#..#...#..#...#.#...",
+    "....#...#..#.#...#...#..#..#..##..#..#.....#...",
+    "....#...#..#.#...#...#..#..#..#...#..#...#.#...",
+    "....#....##...###....###..###.###.###.......#..",
+    "...............................................",
+    "...............................................",
+    "...............................................",
+    "..............................................." ]
+
+heroSpawnCell: 4 8
+
+customEntities: []
+
+levelPortalDescription:
+  cell: 43 8
+  nextLevelDescriptionFilename: "quit"
+  heroExperienceLevelToEnableOn: 0

@@ -1,0 +1,10 @@
+inventoryDescription:
+  invGridW: 3
+  invGridH: 3
+singleDirMovePeriodLimitMillis: 50
+unitsInitParams:
+  - relativeShift:
+      dx: 0
+      dy: 0
+    color: 0 0 190
+    maxHp: 10
